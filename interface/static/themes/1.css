@@ -1,0 +1,61 @@
+html{
+    background-color: #282828;
+    color: #66FF66;
+}
+
+.navbar{
+    background-color: #282828;
+}
+
+.navbar a{
+color:  #66FF66;
+
+}
+
+.dropdown .dropbtn{
+    color: #66FF66;
+}
+
+.navbar a:hover, .dropdown:hover .dropbtn {
+    background-color: #66FF66;
+    color: #282828;
+}
+
+.dropdown-content { 
+    background-color: #66FF66;
+}
+
+.dropdown-content a {
+    color: #282828;
+    background-color: #66FF66;
+}
+
+.nav {
+    color: #66FF66;
+    background-color: #282828;
+}
+
+.nav:hover {
+    background-color: #66FF66;
+    color: #282828;
+}
+
+/* Add a grey background color to dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: #282828;
+    color: #66FF66;
+}
+
+a.navsub{
+    color: #66FF66;
+    background-color: #282828;
+}
+
+.nav:hover>*{
+    background-color: #66FF66;
+    color: #282828;
+}
+
+.email{
+    color: #66FF66;
+}

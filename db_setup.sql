@@ -1,27 +1,27 @@
-DROP DATABASE IF EXISTS Invoices;
-CREATE DATABASE IF NOT EXISTS Invoices;
-USE Invoices;
+DROP DATABASE IF EXISTS invoices;
+CREATE DATABASE IF NOT EXISTS invoices;
+USE invoices;
 
 create table users(
-    seq int primary key auto_increment not null,
-    user_name varchar(20),
-    first_name varchar(20),
-    last_name varchar(20),
-    email varchar(30),
-    password varchar(255),
-    system_user bool default 0,
-    theme bool default 1,
-    added_by int not null,
-    updated_by int not null,
-    dt_added timestamp default current_timestamp,
-    dt_updated timestamp default current_timestamp on update current_timestamp,
+    seq         int         primary key auto_increment not null,
+    user_name   varchar(20)                     unique not null,
+    first_name  varchar(20),
+    last_name   varchar(20),
+    email       varchar(30)                     unique not null,
+    password    varchar(255),
+    system_user bool            default 0,
+    theme       bool            default 1,
+    added_by    int                                     not null,
+    updated_by  int                                     not null,
+    dt_added    timestamp       default current_timestamp,
+    dt_updated  timestamp       default current_timestamp on update current_timestamp,
     CONSTRAINT FOREIGN KEY (added_by) references users(seq),
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
 );
 
 create table permissions(
-    seq            INT auto_increment PRIMARY KEY,
-    user_seq            INT                  NOT NULL,
+    seq                 INT auto_increment PRIMARY KEY,
+    user_seq            INT  UNIQUE    NOT NULL,
     inv_edit            bool default 0 NULL,
     inv_view            bool default 0 NULL,
     doc_edit            bool default 0 NULL,
@@ -31,10 +31,10 @@ create table permissions(
     approve_invoices    bool default 0 NOT NULL,
     receive_emails      bool default 0 NULL,
     user_admin          bool default 0 NULL,
-    added_by int not null,
-    updated_by int not null,
-    dt_added timestamp default current_timestamp,
-    dt_updated timestamp default current_timestamp on update current_timestamp,
+    added_by            INT            NOT NULL,
+    updated_by          INT            NOT NULL,
+    dt_added            TIMESTAMP default current_timestamp,
+    dt_updated          TIMESTAMP default current_timestamp on update current_timestamp,
     CONSTRAINT FOREIGN KEY (added_by) references users(seq),
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (user_seq) references users(seq)
@@ -190,7 +190,6 @@ begin
             SET MESSAGE_TEXT = 'Cannot set added_by';
    end if;
 end;
-# inv_line
 
 create trigger date_check_update_statuses
 before update on statuses
@@ -229,6 +228,21 @@ for each row
 begin
     if (new.approver = new.creator) then
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot approve own invoice';
+            SET MESSAGE_TEXT = 'Cannot approve own finances';
     end if;
+end;
+
+create trigger check_user_can_approve
+before update on inv_head
+for each row
+begin
+    IF new.approver not in (
+            select a.user_seq
+            From permissions a
+            where (a.approve_invoices = 1 and new.approver = a.user_seq)
+        ) THEN
+           SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'User cannot approve finances';
+
+        END IF;
 end;

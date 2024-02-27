@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function forgotPassword(){
+            let uname = document.getElementById("username").value;
+            if(uname == "" || uname == undefined){
+                alert("Please enter a username to reset your password");
+                return;
+            }
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/auth/password_reset/");
+            xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+            const body = JSON.stringify({
+                username: uname
+            });
+
+            xhr.onload = () => {
+                if (xhr.readyState == 4 && xhr.status == 201) {
+                    alert("Check your email for a reset link!");
+                } else {
+                    console.log(`Error: ${xhr.status}`);
+                    alert("Could not request a password reset.\n If this error persists, please contact an application administrator.")
+                }
+            };
+
+            xhr.send(body);
+        }
+    </script>
+    {% render "navbar.liquid" %}
+</head>
+<body>
+    <fieldset id="loginBox">
+        <legend>Log In!</legend>
+    
+        <form action="/auth/login/" method="post">
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" required> <br>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required> <br>
+            <input type="submit" value="Log In">
+        
+        
+        </form>
+        <button onclick="forgotPassword()">Forgot Password?</button>
+    </fieldset>
+</body>
+</html>

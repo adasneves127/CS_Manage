@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS invoices;
-CREATE DATABASE IF NOT EXISTS invoices;
-USE invoices;
+DROP DATABASE IF EXISTS management;
+CREATE DATABASE IF NOT EXISTS management;
+USE management;
 
 create table users(
     seq int primary key auto_increment not null,
@@ -253,5 +253,5 @@ begin
 end;
 
 CREATE USER 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';
-GRANT INSERT, UPDATE, SELECT on invoices.* to 'invoices'@'localhost';
-GRANT DELETE on invoices.password_reset to 'invoices'@'localhost';
+GRANT INSERT, UPDATE, SELECT on management.* to 'invoices'@'localhost';
+GRANT DELETE on management.password_reset to 'invoices'@'localhost';

@@ -5,9 +5,9 @@ from src.utils.templates import send_template
 
 @app.route("/", methods=["GET"])
 def get_root_index():
-    return send_template("navbar.liquid", theme=1, isUserAdmin=True)
+    return send_template("navbar.liquid")
 
 
 @app.route("/about/", methods=['GET'])
 def get_about_page():
-    return send_template("about.liquid", theme=1, isUserAdmin=True)
+    return send_template("about.liquid")

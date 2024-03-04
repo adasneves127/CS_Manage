@@ -10,6 +10,7 @@ create table users(
     email varchar(30),
     password varchar(255),
     system_user bool default 0,
+    invoice_pin char(4),
     theme bool default 1,
     added_by int not null,
     updated_by int not null,
@@ -86,11 +87,15 @@ create table inv_head(
 
 create table valid_items (
     seq int not null primary key auto_increment,
+    id varchar(10) not null,
     item_desc varchar(30),
     item_price decimal(8,3),
     item_type enum('debit', 'credit'),
     added_by int not null,
     updated_by int not null,
+    effective_start timestamp default current_timestamp,
+    effective_end timestamp not null,
+    is_active tinyint,
     dt_added timestamp default current_timestamp,
     dt_updated timestamp default current_timestamp on update current_timestamp,
     CONSTRAINT FOREIGN KEY (added_by) references users(seq),
@@ -252,6 +257,16 @@ begin
         END IF;
 end;
 
-CREATE USER 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';
+create trigger check_eff_dates
+before update on valid_items
+for each row
+begin
+    if new.effective_start > new.effective_end then
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Effective End must be greater than or equal to Effective End!';
+    end if;
+end;
+
+CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';
 GRANT INSERT, UPDATE, SELECT on management.* to 'invoices'@'localhost';
 GRANT DELETE on management.password_reset to 'invoices'@'localhost';

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&display=swap" rel="stylesheet">
+    {% if isPreview %}
+        <style>
+            #paper{
+                background-image: url("/static/finances/view/Watermark.png");
+                background-position: 0 0;
+                z-index: -1;
+            }
+        </style>
+    {% endif %}
+    <title>{{record.header.type}} #{{record.header.id}}</title>
+    <link rel="stylesheet" href="/static/finances/view/style.css">
+</head>
+<body>
+    <div id="paper">
+        <div id="header">
+            <img class="logo" src="/static/logo.png" alt="Computer Science Club @ Bridgewater State" width="216" height="100">
+            {% comment %} <div id="addr">
+                <p>Test123</p>
+                <p>Test123</p>
+                <p>Test123</p>
+                <p>Test123</p>
+            </div> {% endcomment %}
+        </div>
+        <h1>{{record.header.type}}</h1>
+        <hr class="top primary">
+        <hr class="top secondary">
+        <table id="head">
+            <thead>
+                <tr>
+                    <th style="width: 15%">Record ID</th>
+                    <th style="width: 27.5%">Creator</th>
+                    <th style="width: 27.5%">Approver</th>
+                    <th style="width: 15%">Date</th>
+                    <th style="width: 15%">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{record.header.id}}</td>
+                    <td>{{record.header.creator}}</td>
+                    <td>{% if record.header.approver != " " %}
+                        {{record.header.approver}}
+                    {% else %}
+                        <b>Pending Approval</b>
+                    {% endif %}</td>
+                    <td>{{record.header.inv_date}}</td>
+                    <td>{{record.header.status}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <table id="prods">
+            <thead>
+                <tr>
+                    <th>Line ID</th>
+                    <th>Item</th>
+                    <th>Unit Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in record.lines %}
+                    <tr>
+                        <td>{{line.line_id}}</td>
+                        <td>{{line.item_desc}}</td>
+                        <td>{{line.item_price}}</td>
+                        <td>{{line.qty}}</td>
+                        <td>{{line.total}}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4" style="text-align: right; border: none;">Taxes:</td>
+                    <td>{{record.header.tax}}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right; border: none;">Fees:</td>
+                    <td>{{record.header.fees}}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right; border: none;">Total:</td>
+                    <td style="background-color: #85b0ff;">{{record.header.total}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr class="bot primary">
+        <hr class="bot secondary">
+    </div>
+</body>
+</html>

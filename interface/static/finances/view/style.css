@@ -1,0 +1,98 @@
+#paper{
+    margin: 0.5in;
+    width: calc(8.5in - 1in);
+    height: calc(11in - 1in);
+}
+table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 3px;
+}
+th, td{
+    border: 1px solid black;
+    padding: 0.25em;
+}
+
+hr.primary{
+    border: 2.6px solid var(--primary-brand);
+    margin: 0;
+}
+
+hr.secondary{
+    border: 1.6px solid var(--secondary-brand);
+    margin: 0;
+}
+
+hr.primary{
+    margin-bottom: 3px;
+}
+
+hr.secondary{
+    margin-bottom: 3px;
+}
+
+hr.top.secondary{
+    margin-bottom: 0.2in;
+}
+
+hr.bot.primary{
+    position: absolute;
+    bottom: .2in;
+    width: calc(7.5in - 2px);
+}
+hr.bot.secondary{
+    position: absolute;
+    bottom: .15in;
+    width: 7.5in;
+}
+
+@property --primary-brand{
+    syntax: '<color>';
+    initial-value: crimson;
+    inherits: false;
+}
+
+@property --secondary-brand{
+    syntax: '<color>';
+    initial-value: black;
+    inherits: false;
+}
+
+.logo{
+    margin-left: .4in;
+    margin-bottom: .2in;
+    width: 1.5in;
+    object-fit: contain;
+}
+
+div#header{
+    margin-top: .2in;
+}
+
+#addr{
+    float: right;
+    margin-right: .4in;
+    margin-top: .2in;
+    width: 1.5in;
+}
+
+#addr>p{
+    margin: 0;
+}
+
+h1{
+    position: absolute;
+    top: 1.35in;
+    left: 5.25in;
+    padding-left: .05in;
+    padding-right: .1in;
+    background-color: white;
+    font-family: "Noto Sans Mono", monospace;
+    text-transform: uppercase;
+    font-style: italic;
+}
+
+
+table#head{
+    text-align: center;
+}

@@ -30,6 +30,16 @@ color:  #66FF66;
     background-color: #66FF66;
 }
 
+.dropdown-content button {
+    color: #282828;
+    background-color: #66FF66;
+    width: 100%;
+    height: 4dvh;
+    border: none;
+    font-family: blockFont;
+    font-size: 1rem;
+}
+
 .nav {
     color: #66FF66;
     background-color: #282828;
@@ -46,6 +56,12 @@ color:  #66FF66;
     color: #66FF66;
 }
 
+.dropdown-content button:hover {
+    background-color: #282828;
+    color: #66FF66;
+
+}
+
 a.navsub{
     color: #66FF66;
     background-color: #282828;
@@ -58,4 +74,37 @@ a.navsub{
 
 .email{
     color: #66FF66;
+}
+
+.tab {
+    overflow: hidden;
+    color: #66FF66
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    color: #282828;
+    background-color: #66FF66;
+}
+/* Create an active/current tablink class */
+.tab button.active {
+    color: #282828;
+    background-color: #66FF66;
+}
+
+.tab button {
+    color: #66FF66;
+    background-color: #282828;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    background: #1d1d1d;
 }

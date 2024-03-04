@@ -15,7 +15,10 @@ class finance:
             "dt_updated": header[9],
             "added_by": header[10],
             "updated_by": header[11],
-            "total": 0
+            "inv_date": header[12].strftime("%b, %d %Y"),
+            "edit_date": header[12].strftime("%Y-%m-%d"),
+            "total": 0,
+            "item_count": 0
         }
         self.lines = []
         for line in lines:
@@ -26,19 +29,47 @@ class finance:
                     "item_desc": line[2],
                     "item_price": line[3],
                     "qty": line[4],
+                    "total": round(line[3] * line[4], 2),
                     "added_by": line[5],
                     "updated_by": line[6],
                     "dt_added": line[7],
                     "dt_updated": line[8]
                 }
             )
+            self.header['item_count'] += line[4]
             self.header['total'] += (line[3] * line[4])
+            self.__dict__ = {
+                "header": self.header,
+                "lines": self.lines
+            }
+        self.header['total'] += self.header['tax'] + self.header['fees']
+        self.header['total'] = round(self.header['total'], 2)
             
     def __str__(self):
         return "Header: {}\nLines: {}".format(self.header, self.lines)
     
     def __repr__(self):
         return "[Finance] Header: {}\nLines: {}".format(self.header, self.lines)
+    
+    @staticmethod
+    def from_json(json: dict):
+        header_tuple = (
+            json['header']['seq'], json['header']['id'], json['header']['creator'],
+            json['header']['approver'], json['header']['status'], json['header']['type'],
+            json['header']['tax'], json['header']['fees'], json['header']['dt_added'],
+            json['header']['dt_updated'], json['header']['added_by'], json['header']['updated_by'],
+            json['header']['inv_date']
+        )
+        line_list = []
+        for line in json['lines']:
+            line_list.append(
+                (
+                    line['seq'], line['line_id'], line['item_desc'], line['item_price'],
+                    line['qty'], line['added_by'], line['updated_by'], line['dt_added'],
+                    line['dt_updated']
+                )
+            )
+        return finance(header_tuple, line_list)
     
     
 class User:
@@ -48,9 +79,10 @@ class User:
         self.user_name = user_name
         self.first_name = first_name
         self.last_name = last_name
+        self.full_name = f"{first_name} {last_name}"
         self.system_user = is_system_user
         app_info = load_app_info()
-        self.email = email.removesuffix(app_info['email_domain'])
+        self.email = email.removesuffix(app_info['public']['email_domain'])
         for(k, v) in kwargs.items():
             setattr(self, k, v)
         
@@ -115,15 +147,15 @@ class User:
         user.updated_by = user_info[8]
         user.dt_added = user_info[9]
         user.dt_updated = user_info[10]
-        user.inv_edit = permissions[1]
-        user.inv_view = permissions[2]
-        user.doc_edit = permissions[3]
-        user.doc_view = permissions[4]
-        user.inv_admin = permissions[5]
-        user.doc_admin = permissions[6]
-        user.approve_invoices = permissions[7]
-        user.receive_emails = permissions[8]
-        user.user_admin = permissions[9]
+        user.inv_edit = permissions[1] == 1
+        user.inv_view = permissions[2] == 1
+        user.doc_edit = permissions[3] == 1
+        user.doc_view = permissions[4] == 1
+        user.inv_admin = permissions[5] == 1
+        user.doc_admin = permissions[6] == 1
+        user.approve_invoices = permissions[7] == 1
+        user.receive_emails = permissions[8] == 1
+        user.user_admin = permissions[9] == 1
         return user
     
     def __str__(self) -> str:

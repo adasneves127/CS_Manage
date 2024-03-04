@@ -1,6 +1,7 @@
 from src.utils.db_utils import connect
 from src.utils.containers import User
 import json
+import secrets
 
 def create_user(conn: connect):
     
@@ -17,35 +18,41 @@ def config_app_info():
     
     email_domain = input("Enter the email domain for this system: ")
     app_domain = input("Enter the domain for this system: ")
-    app_info = {
-        "system_name": system_name,
-        "deployed_location": deployed_location,
-        "about_text": about_text,
-        "email_domain": email_domain,
-        "application_url": app_domain,
-        "system_administrator": {
-            "name": "",
-            "email": "",
-        },
-        "application_administrators": [
-            {
+    app_info_full = {
+        "public":{
+            "system_name": system_name,
+            "deployed_location": deployed_location,
+            "about_text": about_text,
+            "email_domain": email_domain,
+            "application_url": app_domain,
+            "system_administrator": {
                 "name": "",
                 "email": "",
+            },
+            "application_administrators": [
+                {
+                    "name": "",
+                    "email": "",
+                }
+            ],
+            "enable_smtp": False,
+        },
+        "private": {
+            "secret_token": secrets.token_hex(),
+            "smtp": {
+                "server": "smtp server",
+                "port": "smtp port",
+                "user": "smtp user",
+                "password": "smtp password",
+                "from": "email box name",
+                "use_tls": "true/false",
+                "use_ssl": "true/false",
+                "cc": [],
+                "bcc": []
             }
-        ],
-        "enable_smtp": False,
-        "smtp": {
-            "server": "smtp server",
-            "port": "smtp port",
-            "user": "smtp user",
-            "password": "smtp password",
-            "from": "email box name",
-            "use_tls": "true/false",
-            "use_ssl": "true/false",
-            "cc": [],
-            "bcc": []
         }
     }
+    app_info = app_info_full["public"]
     print("Please review the following information:")
     print(f"System Name: {app_info['system_name']}")
     print(f"Deployed Location: {app_info['deployed_location']}")
@@ -55,7 +62,7 @@ def config_app_info():
     print(f"Email Domain: {app_info['email_domain']}")
     if input("Is this information correct? (y/n): ").lower() == 'y':
         with open("app_info.json", "w") as f:
-            json.dump(app_info, f, indent=4)
+            json.dump(app_info_full, f, indent=4)
         print("Please review app_info.json and populate the " +  
             "system_administrator and application_administrators" + 
             " fields with the appropriate information.")

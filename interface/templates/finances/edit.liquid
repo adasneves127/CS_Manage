@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Record {{record.header.id}}</title>
+    <script src="/static/finances/new/script.js" defer></script>
+    <script>
+        function addRow(){
+            let table = document.getElementById("prods");
+            let row = table.insertRow();
+            rowID = table.rows.length - 1;
+            row.innerHTML = `
+                <td>${rowID}</td>
+                <td><input type="text" id="ItemInfo${rowID}" id="ItemInfo" disabled></td>
+                <td><input type="text" id="ItemPrice${rowID}" disabled style="width: 100px;"></td>
+                <td><button onclick="searchItem(${rowID})">Search!</button></td>
+                <td><input style="width: 95%;" type="number" name="Quantity" id="Quantity${rowID}"></td>
+                <td><input type="number" name="Total" style="width: 100px;" id="Total${rowID}" disabled></td>
+                <td style="align-items: center;" onclick="removeRow(${rowID})"><button>x</button></td>
+            `;
+        }
+
+        function searchItem(rowID){
+            // Open a new window to search for an item
+            // The item will be selected and the window will close
+            let invDate = document.getElementById("RecordDate").value;
+            if (invDate === ""){
+                alert("Please select a date for the invoice");
+                return;
+            }
+            let item = window.open(`/finances/search?invDate=${invDate}`, "ItemSearch", "width=800,height=600");
+            item.rowID = rowID;
+            item.targetRows = [document.getElementById(`ItemInfo${rowID}`), document.getElementById(`ItemPrice${rowID}`)];
+        }
+
+        function removeRow(rowID){
+            let table = document.getElementById("prods");
+            table.deleteRow(rowID);
+            for (let i = rowID; i < table.rows.length; i++){
+                table.rows[i].cells[0].innerText = i;
+                table.rows[i].cells[1].children[0].id = `ItemInfo${i}`;
+                table.rows[i].cells[2].children[0].id = `ItemPrice${i}`;
+                table.rows[i].cells[3].children[0].setAttribute("onclick", `searchItem(${i})`);
+                table.rows[i].cells[4].children[0].id = `Quantity${i}`;
+                table.rows[i].cells[5].children[0].id = `Total${i}`;
+            }
+        }
+
+        function getRecordObject(){
+            updateGrandTotal()
+            let record_object = {
+                "header": {
+                    "id": document.getElementById("InvoiceID").value,
+                    "creator": document.getElementById("Creator").value,
+                    "approver": document.getElementById("Approver").value,
+                    "status": document.getElementById("Status").value,
+                    "inv_date": document.getElementById("RecordDate").value,
+                    "type": document.getElementById("Type").value,
+                    "tax": parseInt(document.getElementById("Taxes").value).toFixed(2),
+                    "fees": parseInt(document.getElementById("Fees").value).toFixed(2),
+                    "total": parseInt(document.getElementById("Total").value).toFixed(2)
+                },
+                "lines": []
+            }
+            let table = document.getElementById("prods");
+            for (let i = 1; i < table.rows.length; i++){
+                let line = {
+                    "line_id": i,
+                    "item_desc": document.getElementById(`ItemInfo${i}`).value,
+                    "item_price": document.getElementById(`ItemPrice${i}`).value,
+                    "qty": document.getElementById(`Quantity${i}`).value,
+                    "total": document.getElementById(`Total${i}`).value
+                }
+                record_object.lines.push(line);
+            }
+            return record_object;
+        }
+
+        function getAuthInfo(){
+            let auth_info = {
+                "creator": document.getElementById("Creator").value,
+                "creatorPin": document.getElementById("creatorPin").value,
+                "approver": document.getElementById("Approver").value,
+                "approverPin": document.getElementById("approverPin").value
+            }
+            return auth_info;
+        }
+
+        function previewRecord(){
+            let record_object = getRecordObject();
+            // XHR POST Request to /finances/new/
+            let xhrHTTP = new XMLHttpRequest();
+            xhrHTTP.open("POST", "/finances/new/preview/");
+            xhrHTTP.setRequestHeader("Content-Type", "application/json");
+            xhrHTTP.send(JSON.stringify(record_object));
+            xhrHTTP.onreadystatechange = function(){
+                console.log(xhrHTTP.readyState, xhrHTTP.status)
+                if (xhrHTTP.readyState == 4 && xhrHTTP.status == 200){
+                    //Open a new window and display the record
+                    let record = window.open("/finances/preview", "RecordPreview", "width=800,height=600");
+                    record.document.write(xhrHTTP.responseText);
+                } else {
+                    if(xhrHTTP.readyState == 4 && xhrHTTP.status != 200){
+                        alert(xhrHTTP.responseText);
+                    }
+                }
+            }
+        }
+
+        function updateRecord(){
+            let record_object = getRecordObject();
+            let auth_info = getAuthInfo();
+            let post_data = {
+                "record": record_object,
+                "auth": auth_info
+            }
+            // XHR POST Request to /finances/new/
+            let xhrHTTP = new XMLHttpRequest();
+            xhrHTTP.open("PATCH", "/finances/edit/");
+            xhrHTTP.setRequestHeader("Content-Type", "application/json");
+            xhrHTTP.send(JSON.stringify(post_data));
+            xhrHTTP.onreadystatechange = function(){
+                console.log(xhrHTTP.readyState, xhrHTTP.status)
+                if (xhrHTTP.readyState == 4 && xhrHTTP.status == 200){
+                    alert("Record Created!");
+                    window.location.href = "/finances/";
+                } else {
+                    if(xhrHTTP.readyState == 4 && xhrHTTP.status != 200){
+                        alert(xhrHTTP.responseText);
+                    }
+                }
+            }
+        }
+
+        function updateLineTotal(){
+            let table = document.getElementById("prods");
+            let total = 0;
+            for (let i = 1; i < table.rows.length; i++){
+                let price = document.getElementById(`ItemPrice${i}`).value;
+                let quantity = document.getElementById(`Quantity${i}`).value;
+                if(quantity === "")
+                    quantity = 0;
+                let subtotal = price * quantity;
+                subtotal = subtotal.toFixed(3);
+                document.getElementById(`Total${i}`).value = subtotal;
+            }
+        }
+
+        function updateGrandTotal(){
+            updateLineTotal();
+            let table = document.getElementById("prods");
+            let total = 0;
+            for (let i = 1; i < table.rows.length; i++){
+                row = parseFloat(document.getElementById(`Total${i}`).value);
+                if(!isNaN(row))
+                    total += row
+                else
+                    alert("Please fill in all the fields");
+            }
+            taxes = parseFloat(document.getElementById("Taxes").value)
+            fees = parseFloat(document.getElementById("Fees").value)
+            if (isNaN(taxes)){
+                taxes = 0;
+                document.getElementById("Taxes").value = 0;
+            }
+            if (isNaN(fees)){
+                fees = 0;
+                document.getElementById("Fees").value = 0;
+            }
+            total = total + taxes + fees
+            document.getElementById("Total").value = total.toFixed(2);
+        }
+
+    </script>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <h1>New Financial Record</h1>
+    <div class="tab">
+        <button class="tablinks active" onclick="openTab(event, 'Setup')">Header</button>
+        <button class="tablinks" onclick="openTab(event, 'Table')">Lines</button>
+        <button class="tablinks" onclick="openTab(event, 'Settings')">Review</button>
+      </div>
+      
+      <!-- Tab content -->
+      <div id="Setup" class="tabcontent" style="display:block;">
+        <h3>Finances Header</h3>
+        <fieldset>
+            <!-- Should contain settings pertaining to:
+            Invoice ID
+            Creator
+            Approver
+            Invoice Date
+            Status
+            Type-->
+            <label for="InvoiceID">Invoice ID:</label>
+            <input type="text" name="invoiceID" id="InvoiceID" value="{{record.header.id}}">
+            <br> <br>
+            <label for="Creator">Creator:</label>
+            <select name="Creator" id="Creator" disabled>
+                <option value="{{record.header.creator}}">{{ record.header.creator }}</option>
+            </select> <input type="password" name="creatorPin" id="creatorPin" style="width: 100px;" autocomplete="one-time-code" disabled value="....">
+            <br>
+            <label for="Approver">Approver:</label>
+            {% if record.header.approver == ' ' %}
+                <select name="Approver" id="Approver">
+                {% for user in approvers %}
+                    <option value="{{ user[1] }}">{{ user[1] }}</option>
+                {% endfor %}
+                </select> 
+                <input type="password" name="approverPin" id="approverPin" style="width: 100px;" autocomplete="one-time-code">
+            
+            {% else %}
+
+            <select name="Approver" id="Approver" disabled>
+                {% for user in approvers %}
+                    <option value="{{record.header.approver}}">{{record.header.approver}}</option>
+                {% endfor %}
+                </select> 
+                <input type="password" name="approverPin" id="approverPin" style="width: 100px;" autocomplete="one-time-code" value="...." disabled>
+
+            {% endif %}
+            <br> <br>
+            <label for="RecordDate">Record Date:</label>
+            <input type="date" name="RecordDate" id="RecordDate" value="{{record.header.edit_date}}">
+            <br> <br>
+            <label for="Status">Status:</label>
+            <select name="Status" id="Status">
+                {% for status in statuses %}
+                    <option value="{{ status }}">{{ status }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <label for="Type">Type:</label>
+            <select name="Type" id="Type" disabled>
+                <option value="{{record.header.type}}">{{record.header.type}}</option>
+            </select>
+        </fieldset>
+      </div>
+
+      
+      <div id="Table" class="tabcontent">
+        <h3>Finances Line</h3>
+        <fieldset>
+            <!-- Should contain settings pertaining to: 
+            Line ID [Unchangeable]
+            Item Info
+            Quantity
+            Total [Unchangeable]
+            -->
+            <table style="width:65%;" id="prods">
+                <thead>
+                    <tr>
+                        <th>Line</th>
+                        <th colspan="3" width="30%;">Item Info</th>
+                        <th style="width: 5%;">Quantity</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in record.lines %}
+                        <td>{{item.line_id}}</td>
+                <td><input type="text" id="ItemInfo{{item.line_id}}" id="ItemInfo" disabled value="{{item.item_desc}}"></td>
+                <td><input type="text" id="ItemPrice{{item.line_id}}" disabled style="width: 100px;" value="{{item.item_price}}"></td>
+                <td><button onclick="searchItem({{item.line_id}})">Search!</button></td>
+                <td><input style="width: 95%;" type="number" name="Quantity" id="Quantity{{item.line_id}}" value="{{item.qty}}"></td>
+                <td><input type="number" name="Total" style="width: 100px;" id="Total{{item.line_id}}" disabled value="{{item.total}}"></td>
+                <td style="align-items: center;" onclick="removeRow({{item.line_id}})"><button disabled title="Cannot delete existing items">x</button></td>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button onclick="addRow()">Add Row</button>
+            <button onclick="updateLineTotal()">Update Total</button>
+        </fieldset>
+
+      </div>
+      
+      <div id="Settings" class="tabcontent">
+        <h3>Review</h3>
+        <fieldset>
+            <!-- Should contain settings pertaining to: 
+            Taxes
+            Fees
+            -->
+            <label for="Taxes">Taxes:</label>
+            <input type="number" name="Taxes" id="Taxes" style="width: 100px;" value="{{record.header.tax}}">
+            <br> <br>
+            <label for="Fees">Fees:</label>
+            <input type="number" name="Fees" id="Fees"style="width: 100px;" value="{{record.header.fees}}">
+            <br> <br>
+            <label for="Total">Total:</label>
+            <input type="number" name="Total" id="Total" disabled style="width: 100px;" value="{{record.header.total}}">
+        </fieldset>
+        <button onclick="updateGrandTotal()">Update Grand Total</button>
+        <br> <br>
+        <button onclick="previewRecord()">Preview</button>
+        <button onclick="updateRecord()">Edit Record</button>
+      </div>
+</body>
+</html>

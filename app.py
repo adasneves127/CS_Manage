@@ -13,8 +13,12 @@ app.config.update(
 
 Session(app)
 
+app.secret_key = load_app_info()['private']['secret_token']
+
 import src.routes.base_routes
 import src.routes.auth
+import src.routes.finances
+import src.routes.user
 
 
 if __name__ == '__main__':

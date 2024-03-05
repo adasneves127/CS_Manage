@@ -1,9 +1,8 @@
 from app import app
 from src.utils.templates import send_template
 import bcrypt
-from flask import session, request, redirect, url_for
+from flask import session, request, redirect
 from src.utils.db_utils import connect
-from src.utils.exceptions import UserNotFoundException, MalformedUserException
 
 @app.route("/auth/login/", methods=["GET"])
 def get_login_page():

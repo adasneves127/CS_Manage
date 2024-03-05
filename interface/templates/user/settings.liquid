@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Settings</title>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <script>
+
+        {% if error != null and error != "" %}
+            alert("{{ error }}")
+        {% endif %}
+        function changePasswordCheck(){
+            var new_password = document.getElementById("new_password").value;
+            var confirm_password = document.getElementById("confirm_password").value;
+            if(new_password != confirm_password){
+                alert("New Password and Confirm Password do not match.");
+                return false;
+            }
+
+            // Check if the password contains:
+            // At least one uppercase letter
+            // At least one lowercase letter
+            // At least one number
+            // At least one special character
+            var password = new_password;
+            var upperCaseLetters = /[A-Z]/g;
+            var lowerCaseLetters = /[a-z]/g;
+            var numbers = /[0-9]/g;
+            var specialCharacters = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g;
+            if(!password.match(upperCaseLetters)){
+                alert("Password must contain at least one uppercase letter.");
+                return false;
+            }
+            if(!password.match(lowerCaseLetters)){
+                alert("Password must contain at least one lowercase letter.");
+                return false;
+            }
+            if(!password.match(numbers)){
+                alert("Password must contain at least one number.");
+                return false;
+            }
+            if(!password.match(specialCharacters)){
+                alert("Password must contain at least one special character.");
+                return false;
+            }
+
+            if(password.length < 8){
+                alert("Password must be at least 8 characters long.");
+                return false;
+            }
+
+            return true;
+        }
+
+        {% if approve_invoices %}
+            function checkApproverPin(){
+                var new_pin = document.getElementById("new_pin").value;
+                var confirm_pin = document.getElementById("confirm_pin").value;
+                if(new_pin != confirm_pin){
+                    alert("New Approver Pin and Confirm Approver Pin do not match.");
+                    return false;
+                }
+
+                if(new_pin.length != 4){
+                    alert("Approver Pin must be 4 digits long.");
+                    return false;
+                }
+
+                return true;
+            }
+        {% endif %}
+
+
+    </script>
+    <h1>User Settings</h1>
+    <p>Change your user settings here.</p>
+    <fieldset>
+        <legend>User Information (Unchangeable)</legend>
+        <p>Name: {{first_name}} {{last_name}}</p>
+        <p>User Sequence ID: {{seq}}</p>
+        <p>Added By: {{added_by}}</p>
+        <p>Date/Time Added: {{dt_added}}</p>
+        <br>
+        <p>Updated By: {{updated_by}}</p>
+        <p>Date/Time Updated: {{dt_updated}}</p>
+        <h2>Permissions:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="4">Finances</th>
+                    <th colspan="3">Docket</th>
+                    <th >Other</th>
+                </tr>
+                <tr>
+                    <th>Read</th>
+                    <th>Write</th>
+                    <th>Admin</th>
+                    <th>Approve</th>
+                    <th>Read</th>
+                    <th>Write</th>
+                    <th>Admin</th>
+                    <th>User Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{inv_view}}</td>
+                    <td>{{inv_edit}}</td>
+                    <td>{{inv_admin}}</td>
+                    <td>{{approve_invoices}}</td>
+                    <td>{{doc_view}}</td>
+                    <td>{{doc_edit}}</td>
+                    <td>{{doc_admin}}</td>
+                    <td>{{user_admin}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </fieldset>
+    <br>
+    <fieldset>
+        <legend>User Settings (Changeable)</legend>
+        <fieldset style="width: 48%">
+            <legend>Change Password</legend>
+            <form onsubmit="return changePasswordCheck() " action="/user/change_password?seq={{seq}}" method="post">
+                <label for="old_password">Old Password:</label>
+                <input type="password" name="old_password" id="old_password" required>
+                <br>
+                <label for="new_password">New Password:</label>
+                <input type="password" name="new_password" id="new_password" required>
+                <br>
+                <label for="confirm_password">Confirm New Password:</label>
+                <input type="password" name="confirm_password" id="confirm_password" required>
+                <br>
+                <input type="submit" value="Change Password">
+            </form>
+        </fieldset>
+        {% if approve_invoices %}
+            <fieldset>
+            <legend>Change Approver Pin</legend>
+            <form action="/user/change_approver_pin?seq={{seq}}" onsubmit="return checkApproverPin()" method="post">
+                <label for="old_pin">Old Approver Pin:</label>
+                <input type="password" name="old_pin" id="old_pin" required>
+                <br>
+                <label for="new_pin">New Approver Pin:</label>
+                <input type="password" name="new_pin" id="new_pin" required>
+                <br>
+                <label for="confirm_pin">Confirm New Approver Pin:</label>
+                <input type="password" name="confirm_pin" id="confirm_pin" required>
+                <br>
+                <input type="submit" value="Change Approver Pin">
+            </form>
+        </fieldset>
+        {% endif %}
+        <fieldset>
+            <legend>User Settings</legend>
+            <form action="/user/preferences?seq={{seq}}" method="post">
+                <label for="theme">Theme:</label>
+                <input type="number" name="theme" id="theme" value="{{theme}}">
+                <br>
+                <label for="email">User Email</label>
+                <input type="email" name="email" id="email" value="{{email}}{{email_domain}}">
+                <label for="uname">Username</label>
+                <input type="text" name="uname" id="uname" value="{{user_name}}">
+                <br>
+                {% if enable_smtp %}
+                    <input type="checkbox" name="recEmails" id="recEmails">
+                <label for="recEmails">Enable Emails</label> <br>
+                {% endif %}
+                <input type="submit" value="Save Preferences">
+            </form>
+        </fieldset>
+    </fieldset> 
+</body>
+</html>

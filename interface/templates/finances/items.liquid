@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Search</title>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <!-- This page will be shown when the finance creation and modification tools request to search an item -->
+    <!-- id, item_desc, item_price, item_type -->
+    <table>
+        <tr>
+            <th>Sequence</th>
+            <th>Item ID</th>
+            <th>Item Name</th>
+            <th>Item Price</th>
+            <th>Item Type</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Is Active</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+            <td>{{ item[4] }}</td>
+            <td>{{ item[5] }}</td>
+            <td>{{ item[6] }}</td>
+            <td>{{ item[7] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>New Item</h2>
+    <form action="/finances/item/" method="post">
+        <label for="ID">Item ID</label>
+        <input type="number" id="ID" name="ID" required><br>
+        <label for="name">Item Name</label>
+        <input type="text" id="name" name="name" required><br>
+        <label for="price">Price</label>
+        <input type="number" id="price" name="price" required><br>
+        <label for="eStart">Effective Start</label>
+        <input type="date" id="eStart" name="eStart" required>
+        <label for="eEnd">Effective End</label>
+        <input type="date" id="eEnd" name="eEnd" required>
+    </form>
+</body>
+</html>

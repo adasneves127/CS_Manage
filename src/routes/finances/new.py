@@ -59,7 +59,7 @@ def create_record():
             if str(e) == "1644 (45000): Cannot approve own invoice":
                 return "Err: Unable to approve own finances!", 401
             else:
-                abort(500)
+                raise e
     else:
         return "You do not have permission to view this page", 403
     

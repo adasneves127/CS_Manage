@@ -99,7 +99,9 @@ class User:
         # Get Permissions
         is_system_admin = input("System Admin? (y/n): ").lower() == 'y'
         if is_system_admin:
-            return User(user_name, first_name, last_name, email, is_system_user, system_admin=True)
+            return User(user_name, first_name, last_name, email, is_system_user, system_admin=True,
+                        inv_edit=True, inv_view=True, inv_admin=True, approve_invoices=True,
+                        doc_edit=True, doc_view=True, doc_admin=True, receive_emails=True)
         print("Permissions: ")
         print("\t Finance Settings")
         inv_edit = input("\t Edit Records (y/n): ").lower() == 'y'
@@ -125,7 +127,7 @@ class User:
         added_by, updated_by)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
         """
-        user_vals = (1, values.get('user_name'), values.get('first_name'),
+        user_vals = (2, values.get('user_name'), values.get('first_name'),
                         values.get('last_name'), values.get('email'),
                         values.get('system_user', False), 1, 1)
         
@@ -135,7 +137,21 @@ class User:
         added_by, updated_by) VALUES
         (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """
-        perms_vals = [1, False, False, False, False, False, False, False, False, values.get('system_admin'), 1, 1]
+        inv_edit = values.get('inv_edit', False)
+        inv_view = values.get('inv_view', False)
+        doc_edit = values.get('doc_edit', False)
+        doc_view = values.get('doc_view', False)
+        inv_admin = values.get('inv_admin', False)
+        doc_admin = values.get('doc_admin', False)
+        approve_invoices = values.get('approve_invoices', False)
+        receive_emails = values.get('receive_emails', False)
+        perms_vals = [2, inv_edit,
+                      inv_view, doc_edit,
+                      doc_view, inv_admin, 
+                      doc_admin, approve_invoices,
+                      receive_emails,
+                      values.get('system_admin'), 
+                      1, 1]
         return ((user_sql, user_vals), (perms_sql, perms_vals))
     
     @staticmethod
@@ -147,10 +163,10 @@ class User:
         user.updated_by = user_info[8]
         user.dt_added = user_info[9]
         user.dt_updated = user_info[10]
-        user.inv_edit = permissions[1] == 1
-        user.inv_view = permissions[2] == 1
-        user.doc_edit = permissions[3] == 1
-        user.doc_view = permissions[4] == 1
+        user.inv_edit = permissions[1] == 1 or permissions[5] == 1
+        user.inv_view = permissions[2] == 1 or permissions[5] == 1
+        user.doc_edit = permissions[3] == 1 or permissions[6] == 1
+        user.doc_view = permissions[4] == 1 or permissions[6] == 1
         user.inv_admin = permissions[5] == 1
         user.doc_admin = permissions[6] == 1
         user.approve_invoices = permissions[7] == 1

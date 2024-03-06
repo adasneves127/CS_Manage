@@ -5,7 +5,7 @@ from src.utils.exceptions import UserNotFoundException, MalformedUserException
 import logging
 import bcrypt
 from typing import NoReturn
-
+from src.utils.app_utils import load_app_info
 
 class connect:
     def __init__(self):
@@ -395,6 +395,22 @@ class connect:
             return_list.append(row_container.__dict__)
         
         return return_list
+    
+    def change_preferences(self, target_user: int, current_user: containers.User, new_prefs: dict):
+        sql = """UPDATE users SET user_name = %s, theme = %s, email=%s, updated_by = %s WHERE seq = %s"""
+        email_domain = load_app_info()['public']['email_domain']
+        email = new_prefs.get('email').removesuffix(email_domain)
+        self.cursor.execute(sql, (new_prefs.get('uname'), new_prefs.get('theme'), email, current_user.seq, target_user))
+        self.connection.commit()
+    
+    def change_password(self, target_seq: int, current_user: containers.User, new_password: str):
+        sql = """UPDATE users SET password = %s, updated_by = %s WHERE seq = %s"""
+        hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+        self.cursor.execute(sql, (hashed, current_user.seq, target_seq))
+        self.connection.commit()
+    
+    def change_approver_pin(self, target_seq: int, current_user: containers.User, new_pin: str):
+        sql = """UPDATE users SET finance_pin = %s, updated_by = %s WHERE seq = %s"""
     
     def __del__(self):
         self.connection.close()

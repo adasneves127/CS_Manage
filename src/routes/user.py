@@ -17,8 +17,8 @@ def user_settings():
 
 @app.route('/user/change_password', methods=["POST"])
 def change_password():
-    seq = request.args.get("seq", -1)
-    if seq == -1:
+    target_seq = request.args.get("seq", -1)
+    if target_seq == -1:
         return send_template("user/settings.liquid", error="Current Password not correct"), 400
     
     else:
@@ -36,7 +36,7 @@ def change_password():
             if new_password == "":
                 return send_template("user/settings.liquid", error="Internal Server Error"), 500
             else:
-                connection.change_password(session['user'], seq, new_password)
+                connection.change_password(target_seq, session['user'], new_password)
                 reload_user()
                 return redirect("/user/settings/")
 
@@ -48,12 +48,12 @@ def change_preferences():
         return send_template("user/settings.liquid", error="Internal Server Error"), 500
     else:
         connection = connect()
-        user = connection.get_user_by_seq(target_seq)
+        user = session['user']
         if user is None:
             return send_template("user/settings.liquid", error="User not found"), 404
         else:
             print(dict(request.form))
-            connection.change_preferences(user, target_seq, request.form)
+            connection.change_preferences(target_seq, user, request.form)
             reload_user()
             return redirect("/user/settings/")
 

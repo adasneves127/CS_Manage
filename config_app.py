@@ -2,11 +2,16 @@ from src.utils.db_utils import connect
 from src.utils.containers import User
 import json
 import secrets
+from getpass import getpass
 
 def create_user(conn: connect):
     
     user_data = User.create_user()
     conn.save_user(user_data)
+    # Get a password and an approval pin
+    password = getpass("Enter a password for the new user: ")
+    pin = getpass("Enter an approval pin for the new user: ")
+    conn.
 
 def config_app_info():
     system_name = input("Enter the name of this system: ")

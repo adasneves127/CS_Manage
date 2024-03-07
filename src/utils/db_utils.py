@@ -6,6 +6,8 @@ import logging
 import bcrypt
 from typing import NoReturn
 from src.utils.app_utils import load_app_info
+from src.utils import email_utils
+from uuid import uuid4
 
 class connect:
     def __init__(self):
@@ -407,10 +409,51 @@ class connect:
         sql = """UPDATE users SET password = %s, updated_by = %s WHERE seq = %s"""
         hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
         self.cursor.execute(sql, (hashed, current_user.seq, target_seq))
+        email_utils.send_password_updated_email(self.get_user_by_seq(target_seq))
         self.connection.commit()
+        
+    def request_reset_password(self, target_seq: int, requested_ip: str):
+        sql = """INSERT INTO password_reset (user_seq, token, created_by)
+        VALUES (%s, %s, %s)"""
+        values = (target_seq, uuid4().hex, requested_ip)
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        app_info = load_app_info()
+        app_domain = app_info['public']['application_url']
+        email_utils.send_password_reset_email(self.get_user_by_seq(target_seq), 
+                            f"http://{app_domain}/reset_password/{values[1]}")
     
+    
+    def get_user_by_reset_token(self, token: str) -> tuple:
+        sql = """SELECT a.seq, a.user_name FROM users a, password_reset b WHERE
+        a.seq = b.user_seq AND b.token = %s AND b.created_at > NOW() - INTERVAL 1 DAY"""
+        self.cursor.execute(sql, (token,))
+        return self.cursor.fetchone()
+        
+        
     def change_approver_pin(self, target_seq: int, current_user: containers.User, new_pin: str):
         sql = """UPDATE users SET finance_pin = %s, updated_by = %s WHERE seq = %s"""
+        self.cursor.execute(sql, (new_pin, current_user.seq, target_seq))
+        self.connection.commit()
+    
+    def can_user_view_officer_docket(self, user: containers.User) -> bool:
+        sql = """SELECT doc_view, doc_admin FROM permissions WHERE user_seq = %s"""
+        self.cursor.execute(sql, (user.seq,))
+        result = self.cursor.fetchone()
+        return result[0] == 1 or result[1] == 1
+    
+    def reset_password(self, user_seq: int, new_password: str):
+        sql = """UPDATE users SET password = %s, updated_by = %s WHERE seq = %s"""
+        hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+        print(sql, (hashed, 0, user_seq))
+        self.cursor.execute(sql, (hashed, 1, user_seq))
+        email_utils.send_password_updated_email(self.get_user_by_seq(user_seq))
+        self.connection.commit()
+        
+        # Delete the old token
+        sql = """DELETE FROM password_reset WHERE user_seq = %s"""
+        self.cursor.execute(sql, (user_seq,))
+        self.connection.commit()
     
     def __del__(self):
         self.connection.close()

@@ -11,7 +11,8 @@ def create_user(conn: connect):
     # Get a password and an approval pin
     password = getpass("Enter a password for the new user: ")
     pin = getpass("Enter an approval pin for the new user: ")
-    conn.
+    conn.change_password(user_data.seq, user_data, password)
+    conn.change_approver_pin(user_data.seq, user_data, pin)
 
 def config_app_info():
     system_name = input("Enter the name of this system: ")
@@ -50,6 +51,7 @@ def config_app_info():
                 "user": "smtp user",
                 "password": "smtp password",
                 "from": "email box name",
+                "from_email": "email box email",
                 "use_tls": "true/false",
                 "use_ssl": "true/false",
                 "cc": [],

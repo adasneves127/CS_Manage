@@ -1,22 +1,29 @@
 from app import app
-
+from flask import abort
 from src.utils.templates import send_template
 from flask import session, redirect, request
 from src.utils.db_utils import connect
+from src.utils import exceptions
 
 @app.route("/user/reload/", methods=["GET"])
 def reload_user():
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
     connection = connect()
     session['user'] = connection.get_user_by_seq(session['user'].seq)
     return "", 200
 
 @app.route("/user/settings/")
 def user_settings():
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
     return send_template("user/settings.liquid")
 
 
 @app.route('/user/change_password', methods=["POST"])
 def change_password():
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
     target_seq = request.args.get("seq", -1)
     if target_seq == -1:
         return send_template("user/settings.liquid", error="Current Password not correct"), 400
@@ -43,6 +50,8 @@ def change_password():
 
 @app.route("/user/preferences", methods=["POST"])
 def change_preferences():
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
     target_seq = request.args.get("seq", -1)
     if target_seq == -1:
         return send_template("user/settings.liquid", error="Internal Server Error"), 500
@@ -59,6 +68,8 @@ def change_preferences():
 
 @app.route("/user/change_approver_pin", methods=["POST"])
 def change_approver_pin():
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
     seq = request.args.get("seq", -1)
     if seq == -1:
         return send_template("user/settings.liquid", error="Internal Server Error"), 500

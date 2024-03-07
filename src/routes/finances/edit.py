@@ -2,21 +2,27 @@ from app import app
 from flask import session, request, redirect
 from src.utils.templates import send_template
 from src.utils.db_utils import connect
+from src.utils import exceptions
 
 
 @app.route("/finances/edit/<int:seq>/", methods=["GET"])
 def edit_record(seq):
     connection = connect()
-    if connection.can_user_view_finances(session['user'].seq):
-        record = connection.get_record_by_seq(seq)
-        return send_template("finances/edit.liquid", record=record,
-                             statuses=connection.get_all_statuses(),
-                             approvers=connection.get_all_approvers())
-    else:
-        return "You do not have permission to view this page", 403
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
+    
+    if not connection.can_user_view_finances(session['user'].seq):
+        raise exceptions.InvalidPermissionException()
+    record = connection.get_record_by_seq(seq)
+    return send_template("finances/edit.liquid", record=record,
+                            statuses=connection.get_all_statuses(),
+                            approvers=connection.get_all_approvers())
     
 @app.route("/finances/edit/<int:seq>", methods=["PATCH"])
 def patch_record(seq):
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
+    
     connection = connect()
     if connection.can_user_view_finances(session['user'].seq):
         
@@ -39,4 +45,4 @@ def patch_record(seq):
         connection.edit_record(seq, request.form)
         return redirect("/finances/")
     else:
-        return "You do not have permission to view this page", 403
+        raise exceptions.InvalidPermissionException()

@@ -122,7 +122,7 @@ create table inv_line(
 CREATE TABLE password_reset
 (
     seq int auto_increment primary key,
-    user_seq int not null unique,
+    user_seq int not null,
     token varchar(40) not null unique,
     created_at datetime default CURRENT_TIMESTAMP,
     created_by varchar(15),

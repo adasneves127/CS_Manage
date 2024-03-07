@@ -2,6 +2,7 @@ from app import app
 from flask import request, session, redirect
 from src.utils.templates import send_template
 from src.utils.db_utils import connect
+from src.utils import exceptions
 
 @app.route("/finances/table/", methods=["POST", "GET"])
 def get_table():
@@ -13,7 +14,7 @@ def get_table():
         finance_records.sort(key=lambda x: int(x['header']['id']))
         return send_template("finances/table.liquid", records=finance_records), 200
     else:
-        return "You do not have permission to view this page", 403
+        raise exceptions.InvalidPermissionException()
 
 @app.route("/finances/view/<int:seq>/", methods=["GET"])
 def get_record(seq):
@@ -23,7 +24,7 @@ def get_record(seq):
         approvers = connection.get_all_approvers()
         return send_template("finances/finance_view.liquid", record=record, isPreview=False)
     else:
-        return "You do not have permission to view this page", 403
+        raise exceptions.InvalidPermissionException()
     
 @app.route("/finances/table/pending/", methods=["POST", "GET"])
 def pending_table():
@@ -34,4 +35,4 @@ def pending_table():
         print(connection.get_pending_finances())
         return send_template("finances/table.liquid", records=connection.get_pending_finances())
     else:
-        return "You do not have permission to view this page", 403
+        raise exceptions.InvalidPermissionException()

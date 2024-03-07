@@ -1,8 +1,8 @@
 from app import app
 from src.utils.templates import send_template
-import bcrypt
 from flask import session, request, redirect
 from src.utils.db_utils import connect
+from src.utils import exceptions
 
 @app.route("/auth/login/", methods=["GET"])
 def get_login_page():
@@ -20,7 +20,7 @@ def login():
     if valid:
         user = connection.get_user_by_seq(user_seq)
         if user.system_user:
-            return "Invalid username or password", 400
+            raise exceptions.UserNotFoundException()
         session["loggedin"] = True
         session['user'] = user
         # return redirect(redir, code=302)
@@ -31,12 +31,38 @@ def login():
 
 @app.route("/auth/logout/")
 def logout():
-    keys = list(session.keys())
-    for key in keys:
-        session.pop(key)
-    return redirect("/" )
+    session.clear()
     
+
+@app.route("/reset_password/<token>", methods=['GET'])
+def reset_password_page(token):
+    conn = connect()
+    user = conn.get_user_by_reset_token(token)
+    if user:
+        return send_template('user/reset_password.liquid', token=token)
+    else:
+        raise exceptions.MalformedRequestException()
+
+@app.route("/reset_password/<token>", methods=['POST'])
+def reset_password_form(token):
+    conn = connect()
+    user = conn.get_user_by_reset_token(token)
+    if user:
+        password = request.form['password']
+        conn.reset_password(user[0], password)
+        session.clear()
+        return redirect("/")
+    else:
+        return "Invalid token", 400
 
 @app.route("/auth/password_reset/", methods=['POST'])
 def reset_password():
-    raise NotImplementedError
+    conn = connect()
+    user_name = request.json['username']
+    user = conn.get_user_by_user_name(user_name)
+    if user:
+        # Get the user's IP address
+        ip = request.remote_addr
+        user = user.seq
+        conn.request_reset_password(user, ip)
+    return "Password reset email sent to your email address. Please check your email.", 201

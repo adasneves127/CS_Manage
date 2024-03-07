@@ -3,17 +3,21 @@ from src.utils.templates import send_template
 from src.utils.db_utils import connect
 from flask import request, session, abort
 from mysql.connector.errors import DatabaseError
+from src.utils import exceptions
 
 @app.route("/finances/new/", methods=["GET"])
 def new_record():
     connection = connect()
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
+    
     if connection.can_user_view_finances(session['user'].seq):
         return send_template("finances/new.liquid", types=connection.get_all_types(),
                              statuses=connection.get_all_statuses(),
                              users=connection.get_all_invoice_users(),
                              approvers=connection.get_all_approvers())
     else:
-        return "You do not have permission to view this page", 403
+        raise exceptions.InvalidPermissionException()
     
 @app.route("/finances/search", methods=["GET"])
 def search():
@@ -23,7 +27,7 @@ def search():
         date = request.args.get("invDate") #datetime.datetime.strptime(request.args.get("invDate"), "%Y-%m-%d")
         return send_template("finances/search.liquid", items=connection.get_all_items(date))
     else:
-        return "You do not have permission to view this page", 403
+        raise exceptions.InvalidPermissionException()
     
 @app.route("/finances/new/", methods=["POST"])
 def create_record():
@@ -61,7 +65,7 @@ def create_record():
             else:
                 raise e
     else:
-        return "You do not have permission to view this page", 403
+        raise exceptions.InvalidPermissionException()
     
 @app.route("/finances/new/preview/", methods=["POST"])
 def preview_record():
@@ -69,4 +73,4 @@ def preview_record():
     if connection.can_user_view_finances(session['user'].seq):
         return send_template("finances/finance_view.liquid", record=request.json, isPreview=True)
     else:
-        return "You do not have permission to view this page", 403
+        raise exceptions.InvalidPermissionException()

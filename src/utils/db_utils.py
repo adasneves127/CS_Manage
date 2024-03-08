@@ -796,5 +796,11 @@ class connect:
         self.cursor.execute(sql, (seq,))
         return [self.get_user_by_seq(x[0]) for x in self.cursor.fetchall()]
     
+    def can_user_view_finances(self, seq: int):
+        sql = """SELECT inv_view, inv_admin FROM permissions WHERE user_seq = %s"""
+        self.cursor.execute(sql, (seq,))
+        results = self.cursor.fetchone()
+        return results[0] == 1 or results[1] == 1
+    
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

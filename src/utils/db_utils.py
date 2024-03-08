@@ -10,9 +10,11 @@ from src.utils import email_utils
 from uuid import uuid4
 import datetime
 import subprocess
+from dotenv import load_dotenv
 
 class connect:
     def __init__(self):
+        load_dotenv()
         try:
             self.connection = mysql.connector.connect(
                 host=os.environ['DB_HOST'],

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page}} Statuses</title>
+    <script>
+        function newStatus() {
+            stat_name = prompt("Enter new status name");
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/admin/finance/status/");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify({name: stat_name}));
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState == 4){
+                    if(xhr.status === 201){
+                        location.reload()
+                    }
+                }
+            }
+        }
+        function editStatus(id) {
+            stat_name = prompt("Enter new status name");
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/admin/finance/status/");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify({id: id, name: stat_name}));
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState == 4){
+                    if(xhr.status === 201){
+                        location.reload()
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <table>
+        <tr>
+            <th>Seq</th>
+            <th>Status Name</th>
+            <th>Created By</th>
+            <th>Updated By</th>
+            <th>Options</th>
+        </tr>
+        {% for status in statuses %}
+        <tr>
+            <td>{{ status[0] }}</td>
+            <td>{{ status[1] }}</td>
+            <td>{{ status[2] }}</td>
+            <td>{{ status[3] }}</td>
+            <td><a onclick="editStatus({{status[0]}})" class="nav">Edit</a></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><a onclick="newStatus()" class="nav">+</a></td></tr>
+    </table>
+</body>
+</html>

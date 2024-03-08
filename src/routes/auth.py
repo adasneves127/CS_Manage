@@ -32,6 +32,7 @@ def login():
 @app.route("/auth/logout/")
 def logout():
     session.clear()
+    return redirect("/", code=302)
     
 
 @app.route("/reset_password/<token>", methods=['GET'])
@@ -65,4 +66,5 @@ def reset_password():
         ip = request.remote_addr
         user = user.seq
         conn.request_reset_password(user, ip)
-    return "Password reset email sent to your email address. Please check your email.", 201
+        return "Password reset email sent to your email address. Please check your email.", 201
+    return "Invalid username", 400

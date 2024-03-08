@@ -9,9 +9,9 @@ create table users(
     last_name varchar(20),
     email varchar(30),
     password varchar(255),
-    system_user bool default 0,
-    invoice_pin char(4),
-    theme bool default 1,
+    system_user bool default 0 NOT NULL,
+    finance_pin char(4),
+    theme int default 1,
     added_by int not null,
     updated_by int not null,
     dt_added timestamp default current_timestamp,
@@ -23,15 +23,16 @@ create table users(
 create table permissions(
     seq            INT auto_increment PRIMARY KEY,
     user_seq            INT                  NOT NULL,
-    inv_edit            bool default 0 NULL,
-    inv_view            bool default 0 NULL,
-    doc_edit            bool default 0 NULL,
-    doc_view            bool default 0 NULL,
-    inv_admin           bool default 0 NULL,
-    doc_admin           bool default 0 NULL,
+    inv_edit            bool default 0 NOT NULL,
+    inv_view            bool default 0 NOT NULL,
+    doc_edit            bool default 0 NOT NULL,
+    doc_view            bool default 0 NOT NULL,
+    doc_vote            bool default 0 NOT NULL,
+    inv_admin           bool default 0 NOT NULL,
+    doc_admin           bool default 0 NOT NULL,
     approve_invoices    bool default 0 NOT NULL,
-    receive_emails      bool default 0 NULL,
-    user_admin          bool default 0 NULL,
+    receive_emails      bool default 0 NOT NULL,
+    user_admin          bool default 0 NOT NULL,
     added_by int not null,
     updated_by int not null,
     dt_added timestamp default current_timestamp,
@@ -128,6 +129,48 @@ CREATE TABLE password_reset
     created_by varchar(15),
 
     constraint foreign key (user_seq) references users (seq)
+);
+
+create table docket_status(
+    seq int auto_increment primary key,
+    stat_desc varchar(20),
+    added_by int not null,
+    updated_by int not null,
+    dt_added timestamp default current_timestamp,
+    dt_updated timestamp default current_timestamp on update current_timestamp,
+    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
+);
+
+create table officer_docket(
+    seq int auto_increment primary key,
+    created_by int,
+    updated_by int,
+    title varchar(80),
+    body text,
+    created_at datetime default current_timestamp,
+    updated_at datetime default current_timestamp on update current_timestamp,
+    status int,
+    CONSTRAINT FOREIGN KEY (created_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (status) references docket_status(seq)
+);
+
+create table officer_votes(
+    seq int auto_increment primary key,
+    user int,
+    docket_item int,
+    vote_type enum('In Favor', 'Opposed', 'Abstained'),
+    CONSTRAINT FOREIGN KEY (user) references users(seq),
+    CONSTRAINT FOREIGN KEY (docket_item) references officer_docket(seq)
+);
+
+create table docket_assignees(
+    seq int auto_increment primary key,
+    docket_seq int not null,
+    assigned_to int not null,
+    CONSTRAINT FOREIGN KEY (assigned_to) references users(seq),
+    CONSTRAINT FOREIGN KEY (docket_seq) references officer_docket(seq)
 );
 
 create trigger date_check_update_users
@@ -247,7 +290,7 @@ before update on inv_head
 for each row
 begin
     IF new.approver not in (
-            select a.approve_invoices
+            select a.user_seq
             From permissions a  -- CHANGED THE ALIAS TO A
             where (a.approve_invoices = 1 and new.approver = a.user_seq)
         ) THEN -- MISSING THEN
@@ -268,5 +311,31 @@ begin
 end;
 
 CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';
-GRANT INSERT, UPDATE, SELECT on management.* to 'invoices'@'localhost';
-GRANT DELETE on management.password_reset to 'invoices'@'localhost';
+GRANT INSERT, UPDATE, SELECT on management.* TO 'invoices'@'localhost';
+GRANT DELETE on management.password_reset TO 'invoices'@'localhost';
+
+-- Insert a 'root' system user - No password set! Don't set one plz
+INSERT INTO users (seq, user_name, first_name, last_name, email, finance_pin, password, system_user, theme, added_by, updated_by) VALUES
+(1, '~', '', '', '', '0000', '', 1, 0, 1, 1);
+INSERT INTO permissions (user_seq, inv_edit, inv_view, doc_edit, doc_view, doc_vote, inv_admin, doc_admin, approve_invoices, receive_emails, user_admin, added_by, updated_by) VALUES
+(1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1);
+
+-- Insert some typical Statuses and Types
+INSERT INTO statuses (stat_desc, added_by, updated_by) VALUES
+('Closed', 1, 1),
+('Paid', 1, 1),
+('Open', 1, 1),
+('Granted', 1, 1),
+('Pending', 1, 1),
+('Denied', 1, 1),
+('Cancelled', 1, 1);
+
+INSERT INTO record_types (type_desc, added_by, updated_by) VALUES
+('Invoice [Debit]', 1, 1),
+('Invoice [Credit]', 1, 1),
+('Budget Request', 1, 1);
+
+-- Create an account that can backup the database using mysqldump
+create user if not exists invoice_backup_account@localhost
+    identified with 'mysql_native_password' by 'LyRk5ASv2hY0';
+GRANT INSERT, UPDATE, LOCK TABLES, SELECT, DELETE, PROCESS, TRIGGER, SHOW VIEW on *.* to invoice_backup_account@localhost;

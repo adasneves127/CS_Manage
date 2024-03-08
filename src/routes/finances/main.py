@@ -11,7 +11,7 @@ def finance():
         raise exceptions.UserNotSignedInException()
     
     if connection.can_user_view_finances(session['user'].seq):
-        statuses = connection.get_all_statuses()
+        statuses = connection.get_all_finance_status_names()
         return send_template("finances/index.liquid", statuses=statuses,
                              types=connection.get_all_types())
     else:

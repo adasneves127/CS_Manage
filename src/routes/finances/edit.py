@@ -15,7 +15,7 @@ def edit_record(seq):
         raise exceptions.InvalidPermissionException()
     record = connection.get_record_by_seq(seq)
     return send_template("finances/edit.liquid", record=record,
-                            statuses=connection.get_all_statuses(),
+                            statuses=connection.get_all_finance_status_names(),
                             approvers=connection.get_all_approvers())
     
 @app.route("/finances/edit/<int:seq>", methods=["PATCH"])

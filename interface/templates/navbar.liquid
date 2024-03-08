@@ -57,7 +57,7 @@
         </button>
         <div class="dropdown-content">
           {% if doc_view or doc_admin %}
-            <a href="/docket/officer/view/">View Record</a>
+            <a href="/docket/officer/view/">View Records</a>
             
           {% endif %}
           {% if doc_edit or doc_admin %}
@@ -78,11 +78,10 @@
           <i class="fa fa-caret-down"></i>
         </button>
         <div class="dropdown-content">
-          <a href="/admin/status/">Statuses</a>
+          <a href="/admin/finance/status/">Finance Statuses</a>
+          <a href="/admin/docket/status/">Docket Statuses</a>
           <a href="/admin/record/">Record Types</a>
           <a href="/admin/users/">Users</a>
-          <a href="/admin/addresses/">Addresses</a>
-          <a href="/admin/perms/">User Permissions</a>
         </div>
       </div>
     {% endif %}

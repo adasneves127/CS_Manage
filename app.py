@@ -15,7 +15,7 @@ app.config.update(
 Session(app)
 app.secret_key = load_app_info()['private']['secret_token']
 
-from src.routes import docket, user, auth, finances, base_routes
+from src.routes import docket, user, auth, finances, base_routes, admin
 
 
 if __name__ == '__main__':

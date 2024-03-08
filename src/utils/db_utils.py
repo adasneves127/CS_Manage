@@ -8,6 +8,8 @@ from typing import NoReturn
 from src.utils.app_utils import load_app_info
 from src.utils import email_utils
 from uuid import uuid4
+import datetime
+import subprocess
 
 class connect:
     def __init__(self):
@@ -90,7 +92,7 @@ class connect:
         self.cursor.fetchall() # flush the cursor
         perms_sql = """SELECT seq, inv_edit, inv_view,
         doc_edit, doc_view, inv_admin, doc_admin, approve_invoices,
-        receive_emails, user_admin, added_by, updated_by, dt_added,
+        receive_emails, user_admin, doc_vote added_by, updated_by, dt_added,
         dt_updated
         FROM permissions WHERE user_seq = %s"""
         self.cursor.execute(perms_sql, (user_seq,))
@@ -111,7 +113,7 @@ class connect:
         self.cursor.fetchall() # flush the cursor
         perms_sql = """SELECT seq, inv_edit, inv_view,
         doc_edit, doc_view, inv_admin, doc_admin, approve_invoices,
-        receive_emails, user_admin, added_by, updated_by, dt_added,
+        receive_emails, user_admin, doc_vote, added_by, updated_by, dt_added,
         dt_updated
         FROM permissions WHERE user_seq = %s"""
         self.cursor.execute(perms_sql, (user[0],))
@@ -145,15 +147,25 @@ class connect:
             return False
         return results[0][0]
     
-    def can_user_view_finances(self, user_seq: int) -> bool | NoReturn:
-        sql = "SELECT inv_view, inv_admin FROM permissions WHERE user_seq = %s"
+
+    def can_user_edit_finances(self, user_seq: int) -> bool | NoReturn:
+        sql = "SELECT inv_edit, inv_admin FROM permissions WHERE user_seq = %s"
         self.cursor.execute(sql, (user_seq,))
         results = self.cursor.fetchall()
         if len(results) != 1:
             return False
         return results[0][0] == 1 or results[0][1] == 1
         
-    def get_all_statuses(self) -> list:
+    def get_all_finance_statuses(self):
+        sql = """SELECT a.seq, a.stat_desc,
+        CONCAT(b.first_name, ' ', b.last_name),
+        CONCAT(c.first_name, ' ', c.last_name),
+        a.dt_added, a.dt_updated FROM statuses a, users b, users c
+        WHERE a.added_by = b.seq AND a.updated_by = c.seq"""
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+    
+    def get_all_finance_status_names(self) -> list:
         sql = "SELECT stat_desc FROM statuses"
         self.cursor.execute(sql)
         return [x[0] for x in self.cursor.fetchall()]
@@ -166,7 +178,7 @@ class connect:
     def filter_finances(self, filter_data: dict):
         return_list = []
         valid_types = self.get_all_types()
-        valid_statuses = self.get_all_statuses()
+        valid_statuses = self.get_all_finance_status_names()
         sql = """
         SELECT a.seq, a.id, concat(b.first_name, ' ', b.last_name),
             concat(c.first_name, ' ', c.last_name), d.stat_desc, e.type_desc,
@@ -413,6 +425,8 @@ class connect:
         self.connection.commit()
         
     def request_reset_password(self, target_seq: int, requested_ip: str):
+        if self.get_user_by_seq(target_seq).system_user:
+            raise UserNotFoundException
         sql = """INSERT INTO password_reset (user_seq, token, created_by)
         VALUES (%s, %s, %s)"""
         values = (target_seq, uuid4().hex, requested_ip)
@@ -429,6 +443,29 @@ class connect:
         a.seq = b.user_seq AND b.token = %s AND b.created_at > NOW() - INTERVAL 1 DAY"""
         self.cursor.execute(sql, (token,))
         return self.cursor.fetchone()
+    
+    def can_user_edit_docket_record(self, user: containers.User, seq: int):
+        # If the user created it, then they can edit it
+        sql = """SELECT created_by FROM officer_docket WHERE seq = %s"""
+        self.cursor.execute(sql, (seq,))
+        creator = self.cursor.fetchone()[0]
+        if creator == user.seq:
+            return True
+        # If the user is an admin, then they can edit it
+        sql = """SELECT doc_admin FROM permissions WHERE user_seq = %s"""
+        self.cursor.execute(sql, (user.seq,))
+        if self.cursor.fetchone()[0] == 1:
+            return True
+
+        #If the user is assigned to it, then they can edit it
+        sql = """SELECT user_seq FROM docket_assignees WHERE docket_seq = %s"""
+        self.cursor.execute(sql, (seq,))
+        results = self.cursor.fetchall()
+        for result in results:
+            if result[0] == user.seq:
+                return True
+        # Otherwise, they can't edit this record.
+        return False
         
         
     def change_approver_pin(self, target_seq: int, current_user: containers.User, new_pin: str):
@@ -438,6 +475,12 @@ class connect:
     
     def can_user_view_officer_docket(self, user: containers.User) -> bool:
         sql = """SELECT doc_view, doc_admin FROM permissions WHERE user_seq = %s"""
+        self.cursor.execute(sql, (user.seq,))
+        result = self.cursor.fetchone()
+        return result[0] == 1 or result[1] == 1
+    
+    def can_user_edit_officer_docket(self, user: containers.User) -> bool:
+        sql = """SELECT doc_edit, doc_admin FROM permissions WHERE user_seq = %s"""
         self.cursor.execute(sql, (user.seq,))
         result = self.cursor.fetchone()
         return result[0] == 1 or result[1] == 1
@@ -454,6 +497,304 @@ class connect:
         sql = """DELETE FROM password_reset WHERE user_seq = %s"""
         self.cursor.execute(sql, (user_seq,))
         self.connection.commit()
+        
+    def is_invoice_admin(self, user_seq: int) -> bool:
+        sql = """SELECT inv_admin FROM permissions WHERE user_seq = %s"""
+        self.cursor.execute(sql, (user_seq,))
+        return self.cursor.fetchone()[0] == 1
+
+    def fetch_items(self):
+        sql = """SELECT seq, id, item_desc, item_price, item_type, effective_start, effective_end, is_active from valid_items"""
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+    
+    def get_next_item_id(self) -> int:
+        sql = """SELECT MAX(id) FROM valid_items"""
+        self.cursor.execute(sql)
+        return self.cursor.fetchone()[0]
+    
+    def create_item(self, item: dict, current_user: containers.User):
+        sql = """
+        INSERT INTO valid_items (id, item_desc, item_price, item_type, 
+        effective_start, effective_end, is_active, added_by, updated_by)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        ID = self.get_next_item_id()
+        values = (
+            ID,
+            item['name'],
+            item['price'],
+            item['type'],
+            item['eStart'],
+            item['eEnd'],
+            1,
+            current_user.seq,
+            current_user.seq
+        )
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+    
+    def ammend_item(self, item: dict, current_user: containers.User):
+        # find what datetime range this item is in
+        sql = """SELECT seq, effective_start, effective_end FROM valid_items WHERE id = %s"""
+        self.cursor.execute(sql, (item['ID'],))
+        results = self.cursor.fetchall()
+        for result in results:
+            if result[1] < convert_to_datetime(item['eStart']):
+                sql = """UPDATE valid_items SET effective_end = %s, updated_by = %s WHERE seq = %s"""
+                self.cursor.execute(sql, (item['eStart'], current_user.seq, result[0]))
+                self.connection.commit()
+            if result[2] > convert_to_datetime(item['eEnd']):
+                sql = """UPDATE valid_items SET effective_start = %s, updated_by = %s WHERE seq = %s"""
+                self.cursor.execute(sql, (item['eEnd'], current_user.seq, result[0]))
+                self.connection.commit()
+        # Create the new item
+        sql = """
+        INSERT INTO valid_items (id, item_desc, item_price, item_type, 
+        effective_start, effective_end, is_active, added_by, updated_by)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        ID = int(self.get_next_item_id()) + 1
+        values = (
+            item['ID'],
+            item['name'],
+            item['price'],
+            item['type'],
+            item['eStart'],
+            item['eEnd'],
+            1,
+            current_user.seq,
+            current_user.seq
+        )
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        
     
     def __del__(self):
         self.connection.close()
+        
+    def get_docket_items(self):
+        sql = """SELECT a.seq, a.created_by, a.title, a.body, a.status, a.created_at, a.updated_at FROM
+        officer_docket a"""
+        self.cursor.execute(sql)
+        results = self.cursor.fetchall()
+        for result in results:
+            # Get the creator
+            user = self.get_user_by_seq(result[1])
+            # Get any people assigned to the docket
+            sql = """SELECT user_seq FROM docket_assignees WHERE docket_seq = %s"""
+    
+    @staticmethod
+    def dump_database():
+        proc = subprocess.Popen(f'''/usr/bin/mysqldump -u {os.environ['DB_BACKUP_USER']} management -p{os.environ['DB_BACKUP_PASS']}''',
+                                stdout=subprocess.PIPE,
+                                shell=True)
+        output = proc.stdout.read().decode()
+        with open('backup.sql', 'w') as f:
+            f.write(output)
+    
+    def update_finance_status(self, seq, stat_desc, user: containers.User):
+        sql = """UPDATE statuses SET stat_desc = %s, updated_by = %s WHERE seq = %s"""
+        self.cursor.execute(sql, (stat_desc, user.seq, seq))
+        self.connection.commit()
+        
+    def create_finance_status(self, stat_desc, user: containers.User):
+        sql = """INSERT INTO statuses (stat_desc, added_by, updated_by) VALUES (%s, %s, %s)"""
+        self.cursor.execute(sql, (stat_desc, user.seq, user.seq))
+        self.connection.commit()        
+    
+    def update_docket_status(self, seq, stat_desc, user: containers.User):
+        sql = """UPDATE docket_status SET stat_desc = %s, updated_by = %s WHERE seq = %s"""
+        self.cursor.execute(sql, (stat_desc, user.seq, seq))
+        self.connection.commit()  
+    
+    def create_finance_status(self, stat_desc, user: containers.User):
+        sql = """INSERT INTO docket_status (stat_desc, added_by, updated_by) VALUES (%s, %s, %s)"""
+        self.cursor.execute(sql, (stat_desc, user.seq, user.seq))
+        self.connection.commit()
+    
+    def get_all_docket_statuses(self):
+        sql = """SELECT a.seq, a.stat_desc,
+        CONCAT(b.first_name, ' ', b.last_name),
+        CONCAT(c.first_name, ' ', c.last_name),
+        a.dt_added, a.dt_updated FROM docket_status a, users b, users c
+        WHERE a.added_by = b.seq AND a.updated_by = c.seq ORDER BY a.seq"""
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+    
+    def get_all_record_types(self):
+        sql = """SELECT a.seq, a.type_desc,
+        CONCAT(b.first_name, ' ', b.last_name),
+        CONCAT(c.first_name, ' ', c.last_name),
+        a.dt_added, a.dt_updated FROM record_types a, users b, users c
+        WHERE a.added_by = b.seq AND a.updated_by = c.seq ORDER BY a.seq"""
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
+    def update_record_type(self, seq, type_desc, user: containers.User):
+        sql = """UPDATE record_types SET type_desc = %s, updated_by = %s WHERE seq = %s"""
+        self.cursor.execute(sql, (type_desc, user.seq, seq))
+        self.connection.commit()
+    
+    def create_record_type(self, type_desc, user: containers.User):
+        sql = """INSERT INTO record_types (type_desc, added_by, updated_by) VALUES (%s, %s, %s)"""
+        self.cursor.execute(sql, (type_desc, user.seq, user.seq))
+        self.connection.commit()
+    
+    def get_all_users(self):
+        sql = """SELECT a.seq, a.user_name, a.first_name, a.last_name, a.email, a.system_user, a.theme,
+        CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name),
+        a.dt_added, a.dt_updated FROM users a, users b, users c WHERE a.added_by = b.seq AND
+        a.updated_by = c.seq"""
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+    
+    def update_user(self, user_seq, vals, current_user: containers.User):
+        sql = """
+        UPDATE users SET user_name = %s,
+        email = %s,
+        first_name = %s,
+        last_name = %s,
+        theme = %s,
+        system_user = %s,
+        updated_by = %s
+        WHERE
+        seq = %s
+        """
+        values = vals[0:6] + (current_user.seq, user_seq)
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        
+        sql = """
+        UPDATE permissions SET
+        receive_emails = %s,
+        inv_view = %s,
+        inv_edit = %s,
+        inv_admin = %s,
+        approve_invoices = %s,
+        doc_view = %s,
+        doc_edit = %s,
+        doc_admin = %s,
+        user_admin = %s,
+        doc_vote = %s,
+        updated_by = %s
+        WHERE
+        user_seq = %s
+        """
+        values = vals[6:] + (current_user.seq, user_seq)
+        self.cursor.execute(sql, values)
+        self.connection.commit()     
+    
+    def add_user(self, vals, current_user):
+        sql = """
+        INSERT INTO users (user_name, email, first_name, last_name, theme, system_user, added_by, updated_by)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        values = vals[0:6] + (current_user.seq, current_user.seq)
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        user_seq = self.cursor.lastrowid
+        sql = """
+        INSERT INTO permissions (user_seq, receive_emails, inv_view, inv_edit, inv_admin, approve_invoices, doc_view, doc_edit, doc_admin, user_admin, doc_vote, added_by, updated_by)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        values = (user_seq,) + vals[6:] + (current_user.seq, current_user.seq)
+        print(sql, values)
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        
+    def get_officer_docket(self):
+        sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
+        CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name)
+        FROM officer_docket a, users b, users c, docket_status d WHERE a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq"""
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+    
+    def get_docket_vote_email_users(self):
+        sql = """SELECT a.seq, a.user_name, a.first_name, a.last_name, a.email, a.system_user, a.theme,
+        CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name),
+        a.dt_added, a.dt_updated FROM users a, users b, users c, permissions d WHERE a.added_by = b.seq AND
+        a.updated_by = c.seq AND a.system_user = 0 AND a.seq = d.user_seq AND d.doc_vote = 1 AND d.receive_emails = 1"""
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+    
+    def create_officer_docket(self, data: dict, user: containers.User):
+        sql = """
+        INSERT INTO officer_docket (title, body, status, created_by, updated_by)
+        VALUES (%s, %s, %s, %s, %s)"""
+        values = (data['title'], data['body'], 1, user.seq, user.seq)
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        seq = self.cursor.lastrowid
+        email_utils.alert_docket_creation(user, 
+                                          self.get_docket_vote_email_users(),
+                                          data, seq)
+    
+    def search_officer_docket(self, seq: int):
+        sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
+        CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name)
+        FROM officer_docket a, users b, users c, docket_status d WHERE 
+        a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq AND
+        a.seq = %s"""
+        self.cursor.execute(sql, (seq,))
+        docket = self.cursor.fetchone()
+        self.cursor.fetchall()
+        # Get the votes
+        sql = """SELECT vote_type FROM officer_votes WHERE docket_item = %s"""
+        self.cursor.execute(sql, (seq,))
+        votes = self.cursor.fetchall()
+        # Get the assigned people
+        sql = """SELECT CONCAT(b.first_name, ' ', b.last_name), b.seq FROM docket_assignees a, users b 
+        WHERE a.assigned_to = b.seq AND a.docket_seq = %s"""
+        self.cursor.execute(sql, (seq,))
+        assignees = self.cursor.fetchall()
+        return docket, votes, assignees
+        
+    def get_assigned_records(self, user: containers.User):
+        sql = """SELECT docket_seq FROM docket_assignees WHERE assigned_to = %s"""
+        self.cursor.execute(sql, (user.seq,))
+        results = self.cursor.fetchall()
+        dockets = []
+        for result in results:
+            sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
+            CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name)
+            FROM officer_docket a, users b, users c, docket_status d WHERE a.created_by = b.seq 
+            AND a.updated_by = c.seq AND a.status = d.seq AND a.seq = %s"""
+            self.cursor.execute(sql, (result[0],))
+            dockets.extend(self.cursor.fetchall())
+        return dockets
+    
+    def add_assignee(self, data):
+        sql = """INSERT INTO docket_assignees (docket_seq, assigned_to,
+        created_by, updated_by) VALUES
+        (%s, %s, %s, %s)"""
+        values = (data[0], data[1], data[2], data[2])
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        email_utils.send_assignment_email(self.get_user_by_seq(data[1]),
+                                          self.get_user_by_seq(data[2]),
+                                          self.search_officer_docket(data[0]))
+
+    def del_assignee(self, data):
+        sql = """DELETE FROM docket_assignees WHERE docket_seq = %s AND assigned_to = %s"""
+        self.cursor.execute(sql, data[0:2])
+        self.connection.commit()
+        email_utils.alert_docket_removal(self.get_user_by_seq(data[1]),
+                                          self.get_user_by_seq(data[2]),
+                                          self.search_officer_docket(data[0]))
+    
+    def update_officer_docket(self, docket, user, seq):
+        sql = """UPDATE officer_docket SET title = %s, 
+        body = %s, updated_by = %s WHERE seq = %s"""
+        values = (docket['title'], docket['body'], user.seq, seq)
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        email_utils.alert_docket_update(user,
+                                        self.get_record_assignees(seq),
+                                        self.search_officer_docket(seq))
+    
+    def get_record_assignees(self, seq: int):
+        sql = """SELECT assigned_to FROM docket_assignees WHERE docket_seq = %s"""
+        self.cursor.execute(sql, (seq,))
+        return [self.get_user_by_seq(x[0]) for x in self.cursor.fetchall()]
+    
+def convert_to_datetime(date_str: str) -> datetime.datetime:
+    return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New User</title>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <h1>Create User</h1>
+    <form action="/admin/users/add/" method="post">
+        <table>
+            <tr>
+                <td>Seq</td>
+                <td>TBD</td>
+            </tr>
+            <tr>
+                <td>Username</td>
+                <td><input type="text" name="username" value="{{user.user_name}}"></td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td style="text-transform:none;"><input type="text" name="email" value="{{user.email}}">{{email_domain}}</td>
+            </tr>
+            <tr>
+                <td>First Name</td>
+                <td><input type="text" name="first_name" value="{{user.first_name}}"></td>
+            </tr>
+            <tr>
+                <td>Last Name</td>
+                <td><input type="text" name="last_name" value="{{user.last_name}}"></td>
+            </tr>
+            <tr>
+                <td>Theme</td>
+                <td><input type="text" name="theme" id="theme" value="{{user.theme}}"></td>
+            </tr>
+            <tr>
+                <td>System User</td>
+                <td>
+                    <input type="checkbox" name="system_user" id="system_user" {% if user.system_user == 1 %} checked {% endif %}>
+                </td>
+            </tr>
+            <tr>
+                <td>Enable Emails</td>
+                <td>
+                    <input type="checkbox" name="enable_emails" id="enable_emails" {% if user.receive_emails %} checked {% endif %}>
+                </td>
+            </tr>
+        </table>
+        <h2>Permissions</h2>
+        <table>
+            <tr>
+                <th colspan="4">Finances</th>
+                <th colspan="4">Docket</th>
+                <th>Application</th>
+            </tr>
+            <tr>
+                <th>Read</th>
+                <th>Write</th>
+                <th>Admin</th>
+                <th>Approve</th>
+                <th>Read</th>
+                <th>Write</th>
+                <th>Admin</th>
+                <th>Vote</th>
+                <th>Admin</th>
+            </tr>
+            <tr>
+                <td><input type="checkbox" name="inv_view" id="inv_view" {% if user.inv_view %}checked {% endif %}></td>
+                <td><input type="checkbox" name="inv_edit" id="inv_edit" {% if user.inv_edit %}checked {% endif %}></td>
+                <td><input type="checkbox" name="inv_admin" id="inv_admin" {% if user.inv_admin %}checked {% endif %}></td>
+                <td><input type="checkbox" name="approve_invoices" id="approve_invoices" {% if user.approve_invoices %}checked {% endif %}></td>
+                <td><input type="checkbox" name="doc_view" id="doc_view" {% if user.doc_view %}checked {% endif %}></td>
+                <td><input type="checkbox" name="doc_edit" id="doc_edit" {% if user.doc_edit %}checked {% endif %}></td>
+                <td><input type="checkbox" name="doc_admin" id="doc_admin" {% if user.doc_admin %}checked {% endif %}></td>
+                <td><input type="checkbox" name="doc_vote" id="doc_vote" {% if user.docket_vote %}checked {% endif %}></td>
+                <td><input type="checkbox" name="user_admin" id="user_admin" {% if user.user_admin %}checked {% endif %}></td>
+            </tr>
+        </table>
+        <input type="submit" value="Submit">
+
+    </form>
+    <br>
+    <br>
+    <br>
+    <br>
+    {% comment %} <button onclick="sendPasswordReset()">Send Password Reset</button> {% endcomment %}
+    {% comment %} {{user}} {% endcomment %}
+</body>
+</html>

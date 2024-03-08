@@ -172,6 +172,7 @@ class User:
         user.approve_invoices = permissions[7] == 1
         user.receive_emails = permissions[8] == 1
         user.user_admin = permissions[9] == 1
+        user.docket_vote = permissions[10] == 1
         return user
     
     def __str__(self) -> str:
@@ -180,3 +181,21 @@ class User:
     
     def __repr__(self) -> str:
         return f"""[USER]{self.__str__()}"""
+
+
+class Docket:
+    def __init__(self, title: str, description: str, creator: User, assignees: list, dt_added, status):
+        self.title = title
+        self.desc = description
+        self.creator_name = creator.full_name
+        self.creator_seq = creator.seq
+        self.assignees = assignees
+        self.dt_added = dt_added
+        self.seq = -1
+        self.status = status
+    
+    @staticmethod
+    def from_sql(creator: User, docket_info: tuple | list, assignees: tuple | list, dt_added, status):
+        docket = Docket(docket_info[1], docket_info[2], creator.full_name, creator.seq, assignees, dt_added, status)
+        docket.seq = docket_info[0]
+        return docket

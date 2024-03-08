@@ -160,6 +160,218 @@ def send_password_reset_email(user_obj: containers.User, reset_link: str):
     """
     send_email(subject, body_html, email, [], [])
 
+def send_assignment_email(target_user: containers.User,
+                          from_user: containers.User,
+                          docket_data: tuple):
+    app_info = load_app_info()
+    email_domain = app_info['public']['email_domain']
+    email = target_user.email
+    email += email_domain
+    subject = '[Notice] Docket Record Assigned'
+
+    if target_user.system_user:
+        return
+
+    if not target_user.receive_emails:
+        return
+
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+
+    body_html = """
+    <html>
+        <head>
+        <style>
+            @media only screen and (max-width: 600px) {
+                #logo{
+                    width: 50dvw
+                }
+            }
+            
+        </style>
+        </head>
+        <body>
+            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            <p>
+                Hello, <br>
+                You have been added as an assignee to an officer docket item. <br/>
+                <br>
+                Docket Information: {docket_data[0][0]}<br/>
+                Docket Title: {docket_data[0][1]}<br/>
+                Docket Description: {docket_data[0][2]}<br/>
+                Docket Status: {docket_data[0][3]}<br/>
+                <br>
+                You have been added to this record by {from_user.full_name}. <br/>
+                You can view this record by logging into the application and navigating to the assigned docket record page. <br/>
+                We encourage you to reach out to {from_user.full_name}, and any other assignees for more information. <br/>
+            </p>
+
+    """
+    body_html += f"""
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, email, [from_user.email + email_domain], [])
+
+def alert_docket_removal(target_user: containers.User, from_user: containers.User, docket_data: tuple):
+    app_info = load_app_info()
+    email_domain = app_info['public']['email_domain']
+    email = target_user.email
+    email += email_domain
+    subject = '[Notice] Docket Record Assignment Removed'
+
+    if target_user.system_user:
+        return
+
+    if not target_user.receive_emails:
+        return
+
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+
+    body_html = """
+    <html>
+        <head>
+        <style>
+            @media only screen and (max-width: 600px) {
+                #logo{
+                    width: 50dvw
+                }
+            }
+            
+        </style>
+        </head>
+        <body>
+            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            <p>
+                Hello, <br>
+                You have been removed as an assignee to an officer docket item. <br/>
+                <br>
+                Docket Information: {docket_data[0][0]}<br/>
+                Docket Title: {docket_data[0][1]}<br/>
+                Docket Status: {docket_data[0][3]}<br/>
+                <br>
+                You have been removed from this record by {from_user.full_name}. <br/>
+                We encourage you to reach out to {from_user.full_name} for more information. <br/>
+                
+            </p>
+
+    """
+    body_html += f"""
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, email, [from_user.email + email_domain], [])
+
+def alert_docket_creation(creation_user, docket_all_users, docket_data, docket_seq):
+    app_info = load_app_info()
+    email_domain = app_info['public']['email_domain']
+    email = creation_user.email
+    email += email_domain
+    subject = '[Notice] Docket Record Created'
+    cc_list = []
+    for user in docket_all_users:
+        cc_list.append(user[4] + email_domain)
+
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+
+    body_html = """
+    <html>
+        <head>
+        <style>
+            @media only screen and (max-width: 600px) {
+                #logo{
+                    width: 50dvw
+                }
+            }
+            
+        </style>
+        </head>
+        <body>
+            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            <p>
+                Hello, <br>
+                A new docket item has been created. <br/>
+                <br>
+                Docket ID: {docket_seq}<br/>
+                Docket Title: {docket_data['title']}<br/>
+                Docket Status: Proposed <br/>
+                <br>
+                This item was created by {creation_user.full_name}. If you have any questions, please reach out to them. <br/>
+            </p>
+
+    """
+    body_html += f"""
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+            <br/>
+            [This email was sent to you as a voting member of the officer board. If you believe this was sent in error, please contact your application administrators.]
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, email, cc_list, [])
+
+def alert_docket_update(creation_user, assignee_users, docket_data):
+    app_info = load_app_info()
+    email_domain = app_info['public']['email_domain']
+    email = creation_user.email
+    email += email_domain
+    subject = '[Notice] Docket Record Created'
+    cc_list = []
+    for user in docket_all_users:
+        cc_list.append(user[4] + email_domain)
+
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+
+    body_html = """
+    <html>
+        <head>
+        <style>
+            @media only screen and (max-width: 600px) {
+                #logo{
+                    width: 50dvw
+                }
+            }
+            
+        </style>
+        </head>
+        <body>
+            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            <p>
+                Hello, <br>
+                A docket item has updated. <br/>
+                <br>
+                Docket ID: {docket_data[0][0]}<br/>
+                Docket Title: {docket_data[0][1]}br/>
+                Docket Status: {docket_data[0][3]} <br/>
+                <br>
+                This item was created by {creation_user.full_name}. If you have any questions, please reach out to them. <br/>
+            </p>
+
+    """
+    body_html += f"""
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+            <br/>
+            [This email was sent to you as a voting member of the officer board. If you believe this was sent in error, please contact your application administrators.]
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, email, cc_list, [])
 
 def send_email(subject, body, email, cc: list, bcc: list):
     app_info = load_app_info()

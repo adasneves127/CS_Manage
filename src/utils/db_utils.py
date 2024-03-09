@@ -513,7 +513,11 @@ class connect:
     def get_next_item_id(self) -> int:
         sql = """SELECT MAX(id) FROM valid_items"""
         self.cursor.execute(sql)
-        return self.cursor.fetchone()[0]
+        result = self.cursor.fetchone()[0]
+        if result is None:
+            return 0
+        else:
+            return result[0]
     
     def create_item(self, item: dict, current_user: containers.User):
         sql = """

@@ -78,9 +78,9 @@
         <legend>Docket Informaion</legend>
         <form action="/docket/officer/edit/{{docket[0]}}" method="post">
             <label for="title">Title:</label>
-            <input type="text" name="title" id="title"> <br> <br>
+            <input type="text" name="title" id="title" value="{{docket[1]}}"> <br> <br>
             <label for="body">Body:</label> <br>
-            <textarea name="body" id="body" cols="40" rows="10"></textarea> <br>
+            <textarea name="body" id="body" cols="40" rows="10">{{docket[2]}}</textarea> <br>
             <label for="status">Status</label>
             <select name="status" id="status">
                 {% for stat in statuses %}

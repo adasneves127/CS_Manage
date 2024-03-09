@@ -21,7 +21,7 @@ Environment=\"PATH=$SCRIPT_DIR/.venv/bin\"
 ExecStart=$SCRIPT_DIR/.venv/bin/gunicorn --reload --workers 3 --bind unix:myproject.sock -m 007 app:app
 
 [Install]
-WantedBy=multi-user.target" | sudo tee /etc/systemd/system/Management.service
+WantedBy=multi-user.target" | sudo tee /etc/systemd/system/Management.service > /dev/null
 
 sudo usermod -aG $USER www-data
 

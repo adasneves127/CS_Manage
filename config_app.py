@@ -56,7 +56,8 @@ def config_app_info():
                 "use_ssl": "true/false",
                 "cc": [],
                 "bcc": []
-            }
+            },
+            "doc_thresh": 2/3
         }
     }
     app_info = app_info_full["public"]

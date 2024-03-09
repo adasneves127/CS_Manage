@@ -446,6 +446,48 @@ def send_bug_report(bug_form: dict, userInfo: containers.User):
     </html>
     """
     send_email(subject, body_html, to_user, cc_list, [])
+    
+def notify_vote_confirmation(user: containers.User, vote, doc_info):
+    app_info = load_app_info()
+    email = user.email + app_info['public']['email_domain']
+    subject = '[Notice] Vote Confirmed'
+
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+
+    body_html = """
+    <html>
+        <head>
+        <style>
+            @media only screen and (max-width: 600px) {
+                #logo{
+                    width: 50dvw
+                }
+            }
+            
+        </style>
+        </head>
+        <body>
+            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            <p>
+                Hello, <br>
+                
+                You are receiving this email because your vote has been confirmed. <br/>
+                Vote Type: {vote}<br/>
+                Docket ID: {doc_info[0][0]}<br/>
+            </p>
+
+    """
+    body_html += f"""
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+            <br/>
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, email, [], [])
 
 def send_email(subject, body, email, cc: list, bcc: list):
     app_info = load_app_info()

@@ -22,6 +22,7 @@ def edit_officer_docket(seq):
     return send_template("docket/edit.liquid", docket=docket,
                          votes=votes, assignees=assignees,
                          statuses = conn.get_all_docket_statuses())
+    
 
 
 @app.route("/docket/officer/edit/<int:seq>", methods=["POST"])
@@ -39,6 +40,7 @@ def update_officer_docket(seq):
     
     docket = request.form
     conn.update_officer_docket(docket, user, seq)
+    return redirect("/docket/officer/view/")
 
 @app.route("/docket/officer/assignee/add/", methods=["POST"])
 def add_assignee():

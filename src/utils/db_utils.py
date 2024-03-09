@@ -711,7 +711,7 @@ class connect:
     def get_officer_docket(self):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
         CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name)
-        FROM officer_docket a, users b, users c, docket_status d WHERE a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq"""
+        FROM officer_docket a, users b, users c, docket_status d WHERE a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq ORDER BY a.seq"""
         self.cursor.execute(sql)
         return self.cursor.fetchall()
     
@@ -790,13 +790,14 @@ class connect:
     
     def update_officer_docket(self, docket, user, seq):
         sql = """UPDATE officer_docket SET title = %s, 
-        body = %s, updated_by = %s WHERE seq = %s"""
-        values = (docket['title'], docket['body'], user.seq, seq)
+        body = %s, status = %s, updated_by = %s WHERE seq = %s"""
+        print(docket['status'])
+        values = (docket['title'], docket['body'], docket['status'], user.seq, seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
-        email_utils.alert_docket_update(user,
-                                        self.get_record_assignees(seq),
-                                        self.search_officer_docket(seq))
+        # email_utils.alert_docket_update(user,
+        #                                 self.get_record_assignees(seq),
+        #                                 self.search_officer_docket(seq))
     
     def get_record_assignees(self, seq: int):
         sql = """SELECT assigned_to FROM docket_assignees WHERE docket_seq = %s"""
@@ -808,6 +809,40 @@ class connect:
         self.cursor.execute(sql, (seq,))
         results = self.cursor.fetchone()
         return results[0] == 1 or results[1] == 1
+    
+    def has_user_voted(self, user: containers.User, seq: int):
+        sql = """SELECT * FROM officer_votes WHERE user = %s AND docket_item = %s"""
+        vals = (user.seq, seq)
+        self.cursor.execute(sql, vals)
+        return len(self.cursor.fetchall()) > 0
+
+    def save_vote(self, user: containers.User, vote: str, dock_seq: int):
+        sql = """INSERT INTO officer_votes (user, vote_type, docket_item) VALUES (%s, %s, %s)"""
+        values = (user.seq, vote, dock_seq)
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+        email_utils.notify_vote_confirmation(user, vote, self.search_officer_docket(dock_seq))
+    
+    def get_vote_types_by_docket_seq(self, docket_seq: int):
+        sql = """SELECT vote_type FROM officer_votes WHERE docket_item = %s"""
+        self.cursor.execute(sql, (docket_seq,))
+        return [x[0] for x in self.cursor.fetchall()]
+    
+    def close_vote(self, docket_seq: int, user: containers.User):
+        votes = self.get_vote_types_by_docket_seq(docket_seq)
+        in_favor = votes.count("In Favor")
+        opposed = votes.count("Opposed")
+        doc_thresh = load_app_info()['private']['doc_thresh']
+        total_votes = in_favor + opposed
+        doc_ratio = in_favor / total_votes
+        if doc_ratio >= doc_thresh:
+            status = 4
+        else:
+            status = 5
+        sql = """UPDATE officer_docket SET status = %s, updated_by = %s WHERE seq = %s"""
+        self.cursor.execute(sql, (status, user.seq, docket_seq))
+        self.connection.commit()
+        
     
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

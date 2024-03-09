@@ -32,10 +32,13 @@
                     {% if seq == item.creator_seq or doc_admin  %}
                         <a href="/docket/officer/edit/{{item[0]}}" class="nav">Edit</a>    
                     {% endif %}
-                    </td>
+                    {% if item[3] == 'In Vote' and docket_vote %}
+                        <a class="nav" href="/docket/officer/vote/{{item[0]}}">Vote</a>
+                    {% endif %}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    
 </body>
 </html>

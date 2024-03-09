@@ -32,6 +32,25 @@
                 }
             }
         }
+        {% if docket[3] == 'In Vote' and doc_admin %}
+        function calculateVote(){
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/docket/officer/vote/calculate/", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            let post_data = {
+                "docket": {{docket[0]}}
+            }
+            xhr.send(JSON.stringify(post_data));
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState != 4) return;
+                if(xhr.status == 200) {
+                    location.href = "/docket/officer/view/";
+                } else {
+                    alert("There was an error calculating the vote");
+                }
+            }
+        }
+        {% endif %}
 
         function remove(user_seq){
             if (name != null) {
@@ -57,7 +76,7 @@
     <h1>Edit Record {{docket[0]}}</h1>
     <fieldset>
         <legend>Docket Informaion</legend>
-        <form action="/docket/officer/new/" method="post">
+        <form action="/docket/officer/edit/{{docket[0]}}" method="post">
             <label for="title">Title:</label>
             <input type="text" name="title" id="title"> <br> <br>
             <label for="body">Body:</label> <br>
@@ -70,6 +89,11 @@
             </select>
             <input type="submit" value="Submit">
     </form>
+    <br>
+    {% if docket[3] == 'In Vote' and doc_admin %}
+    <button onclick="calculateVote()">Close Vote</button>
+        
+    {% endif %}
     </fieldset>
     <fieldset>
         <legend>Assignees</legend>

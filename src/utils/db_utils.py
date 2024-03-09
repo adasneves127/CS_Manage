@@ -570,6 +570,7 @@ class connect:
             current_user.seq,
             current_user.seq
         )
+        print(values)
         self.cursor.execute(sql, values)
         self.connection.commit()
         

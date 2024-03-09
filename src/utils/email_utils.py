@@ -488,8 +488,53 @@ def notify_vote_confirmation(user: containers.User, vote, doc_info):
     </html>
     """
     send_email(subject, body_html, email, [], [])
+    
+def send_backup_file():
+    app_info = load_app_info()
+    email = app_info['public']['system_administrator']['email'] + app_info['public']['email_domain']
+    subject = '[Notice] Weekly Backup Data'
+    cc_list = [
+        x['email'] + app_info['public']['email_domain']
+        for x in app_info['public']['application_administrators']
+    ]
 
-def send_email(subject, body, email, cc: list, bcc: list):
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+
+    body_html = """
+    <html>
+        <head>
+        <style>
+            @media only screen and (max-width: 600px) {
+                #logo{
+                    width: 50dvw
+                }
+            }
+            
+        </style>
+        </head>
+        <body>
+            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            <p>
+                Hello, <br>
+                
+                Please find attached the weekly database backup. <br/>
+                Please keep this file safe, and do not distribute to unauthorized users. <br/>
+            </p>
+
+    """
+    body_html += f"""
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+            <br/>
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, email, cc_list, [], [('./backup.sql', "text", "plain")])
+
+def send_email(subject, body, email, cc: list, bcc: list, attachement_paths: list = []):
     app_info = load_app_info()
 
     if not app_info['public']['enable_smtp']:
@@ -508,6 +553,11 @@ def send_email(subject, body, email, cc: list, bcc: list):
     msg.add_header('reply-to', smtp_settings['from_email'] + email_domain)
     msg.set_content(body, 'html')
     msg.add_alternative(bs4.BeautifulSoup(body, "html.parser").text, 'plain')
+    for attachement in attachement_paths:
+        with open(attachement[0], 'rb') as file:
+            file_data = file.read()
+            file_name = file.name
+            msg.add_attachment(file_data, maintype=attachement[1], subtype=attachement[2], filename=file_name)
 
     # Send the message via  the defined SMTP server.
     smtp_host = smtp_settings['server'] + ":" + str(smtp_settings['port'])
@@ -526,6 +576,5 @@ def send_email(subject, body, email, cc: list, bcc: list):
     bcc_addrs = bcc
     from_addr = smtp_settings['from_email'] + email_domain
     to_list = to_addrs + cc_addrs + bcc_addrs
-    print(to_list, msg.as_string())
     s.sendmail(from_addr, to_list, msg.as_string())
     s.quit()

@@ -1,5 +1,5 @@
 from app import app
-from flask import request, session
+from flask import request, session, redirect
 from src.utils.templates import send_template
 from src.utils.db_utils import connect
 from src.utils import exceptions
@@ -31,6 +31,6 @@ def add_item():
         else:
             conn.ammend_item(item, user)
     
-    return "OK"
+    return redirect('/finances/item/')
         
 

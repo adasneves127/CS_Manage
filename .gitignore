@@ -163,3 +163,4 @@ app_info.json
 #.idea/
 
 flask_session
+backup.sql

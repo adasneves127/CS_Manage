@@ -12,7 +12,7 @@ def send_template(template: str, **kwargs):
         user_data = {
             "theme": 1
         }
-
+    
         if 'loggedin' not in session:
             session["loggedin"] = False
 

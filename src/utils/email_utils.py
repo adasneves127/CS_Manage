@@ -329,7 +329,7 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
     email += email_domain
     subject = '[Notice] Docket Record Created'
     cc_list = []
-    for user in docket_all_users:
+    for user in assignee_users:
         cc_list.append(user[4] + email_domain)
 
     logo_img = open('interface/static/logo.png', 'rb')
@@ -367,11 +367,85 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
             {app_info['public']['system_name']} <br/>
             {app_info['public']['deployed_location']} <br/>
             <br/>
-            [This email was sent to you as a voting member of the officer board. If you believe this was sent in error, please contact your application administrators.]
+            <p>[This email was sent to you for one of the following reasons: </p>
+            <ul>
+                <li>You created this docket</li>
+                <li>You are assigned to this docket item</li>
+            </ul>
+            <p>If you believe this was sent in error, please contact your application administrators.]</p>
         </body>
     </html>
     """
     send_email(subject, body_html, email, cc_list, [])
+
+def send_bug_report(bug_form: dict, userInfo: containers.User):
+    app_info = load_app_info()
+    email_domain = app_info['public']['email_domain']
+    subject = '[CRITICAL] Bug Report Submitted'
+    cc_list = [
+        x['email'] + email_domain
+        for x in app_info['public']['application_administrators']
+    ]
+    to_user = app_info['public']['system_administrator']['email'] + email_domain
+
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+
+    body_html = """
+    <html>
+        <head>
+        <style>
+            @media only screen and (max-width: 600px) {
+                #logo{
+                    width: 50dvw
+                }
+            }
+            
+        </style>
+        </head>
+        <body>
+            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            <p>
+                Hello, <br>
+                
+                You are receiving this email because a bug report has been submitted, and you are listed as an administrator account in the system. <br/>
+                Bug Report Information: <br/>
+                <br/>
+                Datetime Occured: {bug_form['dt_occured']}<br/>
+                Bug Description: {bug_form['description']}<br/>
+                Reporter Information:
+                <table>
+                    <tr>
+                        <th>User Full Name</th>
+                        <td>{userInfo.full_name}</td>
+                    </tr>
+                    <tr>
+                        <th>User Seq</th>
+                        <td>{userInfo.seq}</td>
+                    </tr>
+                    <tr>
+                        <th>User Name</th>
+                        <td>{userInfo.user_name}</td>
+                    </tr>
+                    <tr>
+                        <th>User Email</th>
+                        <td><a href="mailto:{userInfo.email}{email_domain}">Email</a></td>
+                    </tr>
+                </table>
+                For more user information, please visit the user management and administration page <br/>
+            </p>
+
+    """
+    body_html += f"""
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+            <br/>
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, to_user, cc_list, [])
 
 def send_email(subject, body, email, cc: list, bcc: list):
     app_info = load_app_info()

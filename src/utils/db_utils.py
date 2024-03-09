@@ -305,7 +305,7 @@ class connect:
         status_type = self.get_status_seq(record_data['header']['status'])
         
         values = (record_data['header']['id'], creator, approver, record_data['header']['inv_date'],
-                  record_type, status_type,
+                  status_type, record_type,
                   record_data['header']['tax'], record_data['header']['fees'], user.seq,
                   user.seq)
         self.cursor.execute(sql, values)

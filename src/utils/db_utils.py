@@ -530,8 +530,8 @@ class connect:
             item['name'],
             item['price'],
             item['type'],
-            item['eStart'],
-            item['eEnd'],
+            convert_to_datetime(item['eStart']),
+            convert_to_datetime(item['eEnd']),
             1,
             current_user.seq,
             current_user.seq
@@ -547,11 +547,11 @@ class connect:
         for result in results:
             if result[1] < convert_to_datetime(item['eStart']):
                 sql = """UPDATE valid_items SET effective_end = %s, updated_by = %s WHERE seq = %s"""
-                self.cursor.execute(sql, (item['eStart'], current_user.seq, result[0]))
+                self.cursor.execute(sql, (convert_to_datetime(item['eStart']), current_user.seq, result[0]))
                 self.connection.commit()
             if result[2] > convert_to_datetime(item['eEnd']):
                 sql = """UPDATE valid_items SET effective_start = %s, updated_by = %s WHERE seq = %s"""
-                self.cursor.execute(sql, (item['eEnd'], current_user.seq, result[0]))
+                self.cursor.execute(sql, (convert_to_datetime(item['eEnd']), current_user.seq, result[0]))
                 self.connection.commit()
         # Create the new item
         sql = """

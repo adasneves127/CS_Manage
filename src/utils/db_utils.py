@@ -320,7 +320,7 @@ class connect:
             self.connection.commit()
         
     def check_invoice_info(self, user_full_name: str, user_pin: str) -> tuple:
-        sql = """SELECT a.seq, a.user_name, a.invoicePin, a.first_name, a.last_name,
+        sql = """SELECT a.seq, a.user_name, a.finance_pin, a.first_name, a.last_name,
         b.inv_admin, b.inv_edit, b.approve_invoices FROM users a, permissions b WHERE
         a.seq = b.user_seq and concat(a.first_name, ' ', a.last_name) = %s"""
         self.cursor.execute(sql, (user_full_name,))

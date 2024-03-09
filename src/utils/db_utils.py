@@ -564,8 +564,8 @@ class connect:
             item['name'],
             item['price'],
             item['type'],
-            item['eStart'],
-            item['eEnd'],
+            convert_to_datetime(item['eStart']),
+            convert_to_datetime(item['eEnd']),
             1,
             current_user.seq,
             current_user.seq

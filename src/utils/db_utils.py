@@ -75,7 +75,11 @@ class connect:
         self.connection.commit()
         # Send Password Reset Email if not a system user
         if not user.system_user:
-            self.send_password_reset(user.email)
+            self.send_password_reset(user)
+        
+    def send_password_reset(self, user: containers.User):
+        token = self.request_reset_password(user.seq, "SYSTEM")
+        email_utils.send_password_reset_email(user, token)
             
     def get_user_by_seq(self, user_seq: int) -> containers.User:
         user_sql = """SELECT seq, user_name,

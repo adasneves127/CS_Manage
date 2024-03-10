@@ -67,8 +67,8 @@ def reset_password():
     if user:
         # Get the user's IP address
         ip = request.remote_addr
-        user = user.seq
-        key = conn.request_reset_password(user, ip)
+        user_seq = user.seq
+        key = conn.request_reset_password(user_seq, ip)
         email_utils.send_password_reset_email(user, 
                             f"http://{app_domain}/reset_password/{key}")
         return "Password reset email sent to your email address. Please check your email.", 201

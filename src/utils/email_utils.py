@@ -31,6 +31,9 @@ def send_password_updated_email(user_obj: containers.User):
                     width: 50dvw
                 }
             }
+            #logo{
+                width: 10dvw;
+            }
             
         </style>
         </head>
@@ -83,6 +86,9 @@ def send_pin_reset_email(user_obj: containers.User):
                 #logo{
                     width: 50dvw
                 }
+            }
+            #logo{
+                width: 10dvw;
             }
             
         </style>
@@ -137,6 +143,9 @@ def send_password_reset_email(user_obj: containers.User, reset_link: str):
                     width: 50dvw
                 }
             }
+            #logo{
+                width: 10dvw;
+            }
             
         </style>
         </head>
@@ -186,6 +195,9 @@ def send_assignment_email(target_user: containers.User,
                 #logo{
                     width: 50dvw
                 }
+            }
+            #logo{
+                width: 10dvw;
             }
             
         </style>
@@ -242,6 +254,9 @@ def alert_docket_removal(target_user: containers.User, from_user: containers.Use
                     width: 50dvw
                 }
             }
+            #logo{
+                width: 10dvw;
+            }
             
         </style>
         </head>
@@ -293,6 +308,9 @@ def alert_docket_creation(creation_user, docket_all_users, docket_data, docket_s
                     width: 50dvw
                 }
             }
+            #logo{
+                width: 10dvw;
+            }
             
         </style>
         </head>
@@ -342,8 +360,11 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
         <style>
             @media only screen and (max-width: 600px) {
                 #logo{
-                    width: 50dvw
+                    width: 50dvw;
                 }
+            }
+            #logo{
+                width: 10dvw;
             }
             
         </style>
@@ -400,6 +421,9 @@ def send_bug_report(bug_form: dict, userInfo: containers.User):
                 #logo{
                     width: 50dvw
                 }
+            }
+            #logo{
+                width: 10dvw;
             }
             
         </style>
@@ -465,7 +489,9 @@ def notify_vote_confirmation(user: containers.User, vote, doc_info):
                     width: 50dvw
                 }
             }
-            
+            #logo{
+                width: 10dvw;
+            }
         </style>
         </head>
         <body>
@@ -511,6 +537,9 @@ def send_backup_file():
                     width: 50dvw
                 }
             }
+            #logo{
+                width: 10dvw;
+            }
             
         </style>
         </head>
@@ -552,6 +581,9 @@ def send_welcome_email(user: containers.User, reset_link, finance_pin):
                 #logo{
                     width: 50dvw
                 }
+            }
+            #logo{
+                width: 10dvw;
             }
             
         </style>

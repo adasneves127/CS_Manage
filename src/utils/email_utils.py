@@ -327,7 +327,7 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
     email_domain = app_info['public']['email_domain']
     email = creation_user.email
     email += email_domain
-    subject = '[Notice] Docket Record Created'
+    subject = '[Notice] Docket Record Updated'
     cc_list = []
     for user in assignee_users:
         cc_list.append(user['email'] + email_domain)
@@ -355,7 +355,7 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
                 A docket item has updated. <br/>
                 <br>
                 Docket ID: {docket_data[0][0]}<br/>
-                Docket Title: {docket_data[0][1]}br/>
+                Docket Title: {docket_data[0][1]}<br/>
                 Docket Status: {docket_data[0][3]} <br/>
                 <br>
                 This item was created by {creation_user.full_name}. If you have any questions, please reach out to them. <br/>

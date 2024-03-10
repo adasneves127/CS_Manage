@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Officer Docket Table</title>
+</head>
+<body>
+    <table style="width: 100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Creator</th>
+                <th>Status</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in records %}
+                <tr>
+                    <td>{{item[0][0]}}</td>
+                    <td>{{item[0][1]}}</td>
+                    <td>{{item[0][6]}}</td>
+                    <td>{{item[0][5]}}</td>
+                    <td>{{item[0][3]}}</td>
+                    <td><a class="nav" href="/docket/officer/view/{{item[0][0]}}">View</a> 
+                    {% if seq == item[0][8] or doc_admin  %}
+                        <a href="/docket/officer/edit/{{item[0][0]}}" class="nav">Edit</a>   
+                    {% else %}
+                        {% for approver in item[1] %}
+                            {% if approver.seq == seq %}
+                        <a href="/docket/officer/edit/{{item[0][0]}}" class="nav">Edit</a>   
+                                
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if item[3] == 'In Vote' and docket_vote %}
+                        <a class="nav" href="/docket/officer/vote/{{item[0][0]}}">Vote</a>
+                    {% endif %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

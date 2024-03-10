@@ -96,7 +96,7 @@ display: block;
 outline: 1px solid black;
 }
 
-html{
+*{
 font-family: blockFont;
 
 }
@@ -105,5 +105,7 @@ font-family: blockFont;
 src: url(/static/fonts/blockFont.ttf);
 }
 
-
-  
+#reloadUser{
+    text-align: left;
+    padding-left: 1rem;
+}

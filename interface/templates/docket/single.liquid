@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Docket {{docket[0]}}</title>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <h1>View Docket {{docket[0]}}</h1>
+    <p>Created By: {{docket[6]}}</p>
+    <p>Created At: {{docket[4]}}</p>
+    <p>Status: {{docket[3]}}</p>
+    <p>Assigned To:</p>
+    {% for person in assignees %}
+        <p>{{person[0]}}</p>
+    {% endfor %}
+    <br/>
+    <p>Title: {{docket[1]}}</p>
+    <p>Description: <br/> </p>
+    {% for line in docket[2] %}
+        <p>{{ line }}</p>
+    {% endfor %}
+</body>
+</html>

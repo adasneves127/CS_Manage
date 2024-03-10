@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Administration Page</title>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <table>
+        <tr>
+            <th>Seq</th>
+            <th>User Name</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Theme</th>
+            <th>Added By</th>
+            <th>Updated By</th>
+            <th>Added on</th>
+            <th>Updated on</th>
+            <th>Options</th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user[0] }}</td>
+                <td style="text-transform:none">{{ user[1] }}</td>
+                <td>{{ user[2] }}</td>
+                <td>{{ user[3] }}</td>
+                <td style="text-transform:none;">{{ user[4] }}{{ email_domain }}</td>
+                <td>{{ user[6] }}</td>
+                <td>{{ user[7] }}</td>
+                <td>{{ user[8] }}</td>
+                <td>{{ user[9] }}</td>
+                <td>{{ user[10] }}</td>
+                <td><button class="nav" onclick="window.open('/admin/users/edit?seq={{user[0]}}')">Edit</button></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/admin/users/add/" class="nav">New User</a>
+</body>
+</html>

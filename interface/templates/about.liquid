@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About {{system_name}}</title>
@@ -20,5 +24,22 @@
     {% for admin in application_administrators %}
         <a href="mailto:{{admin.email}}{{email_domain}}" target="_blank" class="email">{{admin.name}}</a> <br/><br/>
     {% endfor %}
+    <br>
+    {% if isLoggedIn %}
+        <h3>Report a bug</h3>
+        <form action="/about/bug_report" method="post">
+            <label for="dt_occured">Date/Time of Bug (Approx):</label>
+            <input type="datetime-local" name="dt_occured" id="dt_occured">
+            <br>
+            <label for="description">Description:</label><br>
+            <textarea name="description" id="description" cols="30" rows="10"></textarea>
+            <br/>
+            <input type="submit" value="Submit Report">
+        </form>
+        <p>Along with this form, your user information will be sent along to the administration team.</p>
+        <p>Our administration team with <b><i><u>NEVER</u></i></b> ask for your password or any other sensitive information!</p>
+        <p>Should someone ask for your sensitive information, please alert your system administrator as soon as possible.</p>
+    {% endif %}
+    
 </body>
 </html>

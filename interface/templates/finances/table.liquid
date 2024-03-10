@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finances Table</title>
+</head>
+<body>
+    <table style="width: 100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Creator</th>
+                <th>Status</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in records %}
+                <tr>
+                    <td style="text-align: center">{{item.header.id}}</td>
+                    <td>{{item.header.type}}</td>
+                    <td>{{item.header.creator}}</td>
+                    <td>{{item.header.status}}</td>
+                    <td>{{item.header.item_count}}</td>
+                    <td>{{item.header.total}}</td>
+                    <td><a class="nav" href="/finances/view/{{item.header.seq}}">View</a> 
+                    {% if inv_edit or inv_admin %}
+                        <a href="/finances/edit/{{item.header.seq}}" class="nav">Edit</a>    
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

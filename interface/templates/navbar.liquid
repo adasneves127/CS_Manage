@@ -1,22 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{system_name}}</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/themes/{{theme}}.css">
+    <link rel="stylesheet" href="/static/themes/{{theme}}.css">    
+   <script>
+    function reloadUser() {
+      fetch("/user/reload/")
+      location.reload(true)
+    }
+   </script>
+
 </head>
 <body>
     <body>
 
     <div class="navbar">
       <a href="/">Home</a>
-      <a href="/invoices/">Finances</a>
-      <a href="/docket/">Officer Docket</a>
+      {% if inv_view or inv_edit or inv_admin  %}
+
+      <div class="dropdown">
+
+          
+        
+        <button class="dropbtn">Finances
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          {% if inv_view or inv_admin %}
+            <a href="/finances/">View Records</a>
+            
+          {% endif %}
+          {% if inv_edit or inv_admin  %}
+            <a href="/finances/new/">New Record</a>
+          {% endif %}
+          {% if approve_invoices or inv_admin %}
+            <a href="/finances/pending/">View Pending Invoices</a>
+          {% endif %}
+        </div>
+      </div>
+
+    {% endif %}
+    {% if doc_view or doc_edit or doc_admin %}
+      <div class="dropdown">
+        <button class="dropbtn">Docket
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          {% if doc_view or doc_admin %}
+            <a href="/docket/officer/view/">View Records</a>
+            
+          {% endif %}
+          {% if doc_edit or doc_admin %}
+          <a href="/docket/officer/new/">New Record</a>
+          <a href="/docket/officer/assigned/">View Assigned</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+      
       <a href="https://engage.bridgew.edu/">EngageBSU</a>
       <a href="/about/">About</a>
-      {% if isUserAdmin %}
+      {% if user_admin %}
         
       
       <div class="dropdown">
@@ -24,11 +75,10 @@
           <i class="fa fa-caret-down"></i>
         </button>
         <div class="dropdown-content">
-          <a href="/admin/status/">Statuses</a>
+          <a href="/admin/finance/status/">Finance Statuses</a>
+          <a href="/admin/docket/status/">Docket Statuses</a>
           <a href="/admin/record/">Record Types</a>
           <a href="/admin/users/">Users</a>
-          <a href="/admin/addresses/">Addresses</a>
-          <a href="/admin/perms/">User Permissions</a>
         </div>
       </div>
     {% endif %}
@@ -38,10 +88,12 @@
         </button>
         <div class="dropdown-content">
           {% if isLoggedIn %}
+            <a>{{full_name}}</a>
             <a href="/auth/logout/">Logout</a>
             <a href="/user/settings/">Settings</a>
+            <button id="reloadUser" onclick="reloadUser()">Reload User</button>
           {% else %}
-          <a href="/auth/login/">Log In</a>
+            <a href="/auth/login/">Log In</a>
           {% endif %}
         </div>
       </div>

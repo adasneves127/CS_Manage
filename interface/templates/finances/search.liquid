@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Search</title>
+    <script>
+        function select(id) {
+            targetRows[0].value = document.getElementById(`name${id}`).innerText;
+            targetRows[1].value = document.getElementById(`price${id}`).innerText;
+            window.close();
+        }
+    </script>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <!-- This page will be shown when the finance creation and modification tools request to search an item -->
+    <!-- id, item_desc, item_price, item_type -->
+    <table>
+        <tr>
+            <th>Item ID</th>
+            <th>Item Name</th>
+            <th>Item Price</th>
+            <th>Item Type</th>
+            <th>Actions</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item[1] }}</td>
+            <td id="name{{item[0]}}">{{ item[2] }}</td>
+            <td id="price{{item[0]}}">{{ item[3] }}</td>
+            <td>{{ item[4] }}</td>
+            <td><button onclick="select({{item[0]}})">Select</button></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,20 +1,21 @@
-from flask import Flask, send_from_directory, send_file, render_template
+from flask import Flask
 from flask_session import Session
 from src.utils.app_utils import load_app_info
 from flask_liquid import Liquid
 
 
-app = Flask(__name__, template_folder='./interface/templates/', static_folder='./interface/static/')
+app = Flask(__name__, template_folder='./interface/templates/',
+            static_folder='./interface/static/')
 liquid = Liquid(app)
 app.config.update(
     SESSION_PERMANENT=False,
-    SESSION_TYPE = "filesystem"
+    SESSION_TYPE="filesystem"
 )
 
 Session(app)
+app.secret_key = load_app_info()['private']['secret_token']
 
-import src.routes.base_routes
-import src.routes.auth
+from src.routes import docket, user, auth, finances, base_routes, admin
 
 
 if __name__ == '__main__':

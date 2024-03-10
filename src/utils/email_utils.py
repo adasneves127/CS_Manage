@@ -331,6 +331,7 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
     cc_list = []
     for user in assignee_users:
         cc_list.append(user[4] + email_domain)
+    
 
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')

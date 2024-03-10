@@ -723,9 +723,9 @@ class connect:
         values = (docket['title'], docket['body'], docket['status'], user.seq, seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
-        # email_utils.alert_docket_update(user,
-        #                                 self.get_record_assignees(seq),
-        #                                 self.search_officer_docket(seq))
+        email_utils.alert_docket_update(user,
+                                        self.get_record_assignees(seq),
+                                        self.search_officer_docket(seq))
     
     def get_record_assignees(self, seq: int):
         sql = """SELECT assigned_to FROM docket_assignees WHERE docket_seq = %s"""

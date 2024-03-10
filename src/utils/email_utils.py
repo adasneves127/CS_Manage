@@ -358,7 +358,7 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
                 Docket Title: {docket_data[0][1]}<br/>
                 Docket Status: {docket_data[0][3]} <br/>
                 <br>
-                This item was created by {creation_user.full_name}. If you have any questions, please reach out to them. <br/>
+                This item was updated by {creation_user.full_name}. If you have any questions, please reach out to them. <br/>
             </p>
 
     """

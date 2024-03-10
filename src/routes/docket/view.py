@@ -26,6 +26,8 @@ def get_officer_docket_table():
         return exceptions.InvalidPermissionException()    
 
     docket_records = conn.get_officer_docket()
+    
+    
     return send_template('docket/table.liquid', records = docket_records)
     
 @app.route("/docket/officer/view/<int:seq>", methods=["GET"])
@@ -38,7 +40,11 @@ def get_officer_docket(seq):
         return exceptions.InvalidPermissionException()
     
     docket_info = conn.search_officer_docket(seq)
-    return send_template("docket/single.liquid", docket = docket_info[0],
+    docket_records = docket_info[0]
+    docket_record_data = list(docket_records[0:2]) + \
+        [docket_records[2].split("\n")] + \
+        list(docket_records[3:])
+    return send_template("docket/single.liquid", docket = docket_record_data,
                          votes=docket_info[1], assignees=docket_info[2])
 
 @app.route("/docket/officer/assigned/table/", methods=['POST'])

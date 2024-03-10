@@ -17,6 +17,9 @@
     {% endfor %}
     <br/>
     <p>Title: {{docket[1]}}</p>
-    <p>Description: <br/> {{docket[2]}}</p>
+    <p>Description: <br/> </p>
+    {% for line in docket[2] %}
+        <p>{{ line }}</p>
+    {% endfor %}
 </body>
 </html>

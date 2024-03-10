@@ -632,7 +632,8 @@ class connect:
         
     def get_officer_docket(self):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
-        CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name)
+        CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name),
+        a.created_by
         FROM officer_docket a, users b, users c, docket_status d WHERE a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq ORDER BY a.seq"""
         self.cursor.execute(sql)
         docket_data = []

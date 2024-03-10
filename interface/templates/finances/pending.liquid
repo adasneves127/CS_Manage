@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending {{system_name}} Finances</title>
+    <script src="/static/jquery.min.js"></script>
+    <script>
+        function getTableData(){
+            let xhr = new XMLHttpRequest()
+            xhr.open("POST", "/finances/table/pending/")
+            xhr.setRequestHeader("Content-Type", "application/json")
+            // Set the filterData object as the payload
+            xhr.send(JSON.stringify({}))
+            
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState == 4){
+                    if(xhr.status === 200){
+                        document.getElementById("tableTarget").innerHTML = xhr.responseText
+                    }
+                }
+            }
+        }
+
+        (((seconds) => {
+            var refresh,       
+                intvrefresh = () => {
+                    clearInterval(refresh);
+                    refresh = setTimeout(() => {
+                        getTableData()
+                    }, seconds * 1000);
+                };
+
+            $(document).on('keypress click', () => { intvrefresh() });
+            intvrefresh();
+
+        })(5));
+    </script>
+</head>
+<body style="height: 100%;" onload="getTableData()">
+    {% render "navbar.liquid" %}
+
+    <h1>Pending Club Finances</h1>
+    <div id="tableTarget"></div>
+</body>
+</html>

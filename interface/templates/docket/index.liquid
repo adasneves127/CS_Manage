@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Officer Docket</title>
+    <script src="/static/jquery.min.js"></script>
+    <script>
+        (((seconds) => {
+            var refresh,       
+                intvrefresh = () => {
+                    clearInterval(refresh);
+                    refresh = setTimeout(() => {
+                        refreshTable()
+                    }, seconds * 1000);
+                };
+
+            $(document).on('keypress click', () => { intvrefresh() });
+            intvrefresh();
+
+        })(5));
+
+        function refreshTable(){
+            let xhr = new XMLHttpRequest()
+            xhr.open("POST", "/docket/officer/table/")
+            xhr.setRequestHeader("Content-Type", "application/json")
+            // Set the filterData object as the payload
+            xhr.send(JSON.stringify({}))
+            
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState == 4){
+                    if(xhr.status === 200){
+                        document.getElementById("tableTarget").innerHTML = xhr.responseText
+                    }
+                }
+            }
+        }
+
+    </script>
+</head>
+<body onload="refreshTable()">
+    {% render "navbar.liquid" %}
+    <div id="tableTarget"></div>
+</body>
+</html>

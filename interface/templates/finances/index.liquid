@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{system_name}} Finances</title>
+    <script src="/static/jquery.min.js"></script>
+    <script src="/static/finances/indexFinanceTools.js"></script>
+</head>
+<body style="height: 100%;" onload="reloadTable()">
+    {% render "navbar.liquid" %}
+
+    <h1>Club Finances</h1>
+    <fieldset>
+        <legend>Filter</legend>
+        <fieldset id="statusFilter" style="width: 46%; display: inline">
+            <legend>Status</legend>
+            {% for status in statuses %}
+                <input type="checkbox" name="{{status}}" id="{{status}}" checked>
+                <label for="{{status}}">{{status}}</label> <br>
+            {% endfor %}
+        </fieldset>
+        <fieldset id="typeFilter" style="width: 47%; display: inline">
+            <legend>Record Type</legend>
+            {% for type in types %}
+                <input type="checkbox" name="{{type}}" id="{{type}}" checked>
+                <label for="{{type}}">{{type}}</label> <br/>
+            {% endfor %}
+        </fieldset>
+        <br> <br>
+        <a class="nav" onclick="reloadTable()" style="margin-top: 5px;">Apply</a>
+    </fieldset>
+    <br>
+    {% if inv_edit or inv_admin %}
+        <a href="/finances/new/" class="nav">Create Record</a>
+        <br><br>
+    {% endif %}
+    <div id="tableTarget"></div>
+</body>
+</html>

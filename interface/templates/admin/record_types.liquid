@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Types</title>
+    <script>
+        function newType() {
+            type_desc = prompt("Enter new status name");
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/admin/record/");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify({name: type_desc}));
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState == 4){
+                    if(xhr.status === 201){
+                        location.reload()
+                    }
+                }
+            }
+        }
+        function editType(id) {
+            type_desc = prompt("Enter new status name");
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/admin/record/");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify({id: id, name: type_desc}));
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState == 4){
+                    if(xhr.status === 201){
+                        location.reload()
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <table>
+        <tr>
+            <th>Seq</th>
+            <th>Type Name</th>
+            <th>Created By</th>
+            <th>Updated By</th>
+            <th>Options</th>
+        </tr>
+        {% for type in types %}
+        <tr>
+            <td>{{ type[0] }}</td>
+            <td>{{ type[1] }}</td>
+            <td>{{ type[2] }}</td>
+            <td>{{ type[3] }}</td>
+            <td><a onclick="editType({{type[0]}})" class="nav">Edit</a></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><a onclick="newType()" class="nav">+</a></td></tr>
+    </table>
+</body>
+</html>

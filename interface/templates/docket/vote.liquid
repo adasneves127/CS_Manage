@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Docket {{docket[0]}}</title>
+    <script>
+        function confirmVote() {
+            var vote_type = document.getElementById("vote_type").value;
+            return confirm("Are you sure you want to vote " + vote_type + " on this item?");
+        }
+    </script>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <h1>View Docket {{docket[0]}}</h1>
+    <p>Created By: {{docket[6]}}</p>
+    <p>Created At: {{docket[4]}}</p>
+    <p>Status: {{docket[3]}}</p>
+    <p>Title: {{docket[1]}}</p>
+    <p>Description: <br/> {{docket[2]}}</p>
+    {% if has_voted %}
+        <h2>You have already voted on this item.</h2>
+        <p>Votes are considered "unchangeable". If you truly would like to change your vote, please contact the president of your org.</p>
+    {% else %}
+    <h2>Vote on this item</h2>
+    <p>Votes are considered "unchangeable". Please make sure you are confident in your vote, as a change in vote may not be permisible.</p>
+    <form onsubmit="return confirmVote()" action="/docket/officer/vote/{{docket[0]}}" method="post">
+        <select name="vote_type" id="vote_type">
+            <option value="Abstained">Abstained/No Vote</option>
+            <option value="In Favor">In Favor</option>
+            <option value="Opposed">Opposed</option>
+        </select>
+        <input type="submit" value="Submit Vote">
+    </form>
+    {% endif %}
+</body>
+</html>

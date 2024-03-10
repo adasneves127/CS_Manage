@@ -441,7 +441,7 @@ class connect:
             return True
 
         #If the user is assigned to it, then they can edit it
-        sql = """SELECT user_seq FROM docket_assignees WHERE docket_seq = %s"""
+        sql = """SELECT assigned_to FROM docket_assignees WHERE docket_seq = %s"""
         self.cursor.execute(sql, (seq,))
         results = self.cursor.fetchall()
         for result in results:
@@ -635,7 +635,13 @@ class connect:
         CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name)
         FROM officer_docket a, users b, users c, docket_status d WHERE a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq ORDER BY a.seq"""
         self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        docket_data = []
+        results = self.cursor.fetchall()
+        for result in results:
+            # Get the assignees
+            assignees = self.get_record_assignees(result[0])
+            docket_data.append((result, assignees))
+        return docket_data
     
     def get_docket_vote_email_users(self):
         sql = """SELECT a.seq, a.user_name, a.first_name, a.last_name, a.email, a.system_user, a.theme,
@@ -724,7 +730,7 @@ class connect:
     def get_record_assignees(self, seq: int):
         sql = """SELECT assigned_to FROM docket_assignees WHERE docket_seq = %s"""
         self.cursor.execute(sql, (seq,))
-        return [self.get_user_by_seq(x[0]) for x in self.cursor.fetchall()]
+        return [self.get_user_by_seq(x[0]).__dict__ for x in self.cursor.fetchall()]
     
     def can_user_view_finances(self, seq: int):
         sql = """SELECT inv_view, inv_admin FROM permissions WHERE user_seq = %s"""

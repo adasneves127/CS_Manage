@@ -12,26 +12,12 @@
             rowID = table.rows.length - 1;
             row.innerHTML = `
                 <td>${rowID}</td>
-                <td><input type="text" id="ItemInfo${rowID}" id="ItemInfo" disabled></td>
-                <td><input type="text" id="ItemPrice${rowID}" disabled style="width: 100px;"></td>
-                <td><button onclick="searchItem(${rowID})">Search!</button></td>
+                <td><input type="text" id="ItemInfo${rowID}" id="ItemInfo" ></td>
+                <td><input type="text" id="ItemPrice${rowID}" style="width: 100px;"></td>
                 <td><input style="width: 95%;" type="number" name="Quantity" id="Quantity${rowID}"></td>
                 <td><input type="number" name="Total" style="width: 100px;" id="Total${rowID}" disabled></td>
                 <td style="align-items: center;" onclick="removeRow(${rowID})"><button>x</button></td>
             `;
-        }
-
-        function searchItem(rowID){
-            // Open a new window to search for an item
-            // The item will be selected and the window will close
-            let invDate = document.getElementById("RecordDate").value;
-            if (invDate === ""){
-                alert("Please select a date for the invoice");
-                return;
-            }
-            let item = window.open(`/finances/search?invDate=${invDate}`, "ItemSearch", "width=800,height=600");
-            item.rowID = rowID;
-            item.targetRows = [document.getElementById(`ItemInfo${rowID}`), document.getElementById(`ItemPrice${rowID}`)];
         }
 
         function removeRow(rowID){
@@ -117,7 +103,7 @@
             }
             // XHR POST Request to /finances/new/
             let xhrHTTP = new XMLHttpRequest();
-            xhrHTTP.open("PATCH", "/finances/edit/");
+            xhrHTTP.open("PATCH", "/finances/edit/{{record.header.seq}}");
             xhrHTTP.setRequestHeader("Content-Type", "application/json");
             xhrHTTP.send(JSON.stringify(post_data));
             xhrHTTP.onreadystatechange = function(){
@@ -203,7 +189,7 @@
             </select> <input type="password" name="creatorPin" id="creatorPin" style="width: 100px;" autocomplete="one-time-code" disabled value="....">
             <br>
             <label for="Approver">Approver:</label>
-            {% if record.header.approver == ' ' %}
+            {% if record.header.approver == 'System Account' %}
                 <select name="Approver" id="Approver">
                 {% for user in approvers %}
                     <option value="{{ user[1] }}">{{ user[1] }}</option>
@@ -253,7 +239,8 @@
                 <thead>
                     <tr>
                         <th>Line</th>
-                        <th colspan="3" width="30%;">Item Info</th>
+                        <th width="20%;">Item Info</th>
+                        <th width="10%">Item Price</th>
                         <th style="width: 5%;">Quantity</th>
                         <th>Total</th>
                         <th></th>
@@ -261,13 +248,14 @@
                 </thead>
                 <tbody>
                     {% for item in record.lines %}
+                        <tr>
                         <td>{{item.line_id}}</td>
-                <td><input type="text" id="ItemInfo{{item.line_id}}" id="ItemInfo" disabled value="{{item.item_desc}}"></td>
-                <td><input type="text" id="ItemPrice{{item.line_id}}" disabled style="width: 100px;" value="{{item.item_price}}"></td>
-                <td><button onclick="searchItem({{item.line_id}})">Search!</button></td>
-                <td><input style="width: 95%;" type="number" name="Quantity" id="Quantity{{item.line_id}}" value="{{item.qty}}"></td>
-                <td><input type="number" name="Total" style="width: 100px;" id="Total{{item.line_id}}" disabled value="{{item.total}}"></td>
-                <td style="align-items: center;" onclick="removeRow({{item.line_id}})"><button disabled title="Cannot delete existing items">x</button></td>
+                        <td><input type="text" id="ItemInfo{{item.line_id}}" id="ItemInfo" value="{{item.item_desc}}"></td>
+                        <td><input type="text" id="ItemPrice{{item.line_id}}" style="width: 100px;" value="{{item.item_price}}"></td>
+                        <td><input style="width: 95%;" type="number" name="Quantity" id="Quantity{{item.line_id}}" value="{{item.qty}}"></td>
+                        <td><input type="number" name="Total" style="width: 100px;" id="Total{{item.line_id}}" disabled value="{{item.total}}"></td>
+                        <td style="align-items: center;" onclick="removeRow({{item.line_id}})"><button disabled title="Cannot delete existing items">x</button></td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -11,7 +11,6 @@ def get_table():
     connection = connect()
     if connection.can_user_view_finances(session['user'].seq):
         finance_records = connection.filter_finances(request.json)
-        finance_records.sort(key=lambda x: int(x['header']['id']))
         return send_template("finances/table.liquid", records=finance_records), 200
     else:
         raise exceptions.InvalidPermissionException()

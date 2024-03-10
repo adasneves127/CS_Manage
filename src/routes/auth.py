@@ -3,6 +3,8 @@ from src.utils.templates import send_template
 from flask import session, request, redirect
 from src.utils.db_utils import connect
 from src.utils import exceptions
+from src.utils import email_utils
+from src.utils.app_utils import load_app_info
 
 @app.route("/auth/login/", methods=["GET"])
 def get_login_page():
@@ -61,10 +63,13 @@ def reset_password():
     conn = connect()
     user_name = request.json['username']
     user = conn.get_user_by_user_name(user_name)
+    app_domain = load_app_info()['public']['application_url']
     if user:
         # Get the user's IP address
         ip = request.remote_addr
         user = user.seq
-        conn.request_reset_password(user, ip)
+        key = conn.request_reset_password(user, ip)
+        email_utils.send_password_reset_email(user, 
+                            f"http://{app_domain}/reset_password/{key}")
         return "Password reset email sent to your email address. Please check your email.", 201
     return "Invalid username", 400

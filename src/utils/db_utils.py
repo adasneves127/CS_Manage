@@ -11,6 +11,7 @@ from uuid import uuid4
 import datetime
 import subprocess
 from dotenv import load_dotenv
+import random
 
 class connect:
     def __init__(self):
@@ -22,7 +23,7 @@ class connect:
                 password=os.environ['DB_PASSWORD'],
                 database=os.environ['DB_NAME']
             )
-            self.cursor = self.connection.cursor()
+            self.cursor = self.connection.cursor(buffered=True)
         except mysql.connector.Error as e:
             print("Access denied: {}".format(e))
             exit(1)
@@ -48,12 +49,12 @@ class connect:
         self.cursor.execute(invoice_sql)
         rows = self.cursor.fetchall()
         line_sql = """
-        SELECT a.inv_seq, a.line_id, b.item_desc, b.item_price, a.qty,
+        SELECT a.inv_seq, a.line_id, a.item_desc, a.item_price, a.qty,
         concat(c.first_name, ' ', c.last_name), 
         concat(d.first_name, ' ', d.last_name),
         a.dt_added, a.dt_updated FROM
-        inv_line a, valid_items b, users c, users d WHERE
-        a.inv_seq = %s AND a.item_seq = b.seq AND a.added_by = c.seq
+        inv_line a, users c, users d WHERE
+        a.inv_seq = %s AND a.added_by = c.seq
         AND a.updated_by = d.seq"""
         for row in rows:
             self.cursor.execute(line_sql, (row[0],))
@@ -62,14 +63,7 @@ class connect:
             return_list.append(row_container.__dict__)
         
         return return_list
-    
-    def send_password_reset(self, user: containers.User):
-        pass
 
-    def get_all_items(self, inv_date):
-        sql = "SELECT seq, id, item_desc, item_price, item_type FROM valid_items where effective_start < %s and effective_end > %s"
-        self.cursor.execute(sql, (inv_date, inv_date))
-        return self.cursor.fetchall()
 
     def save_user(self, user: containers.User):
         ((user_seq, user_val), (perms_seq, perms_val)) = user.sql()
@@ -190,7 +184,7 @@ class connect:
             users c, statuses d, record_types e, users f, users g WHERE
             a.creator = b.seq AND a.approver = c.seq AND
             a.record_status = d.seq AND a.record_type = e.seq AND
-            a.added_by = f.seq AND a.updated_by = g.seq"""
+            a.added_by = f.seq AND a.updated_by = g.seq ORDER BY a.id"""
         status_filters_include = []
         status_filters_exclude = []
         for status in valid_statuses:
@@ -230,12 +224,12 @@ class connect:
         self.cursor.execute(sql)
         rows = self.cursor.fetchall()
         line_sql = """
-        SELECT a.inv_seq, a.line_id, b.item_desc, b.item_price, a.qty,
+        SELECT a.inv_seq, a.line_id, a.item_desc, a.item_price, a.qty,
         concat(c.first_name, ' ', c.last_name), 
         concat(d.first_name, ' ', d.last_name),
         a.dt_added, a.dt_updated FROM
-        inv_line a, valid_items b, users c, users d WHERE
-        a.inv_seq = %s AND a.item_seq = b.seq AND a.added_by = c.seq
+        inv_line a, users c, users d WHERE
+        a.inv_seq = %s AND a.added_by = c.seq
         AND a.updated_by = d.seq"""
         for row in rows:
             self.cursor.execute(line_sql, (row[0],))
@@ -260,12 +254,12 @@ class connect:
         self.cursor.execute(SQL, (seq,))
         rows = self.cursor.fetchall()[0]
         line_sql = """
-        SELECT a.inv_seq, a.line_id, b.item_desc, b.item_price, a.qty,
+        SELECT a.inv_seq, a.line_id, a.item_desc, a.item_price, a.qty,
         concat(c.first_name, ' ', c.last_name), 
         concat(d.first_name, ' ', d.last_name),
         a.dt_added, a.dt_updated FROM
-        inv_line a, valid_items b, users c, users d WHERE
-        a.inv_seq = %s AND a.item_seq = b.seq AND a.added_by = c.seq
+        inv_line a, users c, users d WHERE
+        a.inv_seq = %s AND a.added_by = c.seq
         AND a.updated_by = d.seq"""
         self.cursor.execute(line_sql, (seq,))
         lines = self.cursor.fetchall()
@@ -287,14 +281,6 @@ class connect:
         self.cursor.execute(sql, (status_desc,))
         return self.cursor.fetchone()[0]
     
-    def get_item_seq(self, item_info: dict, eff_date: str) -> int:
-        sql = """SELECT seq FROM valid_items WHERE
-                item_desc = %s AND effective_start < %s 
-                and effective_end > %s"""
-        values = (item_info['item_desc'], eff_date, eff_date)
-        self.cursor.execute(sql, values)
-        return self.cursor.fetchone()[0]
-    
     def create_record(self, record_data: dict, user: containers.User):
         sql = """INSERT INTO inv_head (id, creator, approver, inv_date,
         record_status, record_type, tax, fees, added_by, updated_by)
@@ -312,10 +298,9 @@ class connect:
         self.connection.commit()
         record_seq = self.cursor.lastrowid
         for line in record_data['lines']:
-            sql = """INSERT INTO inv_line (inv_seq, line_id, item_seq, qty, added_by, updated_by)
-            VALUES (%s, %s, %s, %s, %s, %s)"""
-            item_seq = self.get_item_seq(line,record_data['header']['inv_date'])
-            values = (record_seq, line['line_id'], item_seq, line['qty'], user.seq, user.seq)
+            sql = """INSERT INTO inv_line (inv_seq, line_id, item_desc, item_price, qty, added_by, updated_by)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+            values = (record_seq, line['line_id'], line['item_desc'], line['item_price'], line['qty'], user.seq, user.seq)
             self.cursor.execute(sql, values)
             self.connection.commit()
         
@@ -346,12 +331,12 @@ class connect:
         return self.cursor.fetchall()
     
     def get_lines(self, seq):
-        sql = """SELECT a.line_id, b.item_desc, a.qty FROM inv_line a, valid_items b
-        WHERE a.item_seq = b.seq AND a.inv_seq = %s"""
+        sql = """SELECT a.line_id, a.item_desc, a.qty FROM inv_line a WHERE
+        a.inv_seq = %s"""
         self.cursor.execute(sql, (seq,))
         return self.cursor.fetchall()
     
-    def edit_record(self, seq: int, data: dict):
+    def edit_record(self, seq: int, data: dict, current_user: containers.User):
         sql = """UPDATE inv_head SET id = %s, creator = %s, approver = %s,
         inv_date = %s, record_status = %s, record_type = %s, tax = %s,
         fees = %s, updated_by = %s WHERE seq = %s"""
@@ -361,23 +346,21 @@ class connect:
         status_type = self.get_status_seq(data['header']['status'])
         values = (data['header']['id'], creator, approver, data['header']['inv_date'],
                   record_type, status_type,
-                  data['header']['tax'], data['header']['fees'], data['header']['updated_by'], seq)
+                  data['header']['tax'], data['header']['fees'], current_user.seq, seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
         existing_line_ids = [x[0] for x in self.get_lines(seq)]
         for line in data['lines']:
             if line['line_id'] in existing_line_ids:
-                sql = """UPDATE inv_line SET line_id = %s, item_seq = %s, qty = %s, updated_by = %s
+                sql = """UPDATE inv_line SET line_id = %s, item_desc = %s, item_price = %s, qty = %s, updated_by = %s
                 WHERE inv_seq = %s AND line_id = %s"""
-                item_seq = self.get_item_seq(line, data['header']['inv_date'])
-                values = (line['line_id'], item_seq, line['qty'], data['header']['updated_by'], seq, line['line_id'])
+                values = (line['line_id'], line['item_desc'], line['item_price'], line['qty'], current_user.seq, seq, line['line_id'])
                 self.cursor.execute(sql, values)
                 self.connection.commit()
             else:
-                sql = """INSERT INTO inv_line (inv_seq, line_id, item_seq, qty, added_by, updated_by)
-                VALUES (%s, %s, %s, %s, %s, %s)"""
-                item_seq = self.get_item_seq(line, data['header']['inv_date'])
-                values = (seq, line['line_id'], item_seq, line['qty'], data['header']['updated_by'], data['header']['updated_by'])
+                sql = """INSERT INTO inv_line (inv_seq, line_id, item_desc, item_price, qty, added_by, updated_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+                values = (seq, line['line_id'], line['item_desc'], line['item_price'], line['qty'], current_user.seq, current_user.seq)
                 self.cursor.execute(sql, values)
                 self.connection.commit()
         
@@ -396,11 +379,11 @@ class connect:
         self.cursor.execute(invoice_sql)
         rows = self.cursor.fetchall()
         line_sql = """
-        SELECT a.inv_seq, a.line_id, b.item_desc, b.item_price, a.qty,
+        SELECT a.inv_seq, a.line_id, a.item_desc, a.item_price, a.qty,
         concat(c.first_name, ' ', c.last_name), 
         concat(d.first_name, ' ', d.last_name),
         a.dt_added, a.dt_updated FROM
-        inv_line a, valid_items b, users c, users d WHERE
+        inv_line a, users c, users d WHERE
         a.inv_seq = %s AND a.item_seq = b.seq AND a.added_by = c.seq
         AND a.updated_by = d.seq"""
         print(invoice_sql)
@@ -426,7 +409,7 @@ class connect:
         email_utils.send_password_updated_email(self.get_user_by_seq(target_seq))
         self.connection.commit()
         
-    def request_reset_password(self, target_seq: int, requested_ip: str):
+    def request_reset_password(self, target_seq: int, requested_ip: str) -> str:
         if self.get_user_by_seq(target_seq).system_user:
             raise UserNotFoundException
         sql = """INSERT INTO password_reset (user_seq, token, created_by)
@@ -434,10 +417,8 @@ class connect:
         values = (target_seq, uuid4().hex, requested_ip)
         self.cursor.execute(sql, values)
         self.connection.commit()
-        app_info = load_app_info()
-        app_domain = app_info['public']['application_url']
-        email_utils.send_password_reset_email(self.get_user_by_seq(target_seq), 
-                            f"http://{app_domain}/reset_password/{values[1]}")
+        return values[1]
+        
     
     
     def get_user_by_reset_token(self, token: str) -> tuple:
@@ -504,75 +485,6 @@ class connect:
         sql = """SELECT inv_admin FROM permissions WHERE user_seq = %s"""
         self.cursor.execute(sql, (user_seq,))
         return self.cursor.fetchone()[0] == 1
-
-    def fetch_items(self):
-        sql = """SELECT seq, id, item_desc, item_price, item_type, effective_start, effective_end, is_active from valid_items"""
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
-    
-    def get_next_item_id(self) -> int:
-        sql = """SELECT MAX(id) FROM valid_items"""
-        self.cursor.execute(sql)
-        result = self.cursor.fetchone()[0]
-        if result is None:
-            return 0
-        else:
-            return result[0]
-    
-    def create_item(self, item: dict, current_user: containers.User):
-        sql = """
-        INSERT INTO valid_items (id, item_desc, item_price, item_type, 
-        effective_start, effective_end, is_active, added_by, updated_by)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-        ID = self.get_next_item_id()
-        values = (
-            ID,
-            item['name'],
-            item['price'],
-            item['type'],
-            convert_to_datetime(item['eStart']),
-            convert_to_datetime(item['eEnd']),
-            1,
-            current_user.seq,
-            current_user.seq
-        )
-        self.cursor.execute(sql, values)
-        self.connection.commit()
-    
-    def ammend_item(self, item: dict, current_user: containers.User):
-        # find what datetime range this item is in
-        sql = """SELECT seq, effective_start, effective_end FROM valid_items WHERE id = %s"""
-        self.cursor.execute(sql, (item['ID'],))
-        results = self.cursor.fetchall()
-        for result in results:
-            if result[1] < convert_to_datetime(item['eStart']):
-                sql = """UPDATE valid_items SET effective_end = %s, updated_by = %s WHERE seq = %s"""
-                self.cursor.execute(sql, (convert_to_datetime(item['eStart']), current_user.seq, result[0]))
-                self.connection.commit()
-            if result[2] > convert_to_datetime(item['eEnd']):
-                sql = """UPDATE valid_items SET effective_start = %s, updated_by = %s WHERE seq = %s"""
-                self.cursor.execute(sql, (convert_to_datetime(item['eEnd']), current_user.seq, result[0]))
-                self.connection.commit()
-        # Create the new item
-        sql = """
-        INSERT INTO valid_items (id, item_desc, item_price, item_type, 
-        effective_start, effective_end, is_active, added_by, updated_by)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-        ID = int(self.get_next_item_id()) + 1
-        values = (
-            item['ID'],
-            item['name'],
-            item['price'],
-            item['type'],
-            convert_to_datetime(item['eStart']),
-            convert_to_datetime(item['eEnd']),
-            1,
-            current_user.seq,
-            current_user.seq
-        )
-        print(values)
-        self.cursor.execute(sql, values)
-        self.connection.commit()
         
     
     def __del__(self):
@@ -692,12 +604,15 @@ class connect:
     
     def add_user(self, vals, current_user):
         sql = """
-        INSERT INTO users (user_name, email, first_name, last_name, theme, system_user, added_by, updated_by)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO users (user_name, email, first_name, last_name, theme, system_user, finance_pin, added_by, updated_by)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        values = vals[0:6] + (current_user.seq, current_user.seq)
+        finance_pin = random.randint(1000, 9999)
+        values = vals[0:6] + (finance_pin, current_user.seq, current_user.seq)
+        print(sql, values)
         self.cursor.execute(sql, values)
         self.connection.commit()
+        print("Next Statement")
         user_seq = self.cursor.lastrowid
         sql = """
         INSERT INTO permissions (user_seq, receive_emails, inv_view, inv_edit, inv_admin, approve_invoices, doc_view, doc_edit, doc_admin, user_admin, doc_vote, added_by, updated_by)
@@ -706,6 +621,13 @@ class connect:
         values = (user_seq,) + vals[6:] + (current_user.seq, current_user.seq)
         print(sql, values)
         self.cursor.execute(sql, values)
+        self.connection.commit()
+        key = self.request_reset_password(user_seq, f"USER:{current_user.seq}")
+        email_utils.send_welcome_email(self.get_user_by_seq(user_seq), key, finance_pin)
+        
+    def clear_old_resets(self):
+        SQL = """DELETE FROM password_reset WHERE created_at <  NOW() - INTERVAL 1 DAY"""
+        self.cursor.execute(SQL)
         self.connection.commit()
         
     def get_officer_docket(self):

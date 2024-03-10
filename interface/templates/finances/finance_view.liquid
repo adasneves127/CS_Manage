@@ -33,7 +33,7 @@
                 <p>Test123</p>
             </div> {% endcomment %}
         </div>
-        <h1>{{record.header.type}}</h1>
+        <h1 >{{record.header.type}}</h1>
         <hr class="top primary">
         <hr class="top secondary">
         <table id="head">
@@ -50,7 +50,7 @@
                 <tr>
                     <td>{{record.header.id}}</td>
                     <td>{{record.header.creator}}</td>
-                    <td>{% if record.header.approver != " " %}
+                    <td>{% if record.header.approver != "System Account" %}
                         {{record.header.approver}}
                     {% else %}
                         <b>Pending Approval</b>

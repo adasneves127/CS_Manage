@@ -86,28 +86,13 @@ create table inv_head(
     CONSTRAINT FOREIGN KEY (record_status) references statuses(seq)
 );
 
-create table valid_items (
-    seq int not null primary key auto_increment,
-    id varchar(10) not null,
-    item_desc varchar(30),
-    item_price decimal(8,3),
-    item_type enum('debit', 'credit'),
-    added_by int not null,
-    updated_by int not null,
-    effective_start timestamp default current_timestamp,
-    effective_end timestamp not null,
-    is_active tinyint,
-    dt_added timestamp default current_timestamp,
-    dt_updated timestamp default current_timestamp on update current_timestamp,
-    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
-    CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
-);
 
 create table inv_line(
     line_seq int not null primary key auto_increment,
     inv_seq int not null,
     line_id int not null,
-    item_seq int not null,
+    item_desc varchar(30),
+    item_price decimal(8,3),
     qty int,
     added_by int not null,
     updated_by int not null,
@@ -115,8 +100,7 @@ create table inv_line(
     dt_updated timestamp default current_timestamp on update current_timestamp,
     CONSTRAINT FOREIGN KEY (added_by) references users(seq),
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
-    CONSTRAINT FOREIGN KEY (inv_seq) references inv_head(seq),
-    CONSTRAINT FOREIGN KEY (item_seq) references valid_items(seq)
+    CONSTRAINT FOREIGN KEY (inv_seq) references inv_head(seq)
 );
 
 
@@ -215,19 +199,6 @@ begin
    end if;
 end;
 
-create trigger date_check_update_valid_items
-before update on valid_items
-for each row
-begin
-    if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set date';
-    end if ;
-    if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
-       SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set added_by';
-   end if;
-end;
 
 create trigger date_check_update_inv_line
 before update on inv_line
@@ -300,15 +271,6 @@ begin
         END IF;
 end;
 
-create trigger check_eff_dates
-before update on valid_items
-for each row
-begin
-    if new.effective_start > new.effective_end then
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Effective End must be greater than or equal to Effective End!';
-    end if;
-end;
 
 CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';
 GRANT INSERT, UPDATE, SELECT on management.* TO 'invoices'@'localhost';

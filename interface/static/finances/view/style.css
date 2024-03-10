@@ -69,25 +69,15 @@ div#header{
     margin-top: .2in;
 }
 
-#addr{
-    float: right;
-    margin-right: .4in;
-    margin-top: .2in;
-    width: 1.5in;
-}
-
-#addr>p{
-    margin: 0;
-}
-
 h1{
     position: absolute;
-    top: 1.35in;
+    top: 1.39in;
     left: 5.25in;
     padding-left: .05in;
-    padding-right: .1in;
+    padding-right: .05in;
     background-color: white;
-    font-family: "Noto Sans Mono", monospace;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2.1rem;
     text-transform: uppercase;
     font-style: italic;
 }

@@ -534,6 +534,57 @@ def send_backup_file():
     """
     send_email(subject, body_html, email, cc_list, [], [('./backup.sql', "text", "plain")])
 
+def send_welcome_email(user: containers.User, reset_link, finance_pin):
+    app_info = load_app_info()
+    email = user.email + app_info['public']['email_domain']
+    subject = 'Welcome to ' + app_info['public']['system_name']
+    app_domain = app_info['public']['application_url']
+
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+
+    body_html = """
+    <html>
+        <head>
+        <style>
+            @media only screen and (max-width: 600px) {
+                #logo{
+                    width: 50dvw
+                }
+            }
+            
+        </style>
+        </head>
+        <body>
+            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            <p>
+                Hello! <br>
+                
+                Welcome to the {app_info['public']['system_name']} application. <br/>
+                
+                To finish setting up your account, please use the following link to set your password: <br/>
+                <a href="http://{app_domain}/reset_password/{reset_link}">Set Password</a> <br/>
+                
+                
+            </p>
+
+    """
+    
+    if user.inv_edit or user.approve_invoices or user.inv_admin:
+        body_html += f"Your financial record pin is {finance_pin}<br/> <br/>"
+    
+    body_html += f"""
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+            <br/>
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, email, [], [])
+
+
 def send_email(subject, body, email, cc: list, bcc: list, attachement_paths: list = []):
     app_info = load_app_info()
 

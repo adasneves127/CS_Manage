@@ -19,7 +19,6 @@ def send_template(template: str, **kwargs):
         if 'user' in session:
             session['user'] = connect().get_user_by_seq(session['user'].seq)
             user_data = session['user'].__dict__
-            print(user_data)
 
         return render_template(template, **app_info, **kwargs,
                                isLoggedIn=session["loggedin"], **user_data)

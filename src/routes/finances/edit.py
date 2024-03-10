@@ -27,7 +27,6 @@ def patch_record(seq):
     if connection.can_user_view_finances(session['user'].seq):
         
         creator_auth = connection.check_invoice_info(request.json['auth']['creator'], request.json['auth']['creatorPin'])
-        print(request.json)
         # Get the old record
         old_record = connection.get_record_by_seq(seq)
         

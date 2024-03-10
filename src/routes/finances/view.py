@@ -31,7 +31,6 @@ def pending_table():
         return redirect("/finances/pending/")
     connection = connect()
     if connection.can_user_view_finances(session['user'].seq):
-        print(connection.get_pending_finances())
         return send_template("finances/table.liquid", records=connection.get_pending_finances())
     else:
         raise exceptions.InvalidPermissionException()

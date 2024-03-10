@@ -57,7 +57,6 @@ def update_user():
             data.get('doc_vote') == 'on'
         )
         
-        print(data)
         conn.update_user(seq, vals, user)
         return redirect("/admin/users/"), 201
     else:

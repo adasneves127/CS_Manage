@@ -61,7 +61,6 @@ def change_preferences():
         if user is None:
             return send_template("user/settings.liquid", error="User not found"), 404
         else:
-            print(dict(request.form))
             connection.change_preferences(target_seq, user, request.form)
             reload_user()
             return redirect("/user/settings/")

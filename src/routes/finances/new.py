@@ -32,7 +32,6 @@ def search():
 @app.route("/finances/new/", methods=["POST"])
 def create_record():
     connection = connect()
-    print(request.json)
     if connection.can_user_view_finances(session['user'].seq):
         # Check the post auth info
         # let auth_info = {
@@ -42,7 +41,6 @@ def create_record():
         #        "approverPin": document.getElementById("approverPin").value
         #    }
         creator_auth = connection.check_invoice_info(request.json['auth']['creator'], request.json['auth']['creatorPin'])
-        print(creator_auth)
         if creator_auth is None:
             return "Err: Creator not found", 401
 

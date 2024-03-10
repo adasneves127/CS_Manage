@@ -330,7 +330,7 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
     subject = '[Notice] Docket Record Created'
     cc_list = []
     for user in assignee_users:
-        cc_list.append(user[4] + email_domain)
+        cc_list.append(user['email'] + email_domain)
     
 
     logo_img = open('interface/static/logo.png', 'rb')

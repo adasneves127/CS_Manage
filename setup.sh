@@ -19,6 +19,8 @@ Group=www-data
 WorkingDirectory=$SCRIPT_DIR
 Environment=\"PATH=$SCRIPT_DIR/.venv/bin\"
 ExecStart=$SCRIPT_DIR/.venv/bin/gunicorn --reload --workers 3 --bind unix:myproject.sock -m 007 app:app
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target" | sudo tee /etc/systemd/system/Management.service > /dev/null
@@ -43,9 +45,10 @@ echo "server {
 "
 
 #write out current crontab
-crontab -l > mycron
+sudo crontab -l > mycron
+sudo chown $USER mycron
 #echo new cron into cron file
 echo "0 2 * * 1 $SCRIPT_DIR/cron.sh" >> mycron
 #install new cron file
-crontab mycron
+sudo crontab mycron
 rm mycron

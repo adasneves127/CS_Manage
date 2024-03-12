@@ -153,6 +153,11 @@ create table docket_assignees(
     seq int auto_increment primary key,
     docket_seq int not null,
     assigned_to int not null,
+    added_by int not null,
+    updated_by int not null,
+
+    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (assigned_to) references users(seq),
     CONSTRAINT FOREIGN KEY (docket_seq) references officer_docket(seq)
 );

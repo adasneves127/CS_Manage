@@ -26,7 +26,7 @@ def get_officer_docket_table():
         return exceptions.InvalidPermissionException()    
 
     docket_records = conn.get_officer_docket()
-    
+    print(docket_records)
     
     return send_template('docket/table.liquid', records = docket_records)
     
@@ -56,6 +56,7 @@ def get_assigned_records_table():
     if not conn.can_user_view_officer_docket(user):
         return exceptions.InvalidPermissionException()
     docket_records = conn.get_assigned_records(user)
+    print(docket_records)
     return send_template('docket/table.liquid', records = docket_records) 
 
 @app.route("/docket/officer/assigned/")

@@ -690,18 +690,19 @@ class connect:
         return docket, votes, assignees
         
     def get_assigned_records(self, user: containers.User):
-        sql = """SELECT docket_seq FROM docket_assignees WHERE assigned_to = %s"""
+        sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
+        CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name),
+        a.created_by
+        FROM officer_docket a, users b, users c, docket_status d, docket_assignees e WHERE a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq AND
+        a.seq = e.docket_seq AND e.assigned_to = %s ORDER BY a.seq"""
         self.cursor.execute(sql, (user.seq,))
+        docket_data = []
         results = self.cursor.fetchall()
-        dockets = []
         for result in results:
-            sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
-            CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name)
-            FROM officer_docket a, users b, users c, docket_status d WHERE a.created_by = b.seq 
-            AND a.updated_by = c.seq AND a.status = d.seq AND a.seq = %s"""
-            self.cursor.execute(sql, (result[0],))
-            dockets.extend(self.cursor.fetchall())
-        return dockets
+            # Get the assignees
+            assignees = self.get_record_assignees(result[0])
+            docket_data.append((result, assignees))
+        return docket_data
     
     def add_assignee(self, data):
         sql = """INSERT INTO docket_assignees (docket_seq, assigned_to,

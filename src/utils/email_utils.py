@@ -7,6 +7,21 @@ import base64
 import bs4
 import uuid
 
+def getStyleData():
+    return """
+<style>
+            @media only screen and (min-width: 768px) {
+                #logo{
+                    width: 20em;
+                }
+            }
+            #logo{
+                width: 5em;
+            }
+            
+            
+        </style>"""
+
 def send_password_updated_email(user_obj: containers.User):
     email = user_obj.email
     if user_obj.system_user:
@@ -22,20 +37,10 @@ def send_password_updated_email(user_obj: containers.User):
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + """">
@@ -78,20 +83,10 @@ def send_pin_reset_email(user_obj: containers.User):
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + """">
@@ -134,20 +129,10 @@ def send_password_reset_email(user_obj: containers.User, reset_link: str):
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">
@@ -187,20 +172,10 @@ def send_assignment_email(target_user: containers.User,
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">
@@ -245,20 +220,10 @@ def alert_docket_removal(target_user: containers.User, from_user: containers.Use
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">
@@ -299,20 +264,10 @@ def alert_docket_creation(creation_user, docket_all_users, docket_data, docket_s
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">
@@ -354,20 +309,11 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw;
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
+        {getStyleData()}
             
-        </style>
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">
@@ -413,20 +359,10 @@ def send_bug_report(bug_form: dict, userInfo: containers.User):
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">
@@ -480,19 +416,10 @@ def notify_vote_confirmation(user: containers.User, vote, doc_info):
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">
@@ -528,20 +455,10 @@ def send_backup_file():
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">
@@ -573,20 +490,10 @@ def send_welcome_email(user: containers.User, reset_link, finance_pin):
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
-    body_html = """
+    body_html = f"""
     <html>
         <head>
-        <style>
-            @media only screen and (max-width: 600px) {
-                #logo{
-                    width: 50dvw
-                }
-            }
-            #logo{
-                width: 10dvw;
-            }
-            
-        </style>
+        {getStyleData()}
         </head>
         <body>
             <img id="logo" src="data:image/png;base64, """ + logo + f"""">

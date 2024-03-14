@@ -12,7 +12,7 @@ app.config.update(
     SESSION_TYPE="filesystem"
 )
 
-app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=1)
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=1)
 
 
 Session(app)

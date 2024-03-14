@@ -321,17 +321,19 @@ class connect:
             return (False, False, False)
         return (user[5] == 1, user[6] == 1, user[7] == 1)
 
-    def get_all_invoice_users(self):
+    def get_all_finance_users(self):
         sql = """SELECT a.seq, concat(a.first_name, ' ', a.last_name) 
         FROM users a, permissions b WHERE system_user = 0 AND
-        a.seq = b.user_seq and (b.inv_admin = 1 or b.inv_edit = 1)"""
+        a.seq = b.user_seq and (b.inv_admin = 1 or b.inv_edit = 1) 
+        and a.is_active = 1"""
         self.cursor.execute(sql)
         return self.cursor.fetchall()
     
     def get_all_approvers(self):
         sql = """SELECT a.seq, concat(a.first_name, ' ', a.last_name) 
         FROM users a, permissions b WHERE
-        a.seq = b.user_seq and (b.inv_admin = 1 or b.approve_invoices = 1) ORDER BY a.seq"""
+        a.seq = b.user_seq and (b.inv_admin = 1 or b.approve_invoices = 1) 
+        and a.is_active = 1 ORDER BY a.seq"""
         self.cursor.execute(sql)
         return self.cursor.fetchall()
     
@@ -467,6 +469,13 @@ class connect:
         result = self.cursor.fetchone()
         return result[0] == 1 or result[1] == 1
     
+    def get_docket_viewers(self):
+        sql = """SELECT a.seq, CONCAT(a.first_name, ' ', a.last_name) FROM users a, permissions b WHERE
+        a.seq = b.user_seq AND (b.doc_view = 1 OR b.doc_admin = 1)"""
+        self.cursor.execute(sql)
+        result = self.cursor.fetchall()
+        return result
+    
     def can_user_edit_officer_docket(self, user: containers.User) -> bool:
         sql = """SELECT doc_edit, doc_admin FROM permissions WHERE user_seq = %s"""
         self.cursor.execute(sql, (user.seq,))
@@ -493,7 +502,11 @@ class connect:
         
     
     def __del__(self):
-        self.connection.close()
+        try:
+            self.connection.close()
+        except Exception as e:
+            print(e)
+            return
         
     def get_docket_items(self):
         sql = """SELECT a.seq, a.created_by, a.title, a.body, a.status, a.created_at, a.updated_at FROM
@@ -777,7 +790,6 @@ class connect:
         sql = """UPDATE officer_docket SET status = %s, updated_by = %s WHERE seq = %s"""
         self.cursor.execute(sql, (status, user.seq, docket_seq))
         self.connection.commit()
-        
     
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

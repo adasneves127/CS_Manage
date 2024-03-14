@@ -40,7 +40,7 @@
                             {% endif %}
                         {% endfor %}
                     {% endif %}
-                    {% if item[3] == 'In Vote' and docket_vote %}
+                    {% if item[0][3] == 'In Vote' and docket_vote %}
                         <a class="nav" href="/docket/officer/vote/{{item[0][0]}}">Vote</a>
                     {% endif %}</td>
                 </tr>

@@ -58,7 +58,7 @@ def update_user():
         )
         
         conn.update_user(seq, vals, user)
-        return redirect("/admin/users/"), 201
+        return """<script>window.close();</script>"""
     else:
         raise exceptions.InvalidPermissionException()
 

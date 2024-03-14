@@ -5,6 +5,13 @@ if [ "$EUID" -eq 0 ]
   exit
 fi
 
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt update
+sudo apt-get install python3.12 python3.12-venv python3.12-pip mysql-server-8.0 -y
+
+python3.12 -m venv .venv
+sudo mysql -u root < db_setup.sql
+
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -18,7 +25,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=$SCRIPT_DIR
 Environment=\"PATH=$SCRIPT_DIR/.venv/bin\"
-ExecStart=$SCRIPT_DIR/.venv/bin/gunicorn --reload --workers 3 --bind unix:myproject.sock -m 007 app:app
+ExecStart=$SCRIPT_DIR/.venv/bin/gunicorn --workers 3 --bind unix:myproject.sock -m 007 app:app
 Restart=on-failure
 RestartSec=5s
 
@@ -48,7 +55,7 @@ echo "server {
 sudo crontab -l > mycron
 sudo chown $USER mycron
 #echo new cron into cron file
-echo "0 2 * * 1 $SCRIPT_DIR/cron.sh" >> mycron
+echo "0 2 * * 1 $SCRIPT_DIR/cron.sh" | tee mycron
 #install new cron file
 sudo crontab mycron
 rm mycron

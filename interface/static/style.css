@@ -18,8 +18,10 @@ table, td, th{
     border-collapse: collapse;
     border: 1px solid black;
     text-transform: capitalize;
+    text-align: center;
+    
 }
-th, label, input{
+label, input{
     cursor: pointer;
 }
 

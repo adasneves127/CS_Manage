@@ -18,6 +18,7 @@ def send_template(template: str, **kwargs):
 
         if 'user' in session:
             session['user'] = connect().get_user_by_seq(session['user'].seq)
+            session.permanent = True
             user_data = session['user'].__dict__
 
         return render_template(template, **app_info, **kwargs,

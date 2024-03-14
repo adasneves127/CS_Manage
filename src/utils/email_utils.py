@@ -5,7 +5,6 @@ import smtplib
 from email.message import EmailMessage
 import base64
 import bs4
-import uuid
 
 def getStyleData():
     return """

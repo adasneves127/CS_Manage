@@ -44,8 +44,10 @@ def get_officer_docket(seq):
     docket_record_data = list(docket_records[0:2]) + \
         [docket_records[2].split("\n")] + \
         list(docket_records[3:])
+    docket_viewers = conn.get_docket_viewers()
     return send_template("docket/single.liquid", docket = docket_record_data,
-                         votes=docket_info[1], assignees=docket_info[2])
+                         votes=docket_info[1], assignees=docket_info[2],
+                         users=docket_viewers)
 
 @app.route("/docket/officer/assigned/table/", methods=['POST'])
 def get_assigned_records_table():

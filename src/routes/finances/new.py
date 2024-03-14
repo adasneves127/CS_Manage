@@ -14,7 +14,7 @@ def new_record():
     if connection.can_user_view_finances(session['user'].seq):
         return send_template("finances/new.liquid", types=connection.get_all_types(),
                              statuses=connection.get_all_finance_status_names(),
-                             users=connection.get_all_invoice_users(),
+                             users=connection.get_all_finance_users(),
                              approvers=connection.get_all_approvers())
     else:
         raise exceptions.InvalidPermissionException()

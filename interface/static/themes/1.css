@@ -12,6 +12,10 @@ color:  #66FF66;
 
 }
 
+table, td, th{
+    border: 1px solid #66FF66; 
+}
+
 .dropdown .dropbtn{
     color: #66FF66;
 }

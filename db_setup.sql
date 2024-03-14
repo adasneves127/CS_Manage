@@ -16,6 +16,7 @@ create table users(
     updated_by int not null,
     dt_added timestamp default current_timestamp,
     dt_updated timestamp default current_timestamp on update current_timestamp,
+    is_active bool default 1 NOT NULL,
     CONSTRAINT FOREIGN KEY (added_by) references users(seq),
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
 );
@@ -283,9 +284,9 @@ GRANT DELETE on management.password_reset TO 'invoices'@'localhost';
 
 -- Insert a 'root' system user - No password set! Don't set one plz
 INSERT INTO users (seq, user_name, first_name, last_name, email, finance_pin, password, system_user, theme, added_by, updated_by) VALUES
-(1, '~', '', '', '', '0000', '', 1, 0, 1, 1);
+(1, '~', 'System', 'Account', '', '0000', '', 1, 0, 1, 1);
 INSERT INTO permissions (user_seq, inv_edit, inv_view, doc_edit, doc_view, doc_vote, inv_admin, doc_admin, approve_invoices, receive_emails, user_admin, added_by, updated_by) VALUES
-(1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1);
+(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1);
 
 -- Insert some typical Statuses and Types
 INSERT INTO statuses (stat_desc, added_by, updated_by) VALUES

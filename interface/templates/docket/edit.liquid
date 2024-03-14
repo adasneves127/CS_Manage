@@ -6,32 +6,46 @@
     <title>Edit Record {{docket[0]}}</title>
     <script>
         function add() {
-            var name = prompt("Enter the name of the assignee");
-            // Check if the name is already in the assignees table
-            var table = document.getElementById("assignees");
-            for (var i = 0, row; row = table.rows[i]; i++) {
-                if (row.cells[0].innerText == name) {
-                    alert("This person is already an assignee");
-                    return;
+            assignee_table = document.getElementById("assignees")
+            assignee_table.insertRow().innerHTML = `
+            <td>
+                <select id="user" name="user" onchange="commitRow()">
+                    <option>Select a User</option>
+                {% for user in users %}
+                    <option value="{{user[0]}}">{{user[1]}}</option>
+                {% endfor %}
+                </select>
+            </td>
+            <td></td>
+            `
+        }
+
+        function commitRow() {
+            var users = document.getElementsByTagName("select")
+            var user = users[users.length - 1].value
+            // Check if the user is already in the table
+            var rows = document.getElementById("assignees").rows
+            for (var i = 0; i < rows.length - 1; i++) {
+                if (rows[i].cells[0].innerText == user) {
+                    alert("User already in table")
+                    return
                 }
             }
-
-            if (name != null) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/docket/officer/assignee/add/", true);
-                xhr.setRequestHeader("Content-Type", "application/json");
-                let post_data = {
-                    "name": name,
-                    "docket": {{docket[0]}}
-                }
-                xhr.send(JSON.stringify(post_data));
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState == 4 && xhr.status == 200) {
-                        location.reload();
-                    }
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/docket/officer/assignee/add/", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            let post_data = {
+                "user": user,
+                "docket": {{docket[0]}}
+            }
+            xhr.send(JSON.stringify(post_data));
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    location.reload();
                 }
             }
         }
+
         {% if docket[3] == 'In Vote' and doc_admin %}
         function calculateVote(){
             var xhr = new XMLHttpRequest();

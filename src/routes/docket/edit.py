@@ -3,6 +3,7 @@ from src.utils.templates import send_template
 from src.utils.db_utils import connect
 from flask import session, request, redirect
 from src.utils import exceptions
+from src.utils.file_utils import is_file_valid_type, valid_file_types
 
 
 @app.route("/docket/officer/edit/<int:seq>", methods=["GET"])
@@ -90,6 +91,9 @@ def add_attachment(seq: int):
     docket_seq = request.json['docket']
     file_name = request.json['file_name']
     file_data = request.json['file_data']
+    if not is_file_valid_type(file_name, file_data):
+        return f"""File must be one of the following formats:
+{', '.join([x[1] for x in valid_file_types])}""", 400
     # Get the existing attachments for this docket
     attachments = conn.get_docket_attachments(docket_seq)
     for item in attachments:

@@ -4,16 +4,17 @@ if [ "$EUID" -eq 0 ]
   then echo "Do not run as root. This script will ask for sudo permissions when needed."
   exit
 fi
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update
 sudo apt-get install python3.12 python3.12-venv python3.12-pip mysql-server-8.0 -y
 
 python3.12 -m venv .venv
+
 sudo mysql -u root < db_setup.sql
+$SCRIPT_DIR/.venv/bin/pip install -r $SCRIPT_DIR/requirements.txt
 
-
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 
 echo "[Unit]
@@ -52,7 +53,7 @@ echo "server {
 "
 
 #write out current crontab
-sudo crontab -l > mycron
+sudo crontab -l > mycron || :
 sudo chown $USER mycron
 #echo new cron into cron file
 echo "0 2 * * 1 $SCRIPT_DIR/cron.sh" | tee mycron

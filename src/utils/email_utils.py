@@ -6,6 +6,16 @@ from email.message import EmailMessage
 import base64
 import bs4
 
+def get_logo_img():
+    try:
+        open('interface/static/logo.png', 'rb').close()
+    except FileNotFoundError:
+        return ""
+    
+    logo_img = open('interface/static/logo.png', 'rb')
+    logo = base64.b64encode(logo_img.read()).decode('utf-8')
+    return f"""<img id="logo" src="data:image/png;base64, {logo}">"""
+
 def getStyleData():
     return """
 <style>
@@ -33,8 +43,6 @@ def send_password_updated_email(user_obj: containers.User):
     email += email_domain
     subject = '[Alert] Password Updated'
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
     body_html = f"""
     <html>
@@ -42,7 +50,7 @@ def send_password_updated_email(user_obj: containers.User):
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + """">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 Your password has been updated. If you did not make this change, please contact your application administrators as soon as possible.
@@ -79,8 +87,6 @@ def send_pin_reset_email(user_obj: containers.User):
     email += email_domain
     subject = '[Alert] Finance Pin Updated'
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
     body_html = f"""
     <html>
@@ -88,7 +94,7 @@ def send_pin_reset_email(user_obj: containers.User):
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + """">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 Your finance pin has been updated.
@@ -125,16 +131,13 @@ def send_password_reset_email(user_obj: containers.User, reset_link: str):
     if not user_obj.receive_emails:
         return
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
-
     body_html = f"""
     <html>
         <head>
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 A request to reset your password has been made. <br/>
@@ -168,16 +171,13 @@ def send_assignment_email(target_user: containers.User,
     if not target_user.receive_emails:
         return
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
-
     body_html = f"""
     <html>
         <head>
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 You have been added as an assignee to an officer docket item. <br/>
@@ -216,16 +216,13 @@ def alert_docket_removal(target_user: containers.User, from_user: containers.Use
     if not target_user.receive_emails:
         return
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
-
     body_html = f"""
     <html>
         <head>
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 You have been removed as an assignee to an officer docket item. <br/>
@@ -260,16 +257,13 @@ def alert_docket_creation(creation_user, docket_all_users, docket_data, docket_s
     for user in docket_all_users:
         cc_list.append(user[4] + email_domain)
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
-
     body_html = f"""
     <html>
         <head>
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 A new docket item has been created. <br/>
@@ -305,9 +299,6 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
         cc_list.append(user['email'] + email_domain)
     
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
-
     body_html = f"""
     <html>
         <head>
@@ -315,7 +306,7 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
             
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 A docket item has updated. <br/>
@@ -355,16 +346,13 @@ def send_bug_report(bug_form: dict, userInfo: containers.User):
     ]
     to_user = app_info['public']['system_administrator']['email'] + email_domain
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
-
     body_html = f"""
     <html>
         <head>
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 
@@ -412,16 +400,13 @@ def notify_vote_confirmation(user: containers.User, vote, doc_info):
     email = user.email + app_info['public']['email_domain']
     subject = '[Notice] Vote Confirmed'
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
-
     body_html = f"""
     <html>
         <head>
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 
@@ -451,8 +436,6 @@ def send_backup_file():
         for x in app_info['public']['application_administrators']
     ]
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
     body_html = f"""
     <html>
@@ -460,7 +443,7 @@ def send_backup_file():
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello, <br>
                 
@@ -486,8 +469,6 @@ def send_welcome_email(user: containers.User, reset_link, finance_pin):
     subject = 'Welcome to ' + app_info['public']['system_name']
     app_domain = app_info['public']['application_url']
 
-    logo_img = open('interface/static/logo.png', 'rb')
-    logo = base64.b64encode(logo_img.read()).decode('utf-8')
 
     body_html = f"""
     <html>
@@ -495,7 +476,7 @@ def send_welcome_email(user: containers.User, reset_link, finance_pin):
         {getStyleData()}
         </head>
         <body>
-            <img id="logo" src="data:image/png;base64, """ + logo + f"""">
+            {get_logo_img()}
             <p>
                 Hello! <br>
                 

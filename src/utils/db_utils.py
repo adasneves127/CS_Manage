@@ -12,6 +12,7 @@ import datetime
 import subprocess
 from dotenv import load_dotenv
 import random
+import base64
 
 class connect:
     def __init__(self):
@@ -73,6 +74,7 @@ class connect:
         perms_val[0] = user_seq
         self.cursor.execute(perms_seq, perms_val)
         self.connection.commit()
+        user.seq = self.cursor.lastrowid
         # Send Password Reset Email if not a system user
         if not user.system_user:
             self.send_password_reset(user)
@@ -700,7 +702,10 @@ class connect:
         WHERE a.assigned_to = b.seq AND a.docket_seq = %s"""
         self.cursor.execute(sql, (seq,))
         assignees = self.cursor.fetchall()
-        return docket, votes, assignees
+        sql = """SELECT seq, file_name from docket_attachments where docket_seq = %s"""
+        self.cursor.execute(sql, (seq,))
+        attachments = self.cursor.fetchall()
+        return docket, votes, assignees, attachments
         
     def get_assigned_records(self, user: containers.User):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
@@ -790,6 +795,18 @@ class connect:
         sql = """UPDATE officer_docket SET status = %s, updated_by = %s WHERE seq = %s"""
         self.cursor.execute(sql, (status, user.seq, docket_seq))
         self.connection.commit()
+    
+    def add_attachment(self, docket_seq: int, file_name: str, file_data: bytes, current_user: containers.User):
+        SQL = """INSERT INTO docket_attachments (docket_seq, file_name, file_data, added_by, updated_by) VALUES
+        (%s,%s,%s,%s,%s)"""
+        self.cursor.execute(SQL, (docket_seq, file_name, file_data, current_user.seq, current_user.seq))
+        # print(SQL, (docket_seq, file_name, file_data, current_user.seq, current_user.seq))
+        self.connection.commit()
+    
+    def search_docket_attachments(self, attachment_seq: int):
+        SQL = """SELECT file_name, file_data FROM docket_attachments WHERE seq = %s"""
+        self.cursor.execute(SQL, (attachment_seq,))
+        return self.cursor.fetchone()
     
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

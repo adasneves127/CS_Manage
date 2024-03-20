@@ -5,6 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Record {{docket[0]}}</title>
     <script>
+        let textFromFileLoaded
+
+
+        function viewItem(seq){
+            window.location.href = `/docket/attach/view/${seq}`
+        }
+
+        function loadData() {
+            let file = document.getElementById("file").files[0];
+            let reader = new FileReader();
+            reader.onload = function(fileLoadedEvent) {
+                textFromFileLoaded = fileLoadedEvent.target.result;
+            };
+
+            reader.readAsBinaryString(file);
+            return textFromFileLoaded
+        }
+
+        function sendFile(){
+            file_data = textFromFileLoaded
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/docket/officer/attach/{{seq}}");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            let post_data = {
+                "docket": {{docket[0]}},
+                "file_name": document.getElementById("file").files[0].name,
+                "file_data": btoa(file_data)
+            }
+            xhr.send(JSON.stringify(post_data));
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    location.reload();
+                } else if (xhr.readyState == 4) {
+                    alert(xhr.body)
+                }
+            }
+        }
+
         function add() {
             assignee_table = document.getElementById("assignees")
             assignee_table.insertRow().innerHTML = `
@@ -129,5 +167,27 @@
         </tr>
         </table>
     </fieldset>
+
+        <table id="attachments">
+            <tr>
+                <th>File Name</th>
+                <th>View File</th>
+            </tr>
+            {% for attachment in attachments %}
+                <tr>
+                    <td style="text-transform:none">{{attachment[1]}}</td>
+                    <td><button class="nav" onclick="viewItem({{attachment[0]}})">View</button></td>
+                </tr>
+            {% endfor %}
+            
+        </table>
+        <br>
+        <fieldset>
+            <legend>Add Attachment</legend>
+            <input type="file" name="file" id="file" onchange="loadData()"> <br>
+            
+            <button onclick="sendFile()">Attach!</button>
+        </fieldset>
+            
 </body>
 </html>

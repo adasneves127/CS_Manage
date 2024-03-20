@@ -21,5 +21,19 @@
     {% for line in docket[2] %}
         <p>{{ line }}</p>
     {% endfor %}
+
+    <table id="attachments">
+            <tr>
+                <th>File Name</th>
+                <th>View File</th>
+            </tr>
+            {% for attachment in attachments %}
+                <tr>
+                    <td style="text-transform:none">{{attachment[1]}}</td>
+                    <td><button class="nav" onclick="viewItem({{attachment[0]}})">View</button></td>
+                </tr>
+            {% endfor %}
+            
+        </table>
 </body>
 </html>

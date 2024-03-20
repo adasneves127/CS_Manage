@@ -156,12 +156,28 @@ create table docket_assignees(
     assigned_to int not null,
     added_by int not null,
     updated_by int not null,
-
+    created_at datetime default current_timestamp,
+    updated_at datetime default current_timestamp on update current_timestamp,
     CONSTRAINT FOREIGN KEY (added_by) references users(seq),
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (assigned_to) references users(seq),
     CONSTRAINT FOREIGN KEY (docket_seq) references officer_docket(seq)
 );
+
+create table docket_attachments(
+    seq int not null auto_increment primary key,
+    docket_seq int not null,
+    file_name text,
+    file_data longblob,
+    added_by int not null,
+    updated_by int not null,
+
+    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (docket_seq) references officer_docket(seq)
+
+)
+
 
 create trigger date_check_update_users
 before update on users

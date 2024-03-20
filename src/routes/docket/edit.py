@@ -18,12 +18,13 @@ def edit_officer_docket(seq):
     if not conn.can_user_edit_docket_record(user, seq):
         raise exceptions.InvalidPermissionException()
     
-    docket, votes, assignees = conn.search_officer_docket(seq)
+    docket, votes, assignees, attach = conn.search_officer_docket(seq)
     statuses = conn.get_all_docket_statuses()
     
     return send_template("docket/edit.liquid", docket=docket,
                          votes=votes, assignees=assignees,
                          statuses = statuses,
+                         attachments = attach,
                          users = conn.get_docket_viewers())
     
 
@@ -76,3 +77,18 @@ def del_assignee():
         return exceptions.InvalidPermissionException()
     conn.del_assignee((seq, data['user'], user.seq))
     return redirect(f"/docket/officer/edit/{seq}")
+
+@app.route("/docket/officer/attach/<int:seq>", methods=["POST"])
+def add_attachment(seq: int):
+    conn = connect()
+    if 'user' not in session:
+        raise exceptions.UserNotSignedInException()
+    user = session['user']
+    if not conn.can_user_edit_officer_docket(user):
+        return exceptions.InvalidPermissionException()
+    
+    docket_seq = request.json['docket']
+    file_name = request.json['file_name']
+    file_data = request.json['file_data']
+    conn.add_attachment(docket_seq, file_name, file_data, user)
+    return "OK", 200

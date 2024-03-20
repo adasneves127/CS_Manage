@@ -154,11 +154,11 @@ create table docket_assignees(
     seq int auto_increment primary key,
     docket_seq int not null,
     assigned_to int not null,
-    added_by int not null,
+    created_by int not null,
     updated_by int not null,
     created_at datetime default current_timestamp,
     updated_at datetime default current_timestamp on update current_timestamp,
-    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (created_by) references users(seq),
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (assigned_to) references users(seq),
     CONSTRAINT FOREIGN KEY (docket_seq) references officer_docket(seq)
@@ -176,7 +176,7 @@ create table docket_attachments(
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (docket_seq) references officer_docket(seq)
 
-)
+);
 
 
 create trigger date_check_update_users
@@ -293,11 +293,6 @@ begin
         END IF;
 end;
 
-
-CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';
-GRANT INSERT, UPDATE, SELECT on management.* TO 'invoices'@'localhost';
-GRANT DELETE on management.password_reset TO 'invoices'@'localhost';
-
 -- Insert a 'root' system user - No password set! Don't set one plz
 INSERT INTO users (seq, user_name, first_name, last_name, email, finance_pin, password, system_user, theme, added_by, updated_by) VALUES
 (1, '~', 'System', 'Account', '', '0000', '', 1, 0, 1, 1);
@@ -319,7 +314,23 @@ INSERT INTO record_types (type_desc, added_by, updated_by) VALUES
 ('Invoice [Credit]', 1, 1),
 ('Budget Request', 1, 1);
 
+INSERT INTO docket_status (stat_desc, added_by, updated_by) VALUES
+('Proposed',2,2),
+('In Debate',2,2),
+('In Vote',2,2),
+('Approved',2,2),
+('Denied',2,2),
+('Tabled',2,2),
+('Need more info',2,2),
+('In Process',2,2),
+('Confirmed',2,2);
+
+-- Create a account for general interaction
+CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';
+GRANT INSERT, UPDATE, SELECT on management.* TO 'invoices'@'localhost';
+GRANT DELETE on management.password_reset TO 'invoices'@'localhost';
+GRANT DELETE on management.docket_assignees TO 'invoices'@'localhost';
+
 -- Create an account that can backup the database using mysqldump
-create user if not exists invoice_backup_account@localhost
-    identified with 'mysql_native_password' by 'LyRk5ASv2hY0';
+CREATE USER IF NOT EXISTS invoice_backup_account@localhost IDENTIFIED WITH mysql_native_password BY 'LyRk5ASv2hY0';
 GRANT INSERT, UPDATE, LOCK TABLES, SELECT, DELETE, PROCESS, TRIGGER, SHOW VIEW on *.* to invoice_backup_account@localhost;

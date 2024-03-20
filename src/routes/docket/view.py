@@ -5,6 +5,7 @@ from flask import session, request, send_file, make_response
 from src.utils import exceptions
 import tempfile
 import base64
+import os
 
 @app.route('/docket/officer/view/')
 def view_officer_docket():
@@ -94,5 +95,8 @@ def view_docket_attachment(seq: int):
         
     resp = make_response(send_file(file_data[0]))
     resp.mimetype = "application/octet-stream"
+
+    os.remove(file_data[0])
+    #print(f"os.remove({file_data[0]})")
     return resp
     

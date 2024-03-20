@@ -83,6 +83,10 @@ z-index: 1;
 
 }
 
+.pointer {
+    cursor: pointer;
+}
+
 fieldset#loginBox{
     width: 50%;
     border-radius: 5px;

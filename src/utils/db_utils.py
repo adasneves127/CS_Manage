@@ -808,5 +808,15 @@ class connect:
         self.cursor.execute(SQL, (attachment_seq,))
         return self.cursor.fetchone()
     
+    def get_docket_attachments(self, docket_seq: int):
+        SQL = """SELECT seq, file_name from docket_attachments WHERE docket_seq = %s"""
+        self.cursor.execute(SQL, (docket_seq,))
+        return self.cursor.fetchall()
+    
+    def update_attachment(self, seq, file_data):
+        SQL = """UPDATE docket_attachments SET file_data = %s where seq = %s"""
+        self.cursor.execute(SQL, (file_data, seq))
+        self.connection.commit()
+    
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

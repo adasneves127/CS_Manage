@@ -90,5 +90,12 @@ def add_attachment(seq: int):
     docket_seq = request.json['docket']
     file_name = request.json['file_name']
     file_data = request.json['file_data']
+    # Get the existing attachments for this docket
+    attachments = conn.get_docket_attachments(docket_seq)
+    for item in attachments:
+        if item[1] == file_name:
+            conn.update_attachment(item[0], file_data)
+            return "OK", 200
+    
     conn.add_attachment(docket_seq, file_name, file_data, user)
     return "OK", 200

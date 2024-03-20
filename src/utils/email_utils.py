@@ -142,7 +142,8 @@ def send_password_reset_email(user_obj: containers.User, reset_link: str):
                 Hello, <br>
                 A request to reset your password has been made. <br/>
                 Please use this link to reset your password:
-                <a href="{reset_link}"> Reset Password</a>
+                <a href="{reset_link}"> Reset Password</a> <br>
+                This link is valid for 24 hours.
             </p>
 
     """

@@ -34,7 +34,7 @@ RestartSec=5s
 WantedBy=multi-user.target" | sudo tee /etc/systemd/system/Management.service > /dev/null
 
 sudo usermod -aG $USER www-data
-
+sudo systemctl daemon-reload
 sudo systemctl start Management.service
 sudo systemctl enable Management.service
 
@@ -51,12 +51,11 @@ echo "server {
     }
 }
 "
-
 #write out current crontab
 sudo crontab -l > mycron || :
 sudo chown $USER mycron
 #echo new cron into cron file
-echo "0 2 * * 1 $SCRIPT_DIR/cron.sh" | tee mycron
+echo "0 2 * * 0 $SCRIPT_DIR/cron.sh" | tee mycron
 #install new cron file
 sudo crontab mycron
 rm mycron

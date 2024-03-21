@@ -1,0 +1,75 @@
+
+html{
+    background-color: var(--back-color);
+    color: var(--fore-color);
+}
+
+.navbar{
+    background-color: var(--back-color);
+}
+
+.navbar a{
+color:  var(--fore-color);
+
+}
+table, td, th{
+    border: 1px solid var(--fore-color); 
+}
+
+.dropdown .dropbtn{
+    color: var(--fore-color);
+}
+
+.navbar a:hover, .dropdown:hover .dropbtn {
+    background-color: var(--fore-color);
+    color: var(--back-color);
+}
+
+.dropdown-content { 
+    background-color: var(--fore-color);
+}
+
+.dropdown-content a {
+    color: var(--back-color);
+    background-color: var(--fore-color);
+}
+
+.nav {
+    color: var(--fore-color);
+    background-color: var(--back-color);
+}
+
+.nav:hover {
+    background-color: var(--fore-color);
+    color: var(--back-color);
+}
+
+/* Add a grey background color to dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: var(--back-color);
+    color: var(--fore-color);
+}
+
+a.navsub{
+    color: var(--fore-color);
+    background-color: var(--back-color);
+}
+
+.nav:hover>*{
+    background-color: var(--fore-color);
+    color: var(--back-color);
+}
+
+/* a::first-letter{
+    color: red;
+    text-decoration: underline;
+}
+
+.dropbtn:first-letter{
+    color: red;
+    text-decoration: underline;
+} */
+
+.email{
+    color: var(--fore-color);
+}

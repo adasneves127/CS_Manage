@@ -166,3 +166,4 @@ flask_session
 backup.sql
 *.sock
 interface/static/logo.*
+backups/

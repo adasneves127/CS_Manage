@@ -6,13 +6,24 @@ if [ "$EUID" -eq 0 ]
 fi
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-sudo add-apt-repository ppa:deadsnakes/ppa -y
-sudo apt update
-sudo apt-get install python3.12 python3.12-venv python3.12-pip mysql-server-8.0 -y
+echo 'Adding Python PPA Repository'
+sudo add-apt-repository ppa:deadsnakes/ppa -y >> /dev/null
+echo 'Updating Apt Repositories'
+sudo apt update >> /dev/null
+echo 'Installing Python and MySQL Server'
+sudo apt-get install python3.12 python3.12-venv python3.12-pip mysql-server-8.0 -y >> /dev/null
 
-python3.12 -m venv .venv
+echo 'Creating Venv'
+python3.12 -m venv $SCRIPT_DIR/.venv >> /dev/null
 
-sudo mysql -u root < db_setup.sql
+
+if [[ -z "`sudo mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='management'" 2>&1`" ]];
+then 
+	echo 'Initializing Database'
+	sudo mysql -u root < db_setup.sql
+else
+	echo 'Database already found'
+fi
 $SCRIPT_DIR/.venv/bin/pip install -r $SCRIPT_DIR/requirements.txt
 
 
@@ -51,11 +62,13 @@ echo "server {
     }
 }
 "
+
+
 #write out current crontab
 sudo crontab -l > mycron || :
 sudo chown $USER mycron
 #echo new cron into cron file
-echo "0 2 * * 0 $SCRIPT_DIR/cron.sh" | tee mycron
+echo "0 0 * * * $SCRIPT_DIR/cron.sh" | tee mycron
 #install new cron file
 sudo crontab mycron
 rm mycron

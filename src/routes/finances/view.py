@@ -4,6 +4,7 @@ from src.utils.templates import send_template
 from src.utils.db_utils import connect
 from src.utils import exceptions
 import requests
+from src.utils.app_utils import load_app_info
 
 @app.route("/finances/table/", methods=["POST", "GET"])
 def get_table():
@@ -19,9 +20,11 @@ def get_table():
 @app.route("/finances/view/<int:seq>/", methods=["GET"])
 def get_record(seq):
     connection = connect()
-    print(requests.get('https://ipinfo.io/ip').text)
-    print(request.headers.get('X-Real-IP', ""))
-    if requests.get('https://ipinfo.io/ip').text == request.headers.get('X-Real-IP', "") or \
+    secret = load_app_info()['private']['secret_token']
+    given_secret = ""
+    if request.is_json:
+        given_secret = secret
+    if given_secret == secret or \
         (session.get('user') is not None and \
          connection.can_user_view_finances(session.get('user').seq)):
 

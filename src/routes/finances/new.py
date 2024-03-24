@@ -5,6 +5,8 @@ from flask import request, session, abort
 from mysql.connector.errors import DatabaseError
 from src.utils import exceptions
 import requests
+from src.utils.app_utils import load_app_info
+from base64 import b64encode
 
 @app.route("/finances/new/", methods=["GET"])
 def new_record():
@@ -50,11 +52,19 @@ def create_record():
             if request.json['record']['header']['approver'] == 'Not Approved':
                 seq = connection.create_officer_docket({
                     "title": f"Review Finance ID {request.json['record']['header']['id']}",
-                    "body": f"""A new finance request was created by {session['user']}.
+                    "body": f"""A new finance request was created by {session['user'].full_name}.
                     Please review and debate this item. Please see attached for item."""
                 }, session['user'])
-                
-                connection.add_attachment(seq, f'Finance{request.json['record']['header']['id']}',
+                app_info = load_app_info()
+                url = app_info['public']['application_url']
+                connection.add_attachment(seq, f'Finance {request.json['record']['header']['id']}.html',
+                                          b64encode(
+                                              requests.get(f"{url}/finances/view/{seq}",
+                                                           json={
+                                                               "auth": app_info['private']['secret_token']
+                                                           }
+                                                       ).content),
+                                          session['user']
                                           )
             return "Record created", 200
         except DatabaseError as e :

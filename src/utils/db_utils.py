@@ -797,7 +797,7 @@ class connect:
         self.cursor.execute(sql, (status, user.seq, docket_seq))
         self.connection.commit()
     
-    def add_attachment(self, docket_seq: int, file_name: str, file_data: bytes, current_user: containers.User):
+    def add_attachment(self, docket_seq: int, file_name: str, file_data: str, current_user: containers.User):
         SQL = """INSERT INTO docket_attachments (docket_seq, file_name, file_data, added_by, updated_by) VALUES
         (%s,%s,%s,%s,%s)"""
         self.cursor.execute(SQL, (docket_seq, file_name, file_data, current_user.seq, current_user.seq))

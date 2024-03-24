@@ -20,12 +20,95 @@
         </style>
     {% endif %}
     <title>{{record.header.type}} #{{record.header.id}}</title>
-    <link rel="stylesheet" href="/static/finances/view/style.css">
+    <style>
+        :root {
+    --primary-brand: crimson;
+    
+    --secondary-brand: black;
+}
+
+#paper{
+    margin: 0.5in;
+    width: calc(8.5in - 1in);
+    height: calc(11in - 1in);
+}
+table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 3px;
+}
+th, td{
+    border: 1px solid black;
+    padding: 0.25em;
+}
+
+hr.primary{
+    border: 2.6px solid var(--primary-brand);
+    margin: 0;
+}
+
+hr.secondary{
+    border: 1.6px solid var(--secondary-brand);
+    margin: 0;
+}
+
+hr.primary{
+    margin-bottom: 3px;
+}
+
+hr.secondary{
+    margin-bottom: 3px;
+}
+
+hr.top.secondary{
+    margin-bottom: 0.2in;
+}
+
+hr.bot.primary{
+    position: absolute;
+    bottom: .2in;
+    width: calc(7.5in - 2px);
+}
+hr.bot.secondary{
+    position: absolute;
+    bottom: .15in;
+    width: 7.5in;
+}
+
+.logo{
+    margin-left: .4in;
+    margin-bottom: .2in;
+    width: 1.5in;
+    object-fit: contain;
+}
+
+div#header{
+    margin-top: .2in;
+}
+
+h1{
+    position: absolute;
+    top: 1.39in;
+    left: 5.25in;
+    padding-left: .05in;
+    padding-right: .05in;
+    background-color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2.1rem;
+    text-transform: uppercase;
+    font-style: italic;
+}
+
+
+table#head{
+    text-align: center;
+}
+    </style>
 </head>
 <body>
     <div id="paper">
         <div id="header">
-            <img class="logo" src="/static/logo.png" alt="Computer Science Club @ Bridgewater State" width="216" height="100">
+            <img class="logo" src="{{application_url}}/static/logo.png" alt="Computer Science Club @ Bridgewater State" width="216" height="100">
             {% comment %} <div id="addr">
                 <p>Test123</p>
                 <p>Test123</p>

@@ -23,7 +23,7 @@ def config_app_info():
         about_text.append(line_text)
     
     email_domain = input("Enter the email domain for this system: ")
-    app_domain = input("Enter the domain for this system: ")
+    app_domain = input("Enter the URL for this system [Include http:// or https://]: ")
     app_info_full = {
         "public":{
             "system_name": system_name,

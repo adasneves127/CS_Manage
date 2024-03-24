@@ -179,119 +179,119 @@ create table docket_attachments(
 );
 
 
-create trigger date_check_update_users
-before update on users
-for each row
-begin
-    if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set date';
-    end if ;
-    if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
-       SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set added_by';
-   end if;
-end;
+-- create trigger date_check_update_users
+-- before update on users
+-- for each row
+-- begin
+--     if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
+--         SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set date';
+--     end if ;
+--     if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
+--        SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set added_by';
+--    end if;
+-- end;
 
-create trigger date_check_update_permissions
-before update on permissions
-for each row
-begin
-    if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set date';
-    end if ;
-    if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
-       SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set added_by';
-   end if;
-end;
+-- create trigger date_check_update_permissions
+-- before update on permissions
+-- for each row
+-- begin
+--     if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
+--         SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set date';
+--     end if ;
+--     if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
+--        SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set added_by';
+--    end if;
+-- end;
 
-create trigger date_check_update_inv_head
-before update on inv_head
-for each row
-begin
-    if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set date';
-    end if ;
-    if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
-       SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set added_by';
-   end if;
-end;
-
-
-create trigger date_check_update_inv_line
-before update on inv_line
-for each row
-begin
-    if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set date';
-    end if ;
-    if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
-       SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set added_by';
-   end if;
-end;
-# inv_line
-
-create trigger date_check_update_statuses
-before update on statuses
-for each row
-begin
-    if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set date';
-    end if ;
-    if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
-       SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set added_by';
-   end if;
-end;
+-- create trigger date_check_update_inv_head
+-- before update on inv_head
+-- for each row
+-- begin
+--     if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
+--         SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set date';
+--     end if ;
+--     if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
+--        SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set added_by';
+--    end if;
+-- end;
 
 
-create trigger date_check_update_record_types
-before update on record_types
-for each row
-begin
-    if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set date';
-    end if ;
-    if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
-       SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot set added_by';
-   end if;
-end;
+-- create trigger date_check_update_inv_line
+-- before update on inv_line
+-- for each row
+-- begin
+--     if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
+--         SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set date';
+--     end if ;
+--     if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
+--        SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set added_by';
+--    end if;
+-- end;
+-- # inv_line
+
+-- create trigger date_check_update_statuses
+-- before update on statuses
+-- for each row
+-- begin
+--     if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
+--         SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set date';
+--     end if ;
+--     if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
+--        SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set added_by';
+--    end if;
+-- end;
+
+
+-- create trigger date_check_update_record_types
+-- before update on record_types
+-- for each row
+-- begin
+--     if (old.dt_added IS NOT NULL and old.dt_added != new.dt_added) then
+--         SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set date';
+--     end if ;
+--     if (old.added_by IS NOT NULL and old.added_by != new.added_by) then
+--        SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot set added_by';
+--    end if;
+-- end;
 
 
 
-create trigger check_user_approve_vs_create
-before update on inv_head
-for each row
-begin
-    if (new.approver = new.creator) then
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot approve own invoice';
-    end if;
-end;
+-- create trigger check_user_approve_vs_create
+-- before update on inv_head
+-- for each row
+-- begin
+--     if (new.approver = new.creator) then
+--         SIGNAL SQLSTATE '45000'
+--             SET MESSAGE_TEXT = 'Cannot approve own invoice';
+--     end if;
+-- end;
 
-create trigger check_user_can_approve
-before update on inv_head
-for each row
-begin
-    IF new.approver not in (
-            select a.user_seq
-            From permissions a  -- CHANGED THE ALIAS TO A
-            where (a.approve_invoices = 1 and new.approver = a.user_seq)
-        ) THEN -- MISSING THEN
-           SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = 'User cannot approve finances';
+-- create trigger check_user_can_approve
+-- before update on inv_head
+-- for each row
+-- begin
+--     IF new.approver not in (
+--             select a.user_seq
+--             From permissions a  -- CHANGED THE ALIAS TO A
+--             where (a.approve_invoices = 1 and new.approver = a.user_seq)
+--         ) THEN -- MISSING THEN
+--            SIGNAL SQLSTATE '45000'
+--            SET MESSAGE_TEXT = 'User cannot approve finances';
 
-        END IF;
-end;
+--         END IF;
+-- end;
 
 -- Insert a 'root' system user - No password set! Don't set one plz
 INSERT INTO users (seq, user_name, first_name, last_name, email, finance_pin, password, system_user, theme, added_by, updated_by) VALUES
@@ -315,15 +315,15 @@ INSERT INTO record_types (type_desc, added_by, updated_by) VALUES
 ('Budget Request', 1, 1);
 
 INSERT INTO docket_status (stat_desc, added_by, updated_by) VALUES
-('Proposed',2,2),
-('In Debate',2,2),
-('In Vote',2,2),
-('Approved',2,2),
-('Denied',2,2),
-('Tabled',2,2),
-('Need more info',2,2),
-('In Process',2,2),
-('Confirmed',2,2);
+('Proposed',        1,1),
+('In Debate',       1,1),
+('In Vote',         1,1),
+('Approved',        1,1),
+('Denied',          1,1),
+('Tabled',          1,1),
+('Need more info',  1,1),
+('In Process',      1,1),
+('Confirmed',       1,1);
 
 -- Create a account for general interaction
 CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';

@@ -166,7 +166,10 @@
                 <input type="text" name="uname" id="uname" value="{{user_name}}">
                 <br>
                 {% if enable_smtp %}
-                    <input type="checkbox" name="recEmails" id="recEmails">
+                    <input type="checkbox" name="recEmails" id="recEmails"{% if receive_emails %}
+                        checked
+                    {% endif %}>
+                    
                 <label for="recEmails">Enable Emails</label> <br>
                 {% endif %}
                 <input type="submit" value="Save Preferences">

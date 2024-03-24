@@ -11,7 +11,7 @@ sudo add-apt-repository ppa:deadsnakes/ppa -y >> /dev/null
 echo 'Updating Apt Repositories'
 sudo apt-get update >> /dev/null
 echo 'Installing Python and MySQL Server'
-sudo apt-get install python3.12 python3.12-venv python3.12-pip mysql-server-8.0 -y >> /dev/null
+sudo apt-get install python3.12-full python3.12-venv python3.12 mysql-server-8.0 -y >> /dev/null
 
 if [[ ! -d $SCRIPT_DIR/.venv ]];
 then

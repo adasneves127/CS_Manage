@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 -- Page not Found</title>
+    <script>
+        function goBack(){
+            history.back()
+        }
+    </script>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <h4>404... Page not Found</h4>
+    <p>The page or resource your were trying to access could not be found by our server.</p>
+    <button class="nav" onclick="goBack()">Click here to go back...</button>
+</body>
+</html>

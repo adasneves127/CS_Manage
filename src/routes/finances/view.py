@@ -3,6 +3,7 @@ from flask import request, session, redirect
 from src.utils.templates import send_template
 from src.utils.db_utils import connect
 from src.utils import exceptions
+import requests
 
 @app.route("/finances/table/", methods=["POST", "GET"])
 def get_table():
@@ -18,9 +19,13 @@ def get_table():
 @app.route("/finances/view/<int:seq>/", methods=["GET"])
 def get_record(seq):
     connection = connect()
-    if connection.can_user_view_finances(session['user'].seq):
+    print(requests.get('https://ipinfo.io/ip').text)
+    print(request.headers.get('X-Real-IP', ""))
+    if requests.get('https://ipinfo.io/ip').text == request.headers.get('X-Real-IP', "") or \
+        (session.get('user') is not None and \
+         connection.can_user_view_finances(session.get('user').seq)):
+
         record = connection.get_record_by_seq(seq)
-        approvers = connection.get_all_approvers()
         return send_template("finances/finance_view.liquid", record=record, isPreview=False)
     else:
         raise exceptions.InvalidPermissionException()

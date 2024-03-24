@@ -26,7 +26,7 @@ def login():
         session["loggedin"] = True
         session['user'] = user
         # return redirect(redir, code=302)
-        return redirect("/", code=302)
+        return redirect(session.get('ref', '/'), code=302)
     else:
         login_error = "Invalid username or password"
         return login_error, 400

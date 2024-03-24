@@ -12,6 +12,7 @@ html{
 color:  var(--fore-color);
 
 }
+
 table, td, th{
     border: 1px solid var(--fore-color); 
 }
@@ -34,6 +35,16 @@ table, td, th{
     background-color: var(--fore-color);
 }
 
+.dropdown-content button {
+    color: var(--back-color);
+    background-color: var(--fore-color);
+    width: 100%;
+    height: 4dvh;
+    border: none;
+    font-family: blockFont;
+    font-size: 1rem;
+}
+
 .nav {
     color: var(--fore-color);
     background-color: var(--back-color);
@@ -50,6 +61,12 @@ table, td, th{
     color: var(--fore-color);
 }
 
+.dropdown-content button:hover {
+    background-color: var(--back-color);
+    color: var(--fore-color);
+
+}
+
 a.navsub{
     color: var(--fore-color);
     background-color: var(--back-color);
@@ -60,16 +77,39 @@ a.navsub{
     color: var(--back-color);
 }
 
-/* a::first-letter{
-    color: red;
-    text-decoration: underline;
-}
-
-.dropbtn:first-letter{
-    color: red;
-    text-decoration: underline;
-} */
-
 .email{
     color: var(--fore-color);
+}
+
+.tab {
+    overflow: hidden;
+    color: var(--fore-color)
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    color: var(--back-color);
+    background-color: var(--fore-color);
+}
+/* Create an active/current tablink class */
+.tab button.active {
+    color: var(--back-color);
+    background-color: var(--fore-color);
+}
+
+.tab button {
+    color: var(--fore-color);
+    background-color: var(--back-color);
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    background: #1d1d1d;
 }

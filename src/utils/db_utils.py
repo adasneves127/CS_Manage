@@ -629,10 +629,9 @@ class connect:
         """
         finance_pin = random.randint(1000, 9999)
         values = vals[0:6] + (finance_pin, current_user.seq, current_user.seq)
-        print(sql, values)
         self.cursor.execute(sql, values)
         self.connection.commit()
-        print("Next Statement")
+        
         user_seq = self.cursor.lastrowid
         sql = """
         INSERT INTO permissions (user_seq, receive_emails, inv_view, inv_edit, inv_admin, approve_invoices, doc_view, doc_edit, doc_admin, user_admin, doc_vote, added_by, updated_by)
@@ -642,8 +641,9 @@ class connect:
         print(sql, values)
         self.cursor.execute(sql, values)
         self.connection.commit()
-        key = self.request_reset_password(user_seq, f"USER:{current_user.seq}")
-        email_utils.send_welcome_email(self.get_user_by_seq(user_seq), key, finance_pin)
+        if not self.get_user_by_seq(user_seq).system_user:
+            key = self.request_reset_password(user_seq, f"USER:{current_user.seq}")
+            email_utils.send_welcome_email(self.get_user_by_seq(user_seq), key, finance_pin)
         
     def clear_old_resets(self):
         SQL = """DELETE FROM password_reset WHERE created_at <  NOW() - INTERVAL 1 DAY"""
@@ -683,7 +683,8 @@ class connect:
         email_utils.alert_docket_creation(user, 
                                           self.get_docket_vote_email_users(),
                                           data, seq)
-    
+        return seq
+
     def search_officer_docket(self, seq: int):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at, a.updated_at,
         CONCAT(b.first_name, ' ', b.last_name), CONCAT(c.first_name, ' ', c.last_name)

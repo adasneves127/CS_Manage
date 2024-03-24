@@ -1,3 +1,9 @@
+:root {
+    --primary-brand: crimson;
+    
+    --secondary-brand: black;
+}
+
 #paper{
     margin: 0.5in;
     width: calc(8.5in - 1in);
@@ -44,18 +50,6 @@ hr.bot.secondary{
     position: absolute;
     bottom: .15in;
     width: 7.5in;
-}
-
-@property --primary-brand{
-    syntax: '<color>';
-    initial-value: crimson;
-    inherits: false;
-}
-
-@property --secondary-brand{
-    syntax: '<color>';
-    initial-value: black;
-    inherits: false;
 }
 
 .logo{

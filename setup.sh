@@ -9,7 +9,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 echo 'Adding Python PPA Repository'
 sudo add-apt-repository ppa:deadsnakes/ppa -y >> /dev/null
 echo 'Updating Apt Repositories'
-sudo apt update >> /dev/null
+sudo apt-get update >> /dev/null
 echo 'Installing Python and MySQL Server'
 sudo apt-get install python3.12 python3.12-venv python3.12-pip mysql-server-8.0 -y >> /dev/null
 

@@ -158,9 +158,14 @@
             document.getElementById("Total").value = total.toFixed(2);
         }
 
+        function fillBoxes(){
+            document.getElementById('Status').value = "{{record.header.status}}"
+            document.getElementById('Approver').value = "{{record.header.approver}}"
+        }
+
     </script>
 </head>
-<body>
+<body onload="fillBoxes()">
     {% render "navbar.liquid" %}
     <h1>New Financial Record</h1>
     <div class="tab">
@@ -189,7 +194,7 @@
             </select> <input type="password" name="creatorPin" id="creatorPin" style="width: 100px;" autocomplete="one-time-code" disabled value="....">
             <br>
             <label for="Approver">Approver:</label>
-            {% if record.header.approver == 'System Account' %}
+            {% if record.header.approver == 'Not Approved' %}
                 <select name="Approver" id="Approver">
                 {% for user in approvers %}
                     <option value="{{ user[1] }}">{{ user[1] }}</option>

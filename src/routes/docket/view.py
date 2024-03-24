@@ -14,7 +14,7 @@ def view_officer_docket():
         raise exceptions.UserNotSignedInException()
     
     if not conn.can_user_view_officer_docket(session['user']):
-        return exceptions.InvalidPermissionException()    
+        raise exceptions.InvalidPermissionException()    
 
     if conn.can_user_view_officer_docket(session['user']):
         return send_template('docket/index.liquid')

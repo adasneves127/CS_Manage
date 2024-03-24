@@ -4,6 +4,7 @@ from src.utils.db_utils import connect
 from flask import request, session, abort
 from mysql.connector.errors import DatabaseError
 from src.utils import exceptions
+import requests
 
 @app.route("/finances/new/", methods=["GET"])
 def new_record():
@@ -16,16 +17,6 @@ def new_record():
                              statuses=connection.get_all_finance_status_names(),
                              users=connection.get_all_finance_users(),
                              approvers=connection.get_all_approvers())
-    else:
-        raise exceptions.InvalidPermissionException()
-    
-@app.route("/finances/search", methods=["GET"])
-def search():
-    connection = connect()
-    if connection.can_user_view_finances(session['user'].seq):
-        # the invDate is in the URL query string
-        date = request.args.get("invDate") #datetime.datetime.strptime(request.args.get("invDate"), "%Y-%m-%d")
-        return send_template("finances/search.liquid", items=connection.get_all_items(date))
     else:
         raise exceptions.InvalidPermissionException()
     
@@ -56,6 +47,15 @@ def create_record():
         
         try:
             connection.create_record(request.json['record'], session['user'])
+            if request.json['record']['header']['approver'] == 'Not Approved':
+                seq = connection.create_officer_docket({
+                    "title": f"Review Finance ID {request.json['record']['header']['id']}",
+                    "body": f"""A new finance request was created by {session['user']}.
+                    Please review and debate this item. Please see attached for item."""
+                }, session['user'])
+                
+                connection.add_attachment(seq, f'Finance{request.json['record']['header']['id']}',
+                                          )
             return "Record created", 200
         except DatabaseError as e :
             if str(e) == "1644 (45000): Cannot approve own invoice":

@@ -39,24 +39,24 @@
         <table id="head">
             <thead>
                 <tr>
-                    <th style="width: 15%">Record ID</th>
-                    <th style="width: 27.5%">Creator</th>
-                    <th style="width: 27.5%">Approver</th>
-                    <th style="width: 15%">Date</th>
-                    <th style="width: 15%">Status</th>
+                    <th style="padding: 5px;">Record ID</th>
+                    <th style="padding: 5px;">Creator</th>
+                    <th style="padding: 5px;">Approver</th>
+                    <th style="padding: 5px;">Date</th>
+                    <th style="padding: 5px;">Status</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>{{record.header.id}}</td>
-                    <td>{{record.header.creator}}</td>
-                    <td>{% if record.header.approver != "System Account" %}
+                    <td style="padding: 5px;">{{record.header.id}}</td>
+                    <td style="padding: 5px;">{{record.header.creator}}</td>
+                    <td style="padding: 5px;">{% if record.header.approver != "System Account" %}
                         {{record.header.approver}}
                     {% else %}
                         <b>Pending Approval</b>
                     {% endif %}</td>
-                    <td>{{record.header.inv_date}}</td>
-                    <td>{{record.header.status}}</td>
+                    <td style="padding: 5px;">{{record.header.inv_date}}</td>
+                    <td style="padding: 5px;">{{record.header.status}}</td>
                 </tr>
             </tbody>
         </table>

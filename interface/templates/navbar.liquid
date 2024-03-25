@@ -25,30 +25,7 @@
 
     <div class="navbar">
       <a href="/">Home</a>
-      {% if inv_view or inv_edit or inv_admin  %}
-
-      <div class="dropdown">
-
-          
-        
-        <button class="dropbtn">Finances
-          <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-          {% if inv_view or inv_admin %}
-            <a href="/finances/">View Records</a>
-            
-          {% endif %}
-          {% if inv_edit or inv_admin  %}
-            <a href="/finances/new/">New Record</a>
-          {% endif %}
-          {% if approve_invoices or inv_admin %}
-            <a href="/finances/pending/">View Pending Invoices</a>
-          {% endif %}
-        </div>
-      </div>
-
-    {% endif %}
+      
     {% if doc_view or doc_edit or doc_admin %}
       <div class="dropdown">
         <button class="dropbtn">Docket
@@ -66,24 +43,41 @@
         </div>
       </div>
     {% endif %}
-      
-      <a href="https://engage.bridgew.edu/">EngageBSU</a>
-      <a href="/about/">About</a>
-      {% if user_admin %}
-        
-      
-      <div class="dropdown">
-        <button class="dropbtn">Admin
+    {% if inv_view or inv_edit or inv_admin  %}
+      <div class="dropdown">        
+        <button class="dropbtn">Finances
           <i class="fa fa-caret-down"></i>
         </button>
         <div class="dropdown-content">
-          <a href="/admin/finance/status/">Finance Statuses</a>
-          <a href="/admin/docket/status/">Docket Statuses</a>
-          <a href="/admin/record/">Record Types</a>
-          <a href="/admin/users/">Users</a>
+          {% if inv_view or inv_admin %}
+            <a href="/finances/">View Records</a>
+            
+          {% endif %}
+          {% if inv_edit or inv_admin  %}
+            <a href="/finances/new/">New Record</a>
+          {% endif %}
+          {% if approve_invoices or inv_admin %}
+            <a href="/finances/pending/">View Pending Invoices</a>
+          {% endif %}
         </div>
       </div>
-    {% endif %}
+    {% endif %} 
+    {% if user_admin %}
+          <div class="dropdown">
+          <button class="dropbtn">Admin
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <div class="dropdown-content">
+            <a href="/admin/finance/status/">Finance Statuses</a>
+            <a href="/admin/docket/status/">Docket Statuses</a>
+            <a href="/admin/record/">Record Types</a>
+            <a href="/admin/users/">Users</a>
+          </div>
+        </div>
+      {% endif %}   
+    <a href="https://engage.bridgew.edu/">EngageBSU</a>
+      <a href="/about/">About</a>
+      
       <div class="dropdown">
         <button class="dropbtn">User
           <i class="fa fa-caret-down"></i>

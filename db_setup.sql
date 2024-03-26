@@ -325,12 +325,3 @@ INSERT INTO docket_status (stat_desc, added_by, updated_by) VALUES
 ('In Process',      1,1),
 ('Confirmed',       1,1);
 
--- Create a account for general interaction
-CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY 'invoices123!';
-GRANT INSERT, UPDATE, SELECT on management.* TO 'invoices'@'localhost';
-GRANT DELETE on management.password_reset TO 'invoices'@'localhost';
-GRANT DELETE on management.docket_assignees TO 'invoices'@'localhost';
-
--- Create an account that can backup the database using mysqldump
-CREATE USER IF NOT EXISTS invoice_backup_account@localhost IDENTIFIED WITH mysql_native_password BY 'LyRk5ASv2hY0';
-GRANT INSERT, UPDATE, LOCK TABLES, SELECT, DELETE, PROCESS, TRIGGER, SHOW VIEW on *.* to invoice_backup_account@localhost;

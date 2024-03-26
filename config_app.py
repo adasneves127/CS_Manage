@@ -83,14 +83,11 @@ def config_app_info():
         print("App Info Not Saved")
     
     
-    
-    
-    
-
 
 if __name__ == "__main__":
     print("Configuring Application Information")
     config_app_info()
+    config_dot_env()
     x = connect()
     print("Creating Administrative User")
     create_user(x)

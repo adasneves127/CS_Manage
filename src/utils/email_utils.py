@@ -74,6 +74,31 @@ def send_password_updated_email(user_obj: containers.User):
     send_email(subject, body_html, email, [], [])
 
 
+def send_user_request_confirmation(email: str):
+    app_info = load_app_info()
+    email_domain = app_info['public']['email_domain']
+    subject = '[Notice] User Request Received'
+    body_html = f"""<html>
+        <head>
+        {getStyleData()}
+        </head>
+        <body>
+            {get_logo_img()}
+            <p>
+                Hello, <br>
+                Your request for access to this system has been received, and sent to our User Administrators.
+                <br>
+                Application Access is not guaranteed, and is contingent on what you
+            </p>
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+        </body>
+    </html>
+    """
+    send_email(subject, body_html, email, [], [])
+
 def send_pin_reset_email(user_obj: containers.User):
     email = user_obj.email
     if user_obj.system_user:
@@ -145,9 +170,6 @@ def send_password_reset_email(user_obj: containers.User, reset_link: str):
                 <a href="{reset_link}"> Reset Password</a> <br>
                 This link is valid for 24 hours.
             </p>
-
-    """
-    body_html += f"""
             Kind Regards, <br>
             The Application Development & Support Team <br/>
             {app_info['public']['system_name']} <br/>
@@ -505,6 +527,36 @@ def send_welcome_email(user: containers.User, reset_link, finance_pin):
     """
     send_email(subject, body_html, email, [], [])
 
+def alert_admins_new_user_request(form_data: dict, admin_emails: list):
+    app_info = load_app_info()
+    email_domain = app_info['public']['email_domain']
+
+    body_html = f"""<html>
+        <head>
+        {getStyleData()}
+        </head>
+        <body>
+            {get_logo_img()}
+            <p>
+                Hello, <br>
+                A request for access to this system has been made.
+                <br>
+                Please review the request information and either approve or reject this request: <br>
+                Name: {form_data['name']} <br>
+                Email: {form_data['email']} <br>
+                Reason: {form_data['reason']}
+                <hr>
+                Once this request has been approved, please create their account through the Application User Administration panel.
+                If this request has been denied, please contact the requested account to inform them of this decision.
+            </p>
+            Kind Regards, <br>
+            The Application Development & Support Team <br/>
+            {app_info['public']['system_name']} <br/>
+            {app_info['public']['deployed_location']} <br/>
+        </body>
+    </html>
+    """
+    send_email("[Notice] New Request for System Access", body_html, admin_emails, [], [])
 
 def send_email(subject, body, email, cc: list, bcc: list, attachement_paths: list = []):
     app_info = load_app_info()
@@ -519,7 +571,10 @@ def send_email(subject, body, email, cc: list, bcc: list, attachement_paths: lis
     msg['Subject'] = subject
     msg['From'] = formataddr((smtp_settings['from'],
                               (smtp_settings['from_email'] + email_domain)))
-    msg['To'] = email
+    if type(email) is list:
+        msg['To'] = email
+    else:
+        msg['To'] = [email]
     msg['Cc'] = ', '.join(cc)
     msg['Bcc'] = ', '.join(bcc)
     msg.add_header('reply-to', smtp_settings['from_email'] + email_domain)
@@ -542,8 +597,10 @@ def send_email(subject, body, email, cc: list, bcc: list, attachement_paths: lis
         s.starttls()
 
     s.login(smtp_settings['user'], smtp_settings['password'])
-
-    to_addrs = [email]
+    if type(email) is list:
+        to_addrs = email
+    else:
+        to_addrs = [email]
     cc_addrs = cc
     bcc_addrs = bcc
     from_addr = smtp_settings['from_email'] + email_domain

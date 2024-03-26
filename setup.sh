@@ -1,4 +1,12 @@
 #! /bin/bash
+create_password(){
+  array=()
+  for i in {a..z} {A..Z} {0..9}; 
+    do
+    array[$RANDOM]=$i
+  done
+  password=$(printf %s ${array[@]::8})
+}
 
 if [ "$EUID" -eq 0 ]
   then echo "Do not run as root. This script will ask for sudo permissions when needed."
@@ -24,6 +32,21 @@ if [[ -z "`sudo mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMAT
 then 
 	echo 'Initializing Database'
 	sudo mysql -u root < db_setup.sql
+  create_password
+
+  sudo mysql -qfsBe "CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY '$password!';"
+  sudo mysql -qfsBe "GRANT INSERT, UPDATE, SELECT on management.* TO 'invoices'@'localhost';"
+  sudo mysql -qfsBe "GRANT DELETE on management.password_reset TO 'invoices'@'localhost';"
+  sudo mysql -qfsBe "GRANT DELETE on management.docket_assignees TO 'invoices'@'localhost';"
+  echo "export DB_HOST='localhost'
+export DB_USER='invoices'
+export DB_PASSWORD='$password'
+export DB_NAME='management'" > .env
+  create_password
+  echo "export DB_BACKUP_USER='invoice_backup_account'
+export DB_BACKUP_PASS='$password'" >> .env
+  sudo mysql -qfsBe "CREATE USER IF NOT EXISTS invoice_backup_account@localhost IDENTIFIED WITH mysql_native_password BY '$password';"
+  sudo mysql -qfsBe "GRANT INSERT, UPDATE, LOCK TABLES, SELECT, DELETE, PROCESS, TRIGGER, SHOW VIEW on *.* to invoice_backup_account@localhost;"
 else
 	echo 'Database already found'
 fi
@@ -66,11 +89,18 @@ then
   "
 fi
 
-#write out current crontab
-sudo crontab -l > mycron || :
-sudo chown $USER mycron
-#echo new cron into cron file
-echo "0 0 * * * $SCRIPT_DIR/cron.sh" >> mycron
-#install new cron file
-sudo crontab mycron
-rm mycron
+sudo crontab -l | grep "$SCRIPT_DIR/cron.sh"
+echo "Test"
+if [[ ! $? ]];
+then
+  #write out current crontab
+  sudo crontab -l > mycron || :
+  sudo chown $USER mycron
+  #echo new cron into cron file
+  echo "0 0 * * * $SCRIPT_DIR/cron.sh" >> mycron
+  #install new cron file
+  sudo crontab mycron
+  rm mycron
+fi
+
+

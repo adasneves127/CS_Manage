@@ -73,3 +73,14 @@ def reset_password():
                             f"http://{app_domain}/reset_password/{key}")
         return "Password reset email sent to your email address. Please check your email.", 201
     return "Invalid username", 400
+
+@app.route("/auth/request/", methods=['GET'])
+def request_access():
+    return send_template('user/request.liquid')
+
+@app.route("/auth/request/", methods=['POST'])
+def request_access_form_submit():
+    form_data = request.form
+    conn = connect()
+    conn.save_user_request(form_data)
+    return redirect('/')

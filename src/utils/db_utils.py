@@ -819,5 +819,27 @@ class connect:
         self.cursor.execute(SQL, (file_data, seq))
         self.connection.commit()
     
+    def save_user_request(self, form_data: dict):
+        SQL = """INSERT INTO user_requests (name, email, reason) VALUES
+        (%s, %s, %s)"""
+        values = (
+            form_data.get('name'),
+            form_data.get('email'),
+            form_data.get('reason')
+        )
+        self.cursor.execute(SQL, values)
+        self.connection.commit()
+
+        # Send the email to confirm to the user that their request was received:
+        email_utils.send_user_request_confirmation(form_data.get('email'))
+        email_utils.alert_admins_new_user_request(form_data, self.get_user_admin_emails())
+
+    def get_user_admin_emails(self):
+        SQL = """SELECT b.email FROM permissions a, users b WHERE a.user_seq = b.seq and a.user_admin = 1"""
+        self.cursor.execute(SQL)
+        domain = load_app_info()['public']['email_domain']
+        return [x[0] + domain for x in self.cursor.fetchall()]
+
+
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

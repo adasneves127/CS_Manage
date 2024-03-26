@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request System Access</title>
+</head>
+<body>
+    {% render "navbar.liquid" %}
+    <h3>Request System Access</h3>
+    <h4>Please fill out this form to request access to the system.</h4>
+    <form action="/auth/request/" method="post">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name"><br>
+        <label for="email">Email Address</label>
+        <input type="email" name="email" id="email">{{email_domain}} <br>
+        <label for="reason">Please state the reason for requesting access:</label> <br>
+        <textarea name="reason" id="reason" cols="30" rows="10"></textarea>
+        <p>A note on this system:</p>
+        <p>Access to this system is not guaranteed, and is restricted to members or affiliates of the Officer Board for the {{system_name}} at {{deployed_location}}.</p>
+        <p>As such, your application administrators will review your request and inform you of your application status. 
+            {% if enable_smtp %}
+                You will receive an email confirming receipt of your request. If access has been granted, you will receive an email with a link to set your password.
+            {% endif %}
+        </p>
+        <input type="submit" value="Submit Request" class="nav">
+    </form>
+</body>
+</html>

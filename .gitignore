@@ -167,3 +167,4 @@ backup.sql
 *.sock
 interface/static/logo.*
 backups/
+wsgi.py

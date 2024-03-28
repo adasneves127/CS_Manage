@@ -82,7 +82,7 @@ class connect:
     def send_password_reset(self, user: containers.User):
         token = self.request_reset_password(user.seq, "SYSTEM")
         app_domain = load_app_info()['public']['application_url']
-        email_utils.send_password_reset_email(user, f"https://{app_domain}/reset_password/{token}")
+        email_utils.send_password_reset_email(user, f"{app_domain}/reset_password/{token}")
             
     def get_user_by_seq(self, user_seq: int) -> containers.User:
         user_sql = """SELECT seq, user_name,

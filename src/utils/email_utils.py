@@ -559,6 +559,7 @@ def alert_admins_new_user_request(form_data: dict, admin_emails: list):
     send_email("[Notice] New Request for System Access", body_html, admin_emails, [], [])
 
 def send_email(subject, body, email, cc: list, bcc: list, attachement_paths: list = []):
+    print(body)
     app_info = load_app_info()
 
     if not app_info['public']['enable_smtp']:

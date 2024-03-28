@@ -113,3 +113,34 @@ a.navsub{
     padding: 6px 12px;
     background: #1d1d1d;
 }
+
+fieldset{
+	border: 1px solid var(--fore-color);
+}
+input[type=text], input[type=password], input[type=number], input[type=email], input[type=submit]{
+	background-color: var(--back-color);
+	color: var(--fore-color);
+	border-radius: 0px;
+	border: .5px solid var(--fore-color);
+}
+
+input[type=submit]:hover{
+	background-color: var(--fore-color);
+	color: var(--back-color);
+}
+
+input[type=checkbox]{
+	accent-color: var(--fore-color);
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}

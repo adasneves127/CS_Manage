@@ -1,5 +1,5 @@
 (((seconds) => {
-    var refresh,       
+    var refresh,
         intvrefresh = () => {
             clearInterval(refresh);
             refresh = setTimeout(() => {
@@ -33,7 +33,7 @@ function applyFilters(){
     for(let i = 0; i < typeCheckboxes.length; i++){
         filterData['types'][typeCheckboxes[i].id] = typeCheckboxes[i].checked
     }
-    
+
 }
 
 
@@ -44,7 +44,7 @@ function getTableData(){
     xhr.setRequestHeader("Content-Type", "application/json")
     // Set the filterData object as the payload
     xhr.send(JSON.stringify(filterData))
-    
+
     xhr.onreadystatechange = function(){
         if(xhr.readyState == 4){
             if(xhr.status === 200){

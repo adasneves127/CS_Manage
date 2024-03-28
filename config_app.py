@@ -5,7 +5,7 @@ import secrets
 from getpass import getpass
 
 def create_user(conn: connect):
-    
+
     user_data = User.create_user()
     conn.save_user(user_data)
     # Get a password and an approval pin
@@ -18,10 +18,10 @@ def config_app_info():
     system_name = input("Enter the name of this system: ")
     deployed_location = input("Enter the location of this system's deployment: ")
     about_text = []
-    
+
     while (line_text := input("Enter the text for this system's 'about' page [End with blank line]: ")) != "":
         about_text.append(line_text)
-    
+
     email_domain = input("Enter the email domain for this system: ")
     app_domain = input("Enter the URL for this system [Include http:// or https://]: ")
     app_info_full = {
@@ -71,23 +71,22 @@ def config_app_info():
     if input("Is this information correct? (y/n): ").lower() == 'y':
         with open("app_info.json", "w") as f:
             json.dump(app_info_full, f, indent=4)
-        print("Please review app_info.json and populate the " +  
-            "system_administrator and application_administrators" + 
+        print("Please review app_info.json and populate the " +
+            "system_administrator and application_administrators" +
             " fields with the appropriate information.")
-        print("If you would like to enable emailing, please" + 
-              " modify the 'smtp' related fields, " + 
+        print("If you would like to enable emailing, please" +
+              " modify the 'smtp' related fields, " +
               "and set 'enable_smtp' to 'true'")
         print("Please Note: Password Reset requires SMTP to be enabled")
         print("App Info Saved")
     else:
         print("App Info Not Saved")
-    
-    
+
+
 
 if __name__ == "__main__":
     print("Configuring Application Information")
     config_app_info()
-    config_dot_env()
     x = connect()
     print("Creating Administrative User")
     create_user(x)

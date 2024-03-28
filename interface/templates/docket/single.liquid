@@ -20,9 +20,9 @@
     {% for person in assignees %}
         <p>{{person[0]}}</p>
     {% endfor %}
-    <br/>
+    <br>
     <p>Title: {{docket[1]}}</p>
-    <p>Description: <br/> </p>
+    <p>Description: <br> </p>
     {% for line in docket[2] %}
         <p>{{ line }}</p>
     {% endfor %}
@@ -38,7 +38,7 @@
                     <td><button class="nav" onclick="viewItem({{attachment[0]}})">View</button></td>
                 </tr>
             {% endfor %}
-            
+
         </table>
 </body>
 </html>

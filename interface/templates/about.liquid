@@ -15,14 +15,14 @@
     {% for line in about_text %}
         <p>{{line}}</p>
     {% endfor %}
-    <br/>
+    <br>
     <h2>Contact Information</h2>
     <h3>System Administrator</h3>
     <a class="email" target="_blank" href="mailto:{{system_administrator.email}}{{email_domain}}">{{system_administrator.name}}</a>
-    <br/><br/>
+    <br><br>
     <h3>Application Administrators</h3>
     {% for admin in application_administrators %}
-        <a href="mailto:{{admin.email}}{{email_domain}}" target="_blank" class="email">{{admin.name}}</a> <br/><br/>
+        <a href="mailto:{{admin.email}}{{email_domain}}" target="_blank" class="email">{{admin.name}}</a> <br><br>
     {% endfor %}
     <br>
     {% if isLoggedIn %}
@@ -33,13 +33,13 @@
             <br>
             <label for="description">Description:</label><br>
             <textarea name="description" id="description" cols="30" rows="10"></textarea>
-            <br/>
+            <br>
             <input type="submit" value="Submit Report">
         </form>
         <p>Along with this form, your user information will be sent along to the administration team.</p>
         <p>Our administration team with <b><i><u>NEVER</u></i></b> ask for your password or any other sensitive information!</p>
         <p>Should someone ask for your sensitive information, please alert your system administrator as soon as possible.</p>
     {% endif %}
-    
+
 </body>
 </html>

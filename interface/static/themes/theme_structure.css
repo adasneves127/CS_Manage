@@ -2,6 +2,7 @@
 html{
     background-color: var(--back-color);
     color: var(--fore-color);
+    overflow-x: hidden;
 }
 
 .navbar{
@@ -145,5 +146,7 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 hr{
+	margin-left: -10px;
+	margin-right: -10px;
 	border: 1px solid var(--fore-color);
 }

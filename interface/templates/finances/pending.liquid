@@ -16,7 +16,7 @@
             xhr.setRequestHeader("Content-Type", "application/json")
             // Set the filterData object as the payload
             xhr.send(JSON.stringify({}))
-            
+
             xhr.onreadystatechange = function(){
                 if(xhr.readyState == 4){
                     if(xhr.status === 200){
@@ -27,7 +27,7 @@
         }
 
         (((seconds) => {
-            var refresh,       
+            var refresh,
                 intvrefresh = () => {
                     clearInterval(refresh);
                     refresh = setTimeout(() => {

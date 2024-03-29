@@ -1,4 +1,4 @@
-from json import load, dump
+from json import load
 
 
 def load_app_info() -> dict:

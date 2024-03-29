@@ -173,7 +173,7 @@
         <button class="tablinks" onclick="openTab(event, 'Table')">Lines</button>
         <button class="tablinks" onclick="openTab(event, 'Settings')">Review</button>
       </div>
-      
+
       <!-- Tab content -->
       <div id="Setup" class="tabcontent" style="display:block;">
         <h3>Finances Header</h3>
@@ -199,16 +199,16 @@
                 {% for user in approvers %}
                     <option value="{{ user[1] }}">{{ user[1] }}</option>
                 {% endfor %}
-                </select> 
+                </select>
                 <input type="password" name="approverPin" id="approverPin" style="width: 100px;" autocomplete="one-time-code">
-            
+
             {% else %}
 
             <select name="Approver" id="Approver" disabled>
                 {% for user in approvers %}
                     <option value="{{record.header.approver}}">{{record.header.approver}}</option>
                 {% endfor %}
-                </select> 
+                </select>
                 <input type="password" name="approverPin" id="approverPin" style="width: 100px;" autocomplete="one-time-code" value="...." disabled>
 
             {% endif %}
@@ -230,11 +230,11 @@
         </fieldset>
       </div>
 
-      
+
       <div id="Table" class="tabcontent">
         <h3>Finances Line</h3>
         <fieldset>
-            <!-- Should contain settings pertaining to: 
+            <!-- Should contain settings pertaining to:
             Line ID [Unchangeable]
             Item Info
             Quantity
@@ -269,11 +269,11 @@
         </fieldset>
 
       </div>
-      
+
       <div id="Settings" class="tabcontent">
         <h3>Review</h3>
         <fieldset>
-            <!-- Should contain settings pertaining to: 
+            <!-- Should contain settings pertaining to:
             Taxes
             Fees
             -->

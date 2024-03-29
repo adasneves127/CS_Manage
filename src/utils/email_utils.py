@@ -6,15 +6,17 @@ from email.message import EmailMessage
 import base64
 import bs4
 
+
 def get_logo_img():
     try:
         open('interface/static/logo.png', 'rb').close()
     except FileNotFoundError:
         return ""
-    
+
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
     return f"""<img id="logo" src="data:image/png;base64, {logo}">"""
+
 
 def getStyleData():
     return """
@@ -27,22 +29,22 @@ def getStyleData():
             #logo{
                 width: 5em;
             }
-            
-            
+
+
         </style>"""
+
 
 def send_password_updated_email(user_obj: containers.User):
     email = user_obj.email
     if user_obj.system_user:
         return
-    
+
     if not user_obj.receive_emails:
         return
     app_info = load_app_info()
     email_domain = app_info['public']['email_domain']
     email += email_domain
     subject = '[Alert] Password Updated'
-
 
     body_html = f"""
     <html>
@@ -53,21 +55,24 @@ def send_password_updated_email(user_obj: containers.User):
             {get_logo_img()}
             <p>
                 Hello, <br>
-                Your password has been updated. If you did not make this change, please contact your application administrators as soon as possible.
+                Your password has been updated. If you did not make this change
+                , please contact your application administrators as soon as
+                possible.
             </p>
             <p>
-            Administrators: <br/>
-        
+            Administrators: <br>
+
     """
     for admin in app_info['public']['application_administrators']:
-        body_html += f'{admin['name']}, <a href="mailto:{admin['email']}{email_domain}">Email</a><br/>'
+        body_html += f'''{admin['name']}, <a
+        href="mailto:{admin['email']}{email_domain}">Email</a><br>'''
 
     body_html += f"""
     </p>
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
         </body>
     </html>
     """
@@ -76,7 +81,6 @@ def send_password_updated_email(user_obj: containers.User):
 
 def send_user_request_confirmation(email: str):
     app_info = load_app_info()
-    email_domain = app_info['public']['email_domain']
     subject = '[Notice] User Request Received'
     body_html = f"""<html>
         <head>
@@ -86,18 +90,21 @@ def send_user_request_confirmation(email: str):
             {get_logo_img()}
             <p>
                 Hello, <br>
-                Your request for access to this system has been received, and sent to our User Administrators.
+                Your request for access to this system has been received, and
+                sent to our User Administrators.
                 <br>
-                Application Access is not guaranteed, and is contingent on what you
+                Application Access is not guaranteed, and is contingent on what
+                you
             </p>
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
         </body>
     </html>
     """
     send_email(subject, body_html, email, [], [])
+
 
 def send_pin_reset_email(user_obj: containers.User):
     email = user_obj.email
@@ -111,7 +118,6 @@ def send_pin_reset_email(user_obj: containers.User):
     email_domain = app_info['public']['email_domain']
     email += email_domain
     subject = '[Alert] Finance Pin Updated'
-
 
     body_html = f"""
     <html>
@@ -134,9 +140,9 @@ def send_pin_reset_email(user_obj: containers.User):
 
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
         </body>
     </html>
     """
@@ -165,19 +171,20 @@ def send_password_reset_email(user_obj: containers.User, reset_link: str):
             {get_logo_img()}
             <p>
                 Hello, <br>
-                A request to reset your password has been made. <br/>
+                A request to reset your password has been made. <br>
                 Please use this link to reset your password:
                 <a href="{reset_link}"> Reset Password</a> <br>
                 This link is valid for 24 hours.
             </p>
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
         </body>
     </html>
     """
     send_email(subject, body_html, email, [], [])
+
 
 def send_assignment_email(target_user: containers.User,
                           from_user: containers.User,
@@ -203,30 +210,36 @@ def send_assignment_email(target_user: containers.User,
             {get_logo_img()}
             <p>
                 Hello, <br>
-                You have been added as an assignee to an officer docket item. <br/>
+                You have been added as an assignee to an officer docket item.
                 <br>
-                Docket Information: {docket_data[0][0]}<br/>
-                Docket Title: {docket_data[0][1]}<br/>
-                Docket Description: {docket_data[0][2]}<br/>
-                Docket Status: {docket_data[0][3]}<br/>
                 <br>
-                You have been added to this record by {from_user.full_name}. <br/>
-                You can view this record by logging into the application and navigating to the assigned docket record page. <br/>
-                We encourage you to reach out to {from_user.full_name}, and any other assignees for more information. <br/>
+                Docket Information: {docket_data[0][0]}<br>
+                Docket Title: {docket_data[0][1]}<br>
+                Docket Description: {docket_data[0][2]}<br>
+                Docket Status: {docket_data[0][3]}<br>
+                <br>
+                You have been added to this record by {from_user.full_name}.
+                <br>
+                You can view this record by logging into the application and
+                navigating to the assigned docket record page. <br>
+                We encourage you to reach out to {from_user.full_name},
+                and any other assignees for more information. <br>
             </p>
 
     """
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
         </body>
     </html>
     """
     send_email(subject, body_html, email, [from_user.email + email_domain], [])
 
-def alert_docket_removal(target_user: containers.User, from_user: containers.User, docket_data: tuple):
+
+def alert_docket_removal(target_user: containers.User,
+                         from_user: containers.User, docket_data: tuple):
     app_info = load_app_info()
     email_domain = app_info['public']['email_domain']
     email = target_user.email
@@ -248,29 +261,35 @@ def alert_docket_removal(target_user: containers.User, from_user: containers.Use
             {get_logo_img()}
             <p>
                 Hello, <br>
-                You have been removed as an assignee to an officer docket item. <br/>
+                You have been removed as an assignee to an officer docket item.
                 <br>
-                Docket Information: {docket_data[0][0]}<br/>
-                Docket Title: {docket_data[0][1]}<br/>
-                Docket Status: {docket_data[0][3]}<br/>
                 <br>
-                You have been removed from this record by {from_user.full_name}. <br/>
-                We encourage you to reach out to {from_user.full_name} for more information. <br/>
-                
+                Docket Information: {docket_data[0][0]}<br>
+                Docket Title: {docket_data[0][1]}<br>
+                Docket Status: {docket_data[0][3]}<br>
+                <br>
+                You have been removed from this record by {from_user.full_name}
+                .
+                <br>
+                We encourage you to reach out to {from_user.full_name} for more
+                information. <br>
+
             </p>
 
     """
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
         </body>
     </html>
     """
     send_email(subject, body_html, email, [from_user.email + email_domain], [])
 
-def alert_docket_creation(creation_user, docket_all_users, docket_data, docket_seq):
+
+def alert_docket_creation(creation_user, docket_all_users, docket_data,
+                          docket_seq):
     app_info = load_app_info()
     email_domain = app_info['public']['email_domain']
     email = creation_user.email
@@ -289,27 +308,32 @@ def alert_docket_creation(creation_user, docket_all_users, docket_data, docket_s
             {get_logo_img()}
             <p>
                 Hello, <br>
-                A new docket item has been created. <br/>
+                A new docket item has been created. <br>
                 <br>
-                Docket ID: {docket_seq}<br/>
-                Docket Title: {docket_data['title']}<br/>
-                Docket Status: Proposed <br/>
+                Docket ID: {docket_seq}<br>
+                Docket Title: {docket_data['title']}<br>
+                Docket Status: Proposed <br>
                 <br>
-                This item was created by {creation_user.full_name}. If you have any questions, please reach out to them. <br/>
+                This item was created by {creation_user.full_name}.
+                If you have any questions, please reach out to them. <br>
             </p>
 
     """
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
-            <br/>
-            [This email was sent to you as a voting member of the officer board. If you believe this was sent in error, please contact your application administrators.]
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
+            <br>
+            [This email was sent to you as a voting member of the officer board
+            <br>
+             If you believe this was sent in error, please contact your
+             application administrators.]
         </body>
     </html>
     """
     send_email(subject, body_html, email, cc_list, [])
+
 
 def alert_docket_update(creation_user, assignee_users, docket_data):
     app_info = load_app_info()
@@ -320,44 +344,47 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
     cc_list = []
     for user in assignee_users:
         cc_list.append(user['email'] + email_domain)
-    
 
     body_html = f"""
     <html>
         <head>
         {getStyleData()}
-            
+
         </head>
         <body>
             {get_logo_img()}
             <p>
                 Hello, <br>
-                A docket item has updated. <br/>
+                A docket item has updated. <br>
                 <br>
-                Docket ID: {docket_data[0][0]}<br/>
-                Docket Title: {docket_data[0][1]}<br/>
-                Docket Status: {docket_data[0][3]} <br/>
+                Docket ID: {docket_data[0][0]}<br>
+                Docket Title: {docket_data[0][1]}<br>
+                Docket Status: {docket_data[0][3]} <br>
                 <br>
-                This item was updated by {creation_user.full_name}. If you have any questions, please reach out to them. <br/>
+                This item was updated by {creation_user.full_name}. If you have
+                any questions, please reach out to them. <br>
             </p>
 
     """
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
-            <br/>
-            <p>[This email was sent to you for one of the following reasons: </p>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
+            <br>
+            <p>[This email was sent to you for one of the following reasons:
+            </p>
             <ul>
                 <li>You created this docket</li>
                 <li>You are assigned to this docket item</li>
             </ul>
-            <p>If you believe this was sent in error, please contact your application administrators.]</p>
+            <p>If you believe this was sent in error, please contact your
+            application administrators.]</p>
         </body>
     </html>
     """
     send_email(subject, body_html, email, cc_list, [])
+
 
 def send_bug_report(bug_form: dict, userInfo: containers.User):
     app_info = load_app_info()
@@ -367,7 +394,8 @@ def send_bug_report(bug_form: dict, userInfo: containers.User):
         x['email'] + email_domain
         for x in app_info['public']['application_administrators']
     ]
-    to_user = app_info['public']['system_administrator']['email'] + email_domain
+    to_user = app_info['public']['system_administrator']['email'] +\
+        email_domain
 
     body_html = f"""
     <html>
@@ -378,12 +406,14 @@ def send_bug_report(bug_form: dict, userInfo: containers.User):
             {get_logo_img()}
             <p>
                 Hello, <br>
-                
-                You are receiving this email because a bug report has been submitted, and you are listed as an administrator account in the system. <br/>
-                Bug Report Information: <br/>
-                <br/>
-                Datetime Occured: {bug_form['dt_occured']}<br/>
-                Bug Description: {bug_form['description']}<br/>
+
+                You are receiving this email because a bug report has been
+                submitted, and you are listed as an administrator account in
+                  the system. <br>
+                Bug Report Information: <br>
+                <br>
+                Datetime Occured: {bug_form['dt_occured']}<br>
+                Bug Description: {bug_form['description']}<br>
                 Reporter Information:
                 <table>
                     <tr>
@@ -400,24 +430,28 @@ def send_bug_report(bug_form: dict, userInfo: containers.User):
                     </tr>
                     <tr>
                         <th>User Email</th>
-                        <td><a href="mailto:{userInfo.email}{email_domain}">Email</a></td>
+                        <td><a href="mailto:{userInfo.email}{email_domain}">
+                        Email
+                        </a></td>
                     </tr>
                 </table>
-                For more user information, please visit the user management and administration page <br/>
+                For more user information, please visit the user management and
+                  administration page <br>
             </p>
 
     """
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
-            <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
+            <br>
         </body>
     </html>
     """
     send_email(subject, body_html, to_user, cc_list, [])
-    
+
+
 def notify_vote_confirmation(user: containers.User, vote, doc_info):
     app_info = load_app_info()
     email = user.email + app_info['public']['email_domain']
@@ -432,33 +466,35 @@ def notify_vote_confirmation(user: containers.User, vote, doc_info):
             {get_logo_img()}
             <p>
                 Hello, <br>
-                
-                You are receiving this email because your vote has been confirmed. <br/>
-                Vote Type: {vote}<br/>
-                Docket ID: {doc_info[0][0]}<br/>
+
+                You are receiving this email because your vote has
+                been confirmed. <br>
+                Vote Type: {vote}<br>
+                Docket ID: {doc_info[0][0]}<br>
             </p>
 
     """
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
-            <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
+            <br>
         </body>
     </html>
     """
     send_email(subject, body_html, email, [], [])
-    
+
+
 def send_backup_file():
     app_info = load_app_info()
-    email = app_info['public']['system_administrator']['email'] + app_info['public']['email_domain']
+    email = app_info['public']['system_administrator']['email'] +\
+        app_info['public']['email_domain']
     subject = '[Notice] Weekly Backup Data'
     cc_list = [
         x['email'] + app_info['public']['email_domain']
         for x in app_info['public']['application_administrators']
     ]
-
 
     body_html = f"""
     <html>
@@ -469,29 +505,31 @@ def send_backup_file():
             {get_logo_img()}
             <p>
                 Hello, <br>
-                
-                Please find attached the weekly database backup. <br/>
-                Please keep this file safe, and do not distribute to unauthorized users. <br/>
+
+                Please find attached the weekly database backup. <br>
+                Please keep this file safe, and do not distribute
+                to unauthorized users. <br>
             </p>
 
     """
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
-            <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
+            <br>
         </body>
     </html>
     """
-    send_email(subject, body_html, email, cc_list, [], [('./backup.sql', "text", "plain")])
+    send_email(subject, body_html, email, cc_list, [],
+               [('backup.sql', "text", "plain")])
+
 
 def send_welcome_email(user: containers.User, reset_link, finance_pin):
     app_info = load_app_info()
     email = user.email + app_info['public']['email_domain']
     subject = 'Welcome to ' + app_info['public']['system_name']
     app_domain = app_info['public']['application_url']
-
 
     body_html = f"""
     <html>
@@ -502,34 +540,37 @@ def send_welcome_email(user: containers.User, reset_link, finance_pin):
             {get_logo_img()}
             <p>
                 Hello! <br>
-                
-                Welcome to the {app_info['public']['system_name']} application. <br/>
-                
-                To finish setting up your account, please use the following link to set your password: <br/>
-                <a href="http://{app_domain}/reset_password/{reset_link}">Set Password</a> <br/>
-                
-                
+
+                Welcome to the {app_info['public']['system_name']} application.
+                <br>
+
+                To finish setting up your account, please use the following
+                link to set your password: <br>
+                <a href="http://{app_domain}/reset_password/{reset_link}">
+                Set Password</a> <br>
+
+
             </p>
 
     """
-    
+
     if user.inv_edit or user.approve_invoices or user.inv_admin:
-        body_html += f"Your financial record pin is {finance_pin}<br/> <br/>"
-    
+        body_html += f"Your financial record pin is {finance_pin}<br> <br>"
+
     body_html += f"""
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
-            <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
+            <br>
         </body>
     </html>
     """
     send_email(subject, body_html, email, [], [])
 
+
 def alert_admins_new_user_request(form_data: dict, admin_emails: list):
     app_info = load_app_info()
-    email_domain = app_info['public']['email_domain']
 
     body_html = f"""<html>
         <head>
@@ -541,24 +582,32 @@ def alert_admins_new_user_request(form_data: dict, admin_emails: list):
                 Hello, <br>
                 A request for access to this system has been made.
                 <br>
-                Please review the request information and either approve or reject this request: <br>
+                Please review the request information and either approve or
+                reject this request: <br>
                 Name: {form_data['name']} <br>
                 Email: {form_data['email']} <br>
                 Reason: {form_data['reason']}
                 <hr>
-                Once this request has been approved, please create their account through the Application User Administration panel.
-                If this request has been denied, please contact the requested account to inform them of this decision.
+                Once this request has been approved, please create their
+                account through the Application User Administration panel.
+                If this request has been denied, please contact the requested
+                account to inform them of this decision.
             </p>
             Kind Regards, <br>
-            The Application Development & Support Team <br/>
-            {app_info['public']['system_name']} <br/>
-            {app_info['public']['deployed_location']} <br/>
+            The Application Development & Support Team <br>
+            {app_info['public']['system_name']} <br>
+            {app_info['public']['deployed_location']} <br>
         </body>
     </html>
     """
-    send_email("[Notice] New Request for System Access", body_html, admin_emails, [], [])
+    send_email("[Notice] New Request for System Access",
+               body_html, admin_emails, [], [])
 
-def send_email(subject, body, email, cc: list, bcc: list, attachement_paths: list = []):
+
+def send_email(subject, body, email,
+               cc: list,
+               bcc: list,
+               attachement_paths: list = []):
     print(body)
     app_info = load_app_info()
 
@@ -585,7 +634,10 @@ def send_email(subject, body, email, cc: list, bcc: list, attachement_paths: lis
         with open(attachement[0], 'rb') as file:
             file_data = file.read()
             file_name = file.name
-            msg.add_attachment(file_data, maintype=attachement[1], subtype=attachement[2], filename=file_name)
+            msg.add_attachment(file_data,
+                               maintype=attachement[1],
+                               subtype=attachement[2],
+                               filename=file_name)
 
     # Send the message via  the defined SMTP server.
     smtp_host = smtp_settings['server'] + ":" + str(smtp_settings['port'])

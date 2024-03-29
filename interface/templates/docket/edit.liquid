@@ -144,7 +144,7 @@
     <br>
     {% if docket[3] == 'In Vote' and doc_admin %}
     <button onclick="calculateVote()">Close Vote</button>
-        
+
     {% endif %}
     </fieldset>
     <fieldset>
@@ -154,7 +154,7 @@
                 <th>Name</th>
                 <th>Actions</th>
             </tr>
-                
+
         {% for person in assignees %}
             <tr>
                 <td>{{person[0]}}</td>
@@ -179,15 +179,15 @@
                     <td><button class="nav" onclick="viewItem({{attachment[0]}})">View</button></td>
                 </tr>
             {% endfor %}
-            
+
         </table>
         <br>
         <fieldset>
             <legend>Add Attachment</legend>
             <input type="file" name="file" id="file" onchange="loadData()"> <br>
-            
+
             <button onclick="sendFile()">Attach!</button>
         </fieldset>
-            
+
 </body>
 </html>

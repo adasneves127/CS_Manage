@@ -1,11 +1,11 @@
 #! /bin/bash
 create_password(){
   array=()
-  for i in {a..z} {A..Z} {0..9}; 
+  for i in {a..z} {A..Z} {0..9};
     do
     array[$RANDOM]=$i
   done
-  password=$(printf %s ${array[@]::8})
+  password=$(printf %s ${array[@]::10})
 }
 
 if [ "$EUID" -eq 0 ]
@@ -29,24 +29,26 @@ then
 fi
 
 if [[ -z "`sudo mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='management'" 2>&1`" ]];
-then 
+then
 	echo 'Initializing Database'
 	sudo mysql -u root < db_setup.sql
   create_password
-
-  sudo mysql -qfsBe "CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY '$password!';"
-  sudo mysql -qfsBe "GRANT INSERT, UPDATE, SELECT on management.* TO 'invoices'@'localhost';"
-  sudo mysql -qfsBe "GRANT DELETE on management.password_reset TO 'invoices'@'localhost';"
-  sudo mysql -qfsBe "GRANT DELETE on management.docket_assignees TO 'invoices'@'localhost';"
+  echo $password
+  echo "CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY '$password';"
+  sudo mysql -fsBe "CREATE USER IF NOT EXISTS 'invoices'@'localhost' IDENTIFIED WITH mysql_native_password BY '$password';"
+  sudo mysql -fsBe "GRANT INSERT, UPDATE, SELECT on management.* TO 'invoices'@'localhost';"
+  sudo mysql -fsBe "GRANT DELETE on management.password_reset TO 'invoices'@'localhost';"
+  sudo mysql -fsBe "GRANT DELETE on management.docket_assignees TO 'invoices'@'localhost';"
   echo "export DB_HOST='localhost'
 export DB_USER='invoices'
 export DB_PASSWORD='$password'
 export DB_NAME='management'" > .env
   create_password
+  echo $password
   echo "export DB_BACKUP_USER='invoice_backup_account'
 export DB_BACKUP_PASS='$password'" >> .env
-  sudo mysql -qfsBe "CREATE USER IF NOT EXISTS invoice_backup_account@localhost IDENTIFIED WITH mysql_native_password BY '$password';"
-  sudo mysql -qfsBe "GRANT INSERT, UPDATE, LOCK TABLES, SELECT, DELETE, PROCESS, TRIGGER, SHOW VIEW on *.* to invoice_backup_account@localhost;"
+  sudo mysql -fsBe "CREATE USER IF NOT EXISTS invoice_backup_account@localhost IDENTIFIED WITH mysql_native_password BY '$password';"
+  sudo mysql -fsBe "GRANT INSERT, UPDATE, LOCK TABLES, SELECT, DELETE, PROCESS, TRIGGER, SHOW VIEW on *.* to invoice_backup_account@localhost;"
 else
 	echo 'Database already found'
 fi
@@ -70,6 +72,7 @@ then
   WantedBy=multi-user.target" | sudo tee /etc/systemd/system/Management.service > /dev/null
 
   sudo usermod -aG $USER www-data
+  sudo usermod -aG www-data $USER
   sudo systemctl daemon-reload
   sudo systemctl start Management.service
   sudo systemctl enable Management.service
@@ -89,12 +92,11 @@ then
   "
 fi
 
-sudo crontab -l | grep "$SCRIPT_DIR/cron.sh"
-echo "Test"
-if [[ ! $? ]];
+sudo crontab -l &>/dev/null | grep "$SCRIPT_DIR/cron.sh"
+if [[ $? ]];
 then
   #write out current crontab
-  sudo crontab -l > mycron || :
+  sudo crontab -l > mycron 2> /dev/null || :
   sudo chown $USER mycron
   #echo new cron into cron file
   echo "0 0 * * * $SCRIPT_DIR/cron.sh" >> mycron
@@ -104,3 +106,4 @@ then
 fi
 
 
+source $SCRIPT_DIR/.venv/bin/activate

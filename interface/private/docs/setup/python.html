@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Documentation</title>
+    <style>
+        body{
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content:flex-start;
+        }
+        nav{
+            padding: 2rem;
+        }
+        table, th, td, tr{
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        td{
+            padding: 3px;
+        }
+    </style>
+    <link rel="stylesheet" href="/docs/style.css">
+</head>
+<body>
+    <nav style="width: 20%;">
+        <h2>Documentation</h2>
+        <ul>
+            <li>Home</li>
+            <li>Setup</li>
+            <ul>
+                <li>Quickstart Guide</li>
+                <li>Python Setup</li>
+                <li>Database Setup</li>
+            </ul>
+            <li>System Administration</li>
+            <ul>
+                <li>Finances</li>
+                <ul>
+                    <li>Statuses</li>
+                    <li>Record Types</li>
+                    <li>Creation and Approving</li>
+                    <li>Updating</li>
+                    <li>Exporting</li>
+                </ul>
+                <li>Docket</li>
+                <ul>
+                    <li>Statuses</li>
+                    <li>Assignees</li>
+                    <li>Privileges</li>
+                    <li>Attachments</li>
+                    <li>Quorum</li>
+                </ul>
+                <li>Users</li>
+                <ul>
+                    <li>Permissions</li>
+                    <li>Passwords</li>
+                    <li>Finance Pin</li>
+                </ul>
+            </ul>
+            <li>About</li>
+            <ul>
+                <li>Purpose</li>
+                <li>Support</li>
+                <li>Issues</li>
+            </ul>
+
+        </ul>
+    </nav>
+    <div>
+        <h1>Python Setup Guide</h1>
+        <h2>Installing Python</h2>
+        This system requires a minimum python version of 3.12. You can find the lastest download from <a href="https://python.org/download/">here</a>. <br>
+
+        Once python is installed, in the project directory, run the command <span class="code">python -m venv .venv</span>. This will create our python virtual environment. <br>
+        Next, we need to tell our computer to use the resources Python has made for us. <br> <br>
+        Use the table below to find what command to run:
+        <table>
+            <tr>
+                <th>System</th>
+                <th>Command</th>
+            </tr>
+            <tr>
+                <td>Windows Powershell</td>
+                <td><span class="code">.\.venv\Scripts\Activate.ps1</span></td>
+            </tr>
+            <tr>
+                <td>FISH Shell</td>
+                <td><span class="code">source .venv/bin/activate.fish</span></td>
+            </tr>
+            <tr>
+                <td>ZSH Shell</td>
+                <td><span class="code">source .venv/bin/activate</span></td>
+            </tr>
+            <tr>
+                <td>C-Shell</td>
+                <td><span class="code">source .venv/bin/activate.csh</span></td>
+            </tr>
+            <tr>
+                <td>Bash Shell</td>
+                <td><span class="code">source .venv/bin/activate</span></td>
+            </tr>
+        </table>
+
+        <br>
+        Now, we need to install all our Python Packages for this program to run. Run the command <span class="code">pip install -r requirements.txt</span>. <br>
+        This will install all the requirements that the program requires to run correctly.
+
+        <h3>Congratulations! Python is now configured for running this project!</h3>
+        <h4>Next step is setting up our database!</h4>
+    </div>
+
+</body>
+</html>

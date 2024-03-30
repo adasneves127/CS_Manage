@@ -18,7 +18,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=1)
 Session(app)
 app.secret_key = load_app_info()['private']['secret_token']
 
-from src.routes import docket, user, auth, finances, base_routes, admin, exception_handler
+from src.routes import docket, user, auth, finances, base_routes, admin
+from src.routes import exception_handler, docs
 
 
 if __name__ == '__main__':

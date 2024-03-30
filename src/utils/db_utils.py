@@ -128,7 +128,8 @@ class connect:
 
     def check_user_valid(self, username: str, password: str) \
             -> containers.User:
-        sql = "SELECT seq, user_name, password FROM users WHERE user_name = %s"
+        sql = """SELECT seq, user_name, password FROM users WHERE 
+        user_name = %s AND is_active = 1;"""
         self.cursor.execute(sql, (username,))
         results = self.cursor.fetchall()
         if len(results) != 1:
@@ -334,7 +335,7 @@ class connect:
         sql = """SELECT a.seq, a.user_name, a.finance_pin, a.first_name,
         a.last_name, b.inv_admin, b.inv_edit, b.approve_invoices FROM users a,
         permissions b WHERE a.seq = b.user_seq and
-        concat(a.first_name, ' ', a.last_name) = %s"""
+        concat(a.first_name, ' ', a.last_name) = %s AND a.is_active = 1"""
         self.cursor.execute(sql, (user_full_name,))
         user = self.cursor.fetchone()
         if user is None:
@@ -496,7 +497,8 @@ class connect:
     def get_user_by_reset_token(self, token: str) -> tuple:
         sql = """SELECT a.seq, a.user_name FROM users a, password_reset b WHERE
         a.seq = b.user_seq AND b.token = %s AND
-        b.created_at > NOW() - INTERVAL 1 DAY"""
+        b.created_at > NOW() - INTERVAL 1 DAY and is_active = 1
+        and is_system_user != 1"""
         self.cursor.execute(sql, (token,))
         return self.cursor.fetchone()
 
@@ -542,7 +544,7 @@ class connect:
     def get_docket_viewers(self):
         sql = """SELECT a.seq, CONCAT(a.first_name, ' ', a.last_name)
                  FROM users a, permissions b WHERE a.seq = b.user_seq AND
-                 (b.doc_view = 1 OR b.doc_admin = 1)"""
+                 (b.doc_view = 1 OR b.doc_admin = 1) and is_active = 1"""
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
         return result

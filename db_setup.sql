@@ -178,6 +178,14 @@ create table docket_attachments(
 
 );
 
+create table user_requests (
+    seq int not null auto_increment primary key,
+    `name` varchar(40),
+    email varchar(30),
+    reason text,
+    dt_added timestamp default current_timestamp
+);
+
 
 -- create trigger date_check_update_users
 -- before update on users

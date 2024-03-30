@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Documentation</title>
+    <style>
+        body{
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content:flex-start;
+        }
+        nav{
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav style="width: 20%;">
+        <h2>Documentation</h2>
+        <ul>
+            <li>Home</li>
+            <li>Setup</li>
+            <ul>
+                <li>Quickstart Guide</li>
+                <li>Python Setup</li>
+                <li>Database Setup</li>
+            </ul>
+            <li>System Administration</li>
+            <ul>
+                <li>Finances</li>
+                <ul>
+                    <li>Statuses</li>
+                    <li>Record Types</li>
+                    <li>Creation and Approving</li>
+                    <li>Updating</li>
+                    <li>Exporting</li>
+                </ul>
+                <li>Docket</li>
+                <ul>
+                    <li>Statuses</li>
+                    <li>Assignees</li>
+                    <li>Privileges</li>
+                    <li>Attachments</li>
+                    <li>Quorum</li>
+                </ul>
+                <li>Users</li>
+                <ul>
+                    <li>Permissions</li>
+                    <li>Passwords</li>
+                    <li>Finance Pin</li>
+                </ul>
+            </ul>
+            <li>About</li>
+            <ul>
+                <li>Purpose</li>
+                <li>Support</li>
+                <li>Issues</li>
+            </ul>
+
+        </ul>
+    </nav>
+    <div>
+        <h1>Quickstart Guide</h1>
+        <h2>Quick System Setup</h2>
+        This system has a 'quick system setup' designed for debian-based linux distributions [i.e. Ubuntu, Kubuntu, Linux Mint, Kali]. If you do not have a debian-based linux distribution, these instructions will not be applicable to you.
+
+        <h3>Debian Quick System Setup</h3>
+        <h4>Requirements:</h4>
+        <ul>
+            <li>A Debian-Based Linux Computer</li>
+            <li>Access to the sudo command</li>
+            <li>A basic knowledge of Python and SQL</li>
+        </ul>
+        <h3>Script Purpose and Tasks:</h3>
+        <ul>
+            <li>Install Python3.12 and MySQL Server</li>
+            <li>Create and instantiate the Python Virtual Environment</li>
+            <li>Initialize the database using the setup SQL file</li>
+            <li>Create a System Daemon to serve this website using Gunicorn (Does not set up a proxy for NGINX or Apache)</li>
+            <li>Adds the group 'www-data' to the current user's group</li>
+            <li>Adds the current user to the group 'www-data'</li>
+            <li>Reloads, starts, and sets up the System Daemon to run on startup</li>
+            <li>Informs the user how to set up NGINX to serve the project</li>
+            <li>Creates a script that runs daily to backup the data from the database</li>
+        </ul>
+        <br>
+        To run the `Quick Setup` script, run 'source setup.sh' file in the project directory. <br>
+        This script will provide you with how to configure an NGINX instance to run our project. If you are deploying this system, run 'source nginx.sh'.
+
+        Once this is done, we now must create our 'Administrator' user. I have provided a command-line utility to create this account. <br>
+
+        To finish our setup, run the 'config_app.py' file with the syntax 'python config_app.py'. This will prompt you for the following information:
+        <ul>
+            <li>The name of your system</li>
+            <li>The location of your institution</li>
+            <li>The "About" text of your system</li>
+            <li>The email domain of your institution [The "Common" part of your addresses]</li>
+            <li>The URL where your system will be deployed. Include the "http" or "https" at the start of the domain.</li>
+        </ul>
+        Confirm if the data is correct. If it is, type 'y', and press enter. <br>
+        Next, the script will create a user to access the system. It will ask for the following:
+        <ul>
+            <li>First Name</li>
+            <li>Last Name</li>
+            <li>Email Address</li>
+            <li>If they are a system user [y/n] (Not recomended for the first user)</li>
+            <li>If they are a system administrator [y/n] (Recomended for the first account) <br>
+                If you chose "No" for system administrator, it will prompt you for the individual permissions for the user.</li>
+            <li>A password for the user</li>
+            <li>A finance pin for the user.</li>
+        </ul>
+    </div>
+
+</body>
+</html>

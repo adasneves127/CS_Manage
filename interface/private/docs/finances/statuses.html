@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Documentation</title>
+    <link rel="stylesheet" href="/docs/style.css">
+</head>
+<body>
+    <article>
+        <nav>
+            <h2>Documentation</h2>
+            <ul>
+                <li> <a href="/docs/">Home</a></li>
+                <li>Setup</li>
+                <ul>
+                    <li><a href="/docs/setup/quick.html">Quickstart Guide</a></li>
+                    <li><a href="/docs/setup/database.html">Database Setup</a></li>
+                    <li><a href="/docs/setup/python.html">Python Setup</a></li>
+                </ul>
+                <li>System Administration</li>
+                <ul>
+                    <li>Finances</li>
+                    <ul>
+                        <li>Statuses</li>
+                        <li>Record Types</li>
+                        <li>Creation and Approving</li>
+                        <li>Updating</li>
+                        <li>Exporting</li>
+                    </ul>
+                    <li>Docket</li>
+                    <ul>
+                        <li>Statuses</li>
+                        <li>Assignees</li>
+                        <li>Privileges</li>
+                        <li>Attachments</li>
+                        <li>Quorum</li>
+                    </ul>
+                    <li>Users</li>
+                    <ul>
+                        <li>Permissions</li>
+                        <li>Passwords</li>
+                        <li>Finance Pin</li>
+                    </ul>
+                </ul>
+                <li>About</li>
+                <ul>
+                    <li>Purpose</li>
+                    <li>Support</li>
+                    <li>Issues</li>
+                </ul>
+            </ul>
+        </nav>
+        <div>
+            <h1>Finance Statuses</h1>
+            Financial Statuses are the method to control what stage a financial record is in the process of payment.
+            <br>
+            The statuses given by the system on creation are:
+            <ul>
+                <li>Pending &mdash; Used when the record has been created, but not debated or approved by either the Officers or the Student Government Financial Committee.</li>
+                <li>Granted &mdash; Used only for Budget records, used to indicate that the budget request has been approved by the club.</li>
+                <li>Denied &mdash; Used when the financial record has been denied by the Finance Committee, or denied by a vote of the officers.</li>
+                <li>Open &mdash; Used when an <code>Invoice</code> or <code>Credit</code> type record is awaiting payment.</li>
+                <li>Paid &mdash; Used when an <code>Invoice</code> type record has been paid, but confirmation of the items requested has not been received.</li>
+                <li>Closed &mdash; Used when a finance record has been paid <b>and</b> confirmation of the goods has been received, or all available funds from the budget have been used.</li>
+                <li>Cancelled &mdash; Used when an approved finance record needs to be rescinded.</li>
+            </ul>
+            This system allows Finance Administrators to modify the statuses available in the system. To do so, use the navbar on the application pages, and go to <code>Admin</code> -> <code>Finance Statuses</code>.
+            <br>
+            This page allows you to edit and create new Finance Statuses. Please note, editing a finance status will result in all records which referenced that status, updating to the new status description. <br>
+
+            Updating the <code>Pending</code> status is also not recomended, as some system-automated processes are driven off of this status (Such as creation of a Docket Item on Finance Creation). <br>
+            The system will also default to the <code>Pending</code> status for new records for non-finance admin users. If the user is a Finance Admin, then they can set the status to any existing status in the system.
+            
+        </div>
+    </article>
+    <footer><p>&copy; 2024 Alex Dasneves</p></footer>
+</body>
+</html>

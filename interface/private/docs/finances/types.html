@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Documentation</title>
+    <link rel="stylesheet" href="/docs/style.css">
+</head>
+<body>
+    <article>
+        <nav>
+            <h2>Documentation</h2>
+            <ul>
+                <li> <a href="/docs/">Home</a></li>
+                <li>Setup</li>
+                <ul>
+                    <li><a href="/docs/setup/quick.html">Quickstart Guide</a></li>
+                    <li><a href="/docs/setup/database.html">Database Setup</a></li>
+                    <li><a href="/docs/setup/python.html">Python Setup</a></li>
+                </ul>
+                <li>System Administration</li>
+                <ul>
+                    <li>Finances</li>
+                    <ul>
+                        <li>Statuses</li>
+                        <li>Record Types</li>
+                        <li>Creation and Approving</li>
+                        <li>Updating</li>
+                        <li>Exporting</li>
+                    </ul>
+                    <li>Docket</li>
+                    <ul>
+                        <li>Statuses</li>
+                        <li>Assignees</li>
+                        <li>Privileges</li>
+                        <li>Attachments</li>
+                        <li>Quorum</li>
+                    </ul>
+                    <li>Users</li>
+                    <ul>
+                        <li>Permissions</li>
+                        <li>Passwords</li>
+                        <li>Finance Pin</li>
+                    </ul>
+                </ul>
+                <li>About</li>
+                <ul>
+                    <li>Purpose</li>
+                    <li>Support</li>
+                    <li>Issues</li>
+                </ul>
+            </ul>
+        </nav>
+        <div>
+            <h1>Finance Types</h1>
+            Financial Record Types are the manner in which this system organizes types of Finances.
+            <br>
+            The following types are given by the system on creation:
+            <ul>
+                <li>Budget &mdash; Used for records requesting money from the Student Government Association. While this item is debated, it should be approved by a <code>System Account</code> which represents the Student Government Finance Committee. Totals should be a negative ammount to reflect a <code>negative outgoing ammount</code>, since the money is comming into the account.</li>
+                <li>Invoice &mdash; Used for records paying money to other organizations. Totals should be a positive number, to reflect money going out of the account.</li>
+                <li>Credit</li>
+            </ul>
+            This system allows Finance Administrators to modify the types available to users in the system. To do so, use the navbar on the application pages, and go to <code>Admin</code> -> <code>Record Types</code>.
+            <br>
+            This page allows you edit existing Finance Types as well as create new items. Please note that editing existing types is not reccomended, as updating an existing type will update all records which use that type already.
+            <br>
+
+        </div>
+    </article>
+    <footer><p>&copy; 2024 Alex Dasneves</p></footer>
+</body>
+</html>

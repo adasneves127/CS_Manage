@@ -1,5 +1,5 @@
 from app import app
-from flask import request, session, redirect
+from flask import request, session, redirect, send_file
 from src.utils.templates import send_template
 from src.utils.email_utils import send_bug_report
 
@@ -18,3 +18,7 @@ def get_about_page():
 def send_report():
     send_bug_report(request.form, session["user"])
     return redirect("/about/")
+
+@app.route("/robots.txt", methods=['GET'])
+def send_robots():
+    return send_file("interface/private/robots.txt")

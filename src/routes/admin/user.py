@@ -26,9 +26,9 @@ def edit_user():
 
     user = session["user"]
     if conn.is_user_admin(user.seq):
-        target_seq = conn.get_user_by_seq(int(request.args["seq"]))
+        target_user = conn.get_user_by_seq(int(request.args["seq"]))
         return send_template(
-            "admin/user.liquid", user=conn.get_user_by_seq(target_seq.__dict__)
+            "admin/user.liquid", user=target_user.__dict__
         )
     else:
         raise exceptions.InvalidPermissionException()

@@ -48,7 +48,7 @@ def get_officer_docket(seq):
     print(docket_info)
     docket_records = docket_info[0]
     docket_record_data = (
-        docket_records[:2] + tuple(docket_records[2].split("\n")) + docket_records[3:]
+        *docket_records[:2], docket_records[2].split("\n"), *docket_records[3:]
     )
     docket_viewers = conn.get_docket_viewers()
     return send_template(

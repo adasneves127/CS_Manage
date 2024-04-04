@@ -1,10 +1,10 @@
 from app import app
 from src.utils.templates import send_template
 from src.utils.db_utils import connect
-from flask import session, send_file, make_response
+from flask import session, send_file, make_response, request
 from src.utils import exceptions
 import base64
-import os
+import tempfile
 
 
 @app.route("/docket/officer/view/")
@@ -20,7 +20,7 @@ def view_officer_docket():
         return send_template("docket/index.liquid")
 
 
-@app.route("/docket/officer/table/", methods=["POST"])
+@app.route("/docket/officer/table/", methods=["GET"])
 def get_officer_docket_table():
     conn = connect()
     if "user" not in session:
@@ -30,7 +30,6 @@ def get_officer_docket_table():
         return exceptions.InvalidPermissionException()
 
     docket_records = conn.get_officer_docket()
-    print(docket_records)
 
     return send_template("docket/table.liquid", records=docket_records)
 
@@ -45,10 +44,10 @@ def get_officer_docket(seq):
         return exceptions.InvalidPermissionException()
 
     docket_info = conn.search_officer_docket(seq)
-    print(docket_info)
+    (docket_info)
     docket_records = docket_info[0]
     docket_record_data = (
-        docket_records[:2] + docket_records[2].split("\n") + docket_records[3:]
+        *docket_records[:2], docket_records[2].split("\n"), *docket_records[3:]
     )
     docket_viewers = conn.get_docket_viewers()
     return send_template(
@@ -70,7 +69,7 @@ def get_assigned_records_table():
     if not conn.can_user_view_officer_docket(user):
         return exceptions.InvalidPermissionException()
     docket_records = conn.get_assigned_records(user)
-    print(docket_records)
+    (docket_records)
     return send_template("docket/table.liquid", records=docket_records)
 
 
@@ -97,14 +96,10 @@ def view_docket_attachment(seq: int):
 
     file_data = conn.search_docket_attachments(seq)
 
-    # with tempfile.TemporaryDirectory() as temp_dir:
-    with open(file_data[0], "wb") as f:
+    with tempfile.TemporaryFile() as tempFile:
         file_contents = base64.b64decode(file_data[1])
-        f.write(file_contents)
+        tempFile.write(file_contents)
 
-    resp = make_response(send_file(file_data[0]))
+    resp = make_response(send_file(tempFile))
     resp.mimetype = "application/octet-stream"
-
-    os.remove(file_data[0])
-    # print(f"os.remove({file_data[0]})")
     return resp

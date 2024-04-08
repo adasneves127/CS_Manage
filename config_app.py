@@ -49,6 +49,7 @@ def config_app_info():
                 "server": "smtp server",
                 "port": "smtp port",
                 "user": "smtp user",
+                # deepcode ignore NoHardcodedPasswords: Password not real!
                 "password": "smtp password",
                 "from": "email box name",
                 "from_email": "email box email",
@@ -90,4 +91,5 @@ if __name__ == "__main__":
     x = connect()
     print("Creating Administrative User")
     create_user(x)
+    x.close()
     

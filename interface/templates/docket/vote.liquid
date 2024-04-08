@@ -19,6 +19,10 @@
     <p>Status: {{docket[3]}}</p>
     <p>Title: {{docket[1]}}</p>
     <p>Description: <br> {{docket[2]}}</p>
+    {% if is_vote %}
+        <p>This is a non-votable docket item.</p>
+    {% else %}
+            
     {% if has_voted %}
         <h2>You have already voted on this item.</h2>
         <p>Votes are considered "unchangeable". If you truly would like to change your vote, please contact the president of your org.</p>
@@ -34,5 +38,7 @@
         <input type="submit" value="Submit Vote">
     </form>
     {% endif %}
+
+{% endif %}
 </body>
 </html>

@@ -38,9 +38,10 @@ function applyFilters(){
 
 
 
+
 function getTableData(){
     let xhr = new XMLHttpRequest()
-    xhr.open("POST", "/finances/table/")
+    xhr.open("GET", "/finances/table/")
     xhr.setRequestHeader("Content-Type", "application/json")
     // Set the filterData object as the payload
     xhr.send(JSON.stringify(filterData))

@@ -13,6 +13,9 @@
         <input type="text" name="title" id="title"> <br> <br>
         <label for="body">Body:</label> <br>
         <textarea name="body" id="body" cols="40" rows="10"></textarea> <br>
+        {% if doc_admin %}
+            <input type="checkbox" name="isVote" id="isVote"> <label for="isVote">Is Voteable?</label> <br>
+        {% endif %}
         <input type="submit" value="Submit">
     </form>
 </body>

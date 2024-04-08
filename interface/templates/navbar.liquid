@@ -74,7 +74,20 @@
         </div>
       {% endif %}
     <a href="https://engage.bridgew.edu/">EngageBSU</a>
-      <a href="/about/">About</a>
+    <div class="dropdown">
+      <button class="dropbtn">About
+        <i class="fa fa-caret-down"></i>
+      </button>
+      <div class="dropdown-content">
+        <a href="/about">About System</a>
+
+        {% if isLoggedIn %}
+          <a href="/about/bug_report">Bug Report</a>
+          <a href="/about/feature">Feature Request</a>
+          <a href="/about/doc_request">Documentation Request</a>
+        {% endif %}
+      </div>
+    </div>
 
       <div class="dropdown">
         <button class="dropbtn">User

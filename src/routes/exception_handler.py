@@ -48,3 +48,8 @@ def malformed_user_handler(e: exceptions.MalformedUserException):
 @app.errorhandler(exceptions.MalformedRequestException)
 def malformed_req_handler(e: exceptions.MalformedRequestException):
     return send_template("exceptions/malformedReq.liquid")
+
+
+@app.errorhandler(exceptions.DocketNotVoting)
+def docket_not_voting(e: exceptions.DocketNotVoting):
+    return send_template('exceptions/notVoting.liquid')

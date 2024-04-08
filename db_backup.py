@@ -1,10 +1,11 @@
-from src.utils import db_utils
+from src.utils.app_utils import db_connection
 import dotenv
 from src.utils.email_utils import send_backup_file
+from src.utils.db_utils import connect
 dotenv.load_dotenv()
 
-conn = db_utils.connect()
-conn.clear_old_resets()
+with db_connection() as conn:
+    conn.clear_old_resets()
 
-db_utils.connect.dump_database()
-send_backup_file()
+    connect.dump_database()
+    send_backup_file()

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About {{system_name}}</title>
+    {% render "navbar.liquid" %}
+</head>
+<body>
+    <h1>About {{system_name}}</h1>
+    {% for line in about_text %}
+        <p>{{line}}</p>
+    {% endfor %}
+    <br>
+    <h2>Contact Information</h2>
+    <h3>System Administrator</h3>
+    <a class="email" target="_blank" href="mailto:{{system_administrator.email}}{{email_domain}}">{{system_administrator.name}}</a>
+    <br><br>
+    <h3>Application Administrators</h3>
+    {% for admin in application_administrators %}
+        <a href="mailto:{{admin.email}}{{email_domain}}" target="_blank" class="email">{{admin.name}}</a> <br><br>
+    {% endfor %}
+
+</body>
+</html>

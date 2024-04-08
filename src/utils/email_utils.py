@@ -15,6 +15,7 @@ def get_logo_img():
 
     logo_img = open('interface/static/logo.png', 'rb')
     logo = base64.b64encode(logo_img.read()).decode('utf-8')
+    logo_img.close()
     return f"""<img id="logo" src="data:image/png;base64, {logo}">"""
 
 
@@ -608,7 +609,6 @@ def send_email(subject, body, email,
                cc: list,
                bcc: list,
                attachement_paths: list = []):
-    print(body)
     app_info = load_app_info()
 
     if not app_info['public']['enable_smtp']:

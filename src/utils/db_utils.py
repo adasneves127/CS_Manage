@@ -11,6 +11,7 @@ import datetime
 import subprocess
 from dotenv import load_dotenv
 import random
+import sys
 
 
 class connect:
@@ -26,13 +27,13 @@ class connect:
             self.cursor = self.connection.cursor(buffered=True)
         except mysql.connector.Error as e:
             print("Access denied: {}".format(e))
-            exit(1)
+            sys.exit(1)
         except KeyError as e:
             print("Environment variable not found: {}".format(e))
             raise SystemError
         except Exception as e:
             print("Error: {}".format(e))
-            exit(1)
+            sys.exit(1)
 
     def get_all_finances(self) -> list:
         return_list = []
@@ -128,7 +129,7 @@ class connect:
 
     def check_user_valid(self, username: str, password: str) \
             -> containers.User:
-        sql = """SELECT seq, user_name, password FROM users WHERE 
+        sql = """SELECT seq, user_name, password FROM users WHERE
         user_name = %s AND is_active = 1;"""
         self.cursor.execute(sql, (username,))
         results = self.cursor.fetchall()
@@ -184,6 +185,18 @@ class connect:
         return_list = []
         valid_types = self.get_all_types()
         valid_statuses = self.get_all_finance_status_names()
+
+        allowed_statuses = []
+        for status in valid_statuses:
+            if status in filter_data['status'] and \
+                    filter_data['status'][status]:
+                allowed_statuses.append(status)
+
+        allowed_types = []
+        for type in valid_types:
+            if type in filter_data['types'] and filter_data['types'][type]:
+                allowed_types.append(type)
+
         sql = """
         SELECT a.seq, a.id, concat(b.first_name, ' ', b.last_name),
             concat(c.first_name, ' ', c.last_name), d.stat_desc, e.type_desc,
@@ -194,44 +207,14 @@ class connect:
             WHERE a.creator = b.seq AND a.approver = c.seq AND
             a.record_status = d.seq AND a.record_type = e.seq AND
             a.added_by = f.seq AND a.updated_by = g.seq ORDER BY a.id"""
-        status_filters_include = []
-        status_filters_exclude = []
-        for status in valid_statuses:
-            should_filter = filter_data["status"].get(status, False)
-            if should_filter:
-                status_filters_include.append(f"d.stat_desc = '{status}'")
-            else:
-                status_filters_exclude.append(f"d.stat_desc != '{status}'")
-
-        type_filters_include = []
-        type_filters_exclude = []
-        for current_type in valid_types:
-            should_filter = filter_data["types"].get(current_type, False)
-            if should_filter:
-                type_filters_include.append(f"e.type_desc = '{current_type}'")
-            else:
-                type_filters_exclude.append(f"e.type_desc != '{current_type}'")
-
-        status_include_sql = " OR ".join(status_filters_include)
-        status_exclude_sql = " AND ".join(status_filters_exclude)
-
-        type_include_sql = " OR ".join(type_filters_include)
-        type_exclude_sql = " AND ".join(type_filters_exclude)
-
-        if status_include_sql:
-            sql += f" AND ({status_include_sql})"
-
-        if status_exclude_sql:
-            sql += f" AND ({status_exclude_sql})"
-
-        if type_include_sql:
-            sql += f" AND ({type_include_sql})"
-
-        if type_exclude_sql:
-            sql += f" AND ({type_exclude_sql})"
+        (allowed_statuses, allowed_types, filter_data)
 
         self.cursor.execute(sql)
         rows = self.cursor.fetchall()
+        finance_filtered_rows = []
+        for row in rows:
+            if row[4] in allowed_statuses and row[5] in allowed_types:
+                finance_filtered_rows.append(row)
         line_sql = """
         SELECT a.inv_seq, a.line_id, a.item_desc, a.item_price, a.qty,
         concat(c.first_name, ' ', c.last_name),
@@ -240,7 +223,7 @@ class connect:
         inv_line a, users c, users d WHERE
         a.inv_seq = %s AND a.added_by = c.seq
         AND a.updated_by = d.seq"""
-        for row in rows:
+        for row in finance_filtered_rows:
             self.cursor.execute(line_sql, (row[0],))
             lines = self.cursor.fetchall()
             row_container = containers.finance(row, lines)
@@ -444,7 +427,7 @@ class connect:
         inv_line a, users c, users d WHERE
         a.inv_seq = %s AND a.item_seq = b.seq AND a.added_by = c.seq
         AND a.updated_by = d.seq"""
-        print(invoice_sql)
+        (invoice_sql)
         for row in rows:
             self.cursor.execute(line_sql, (row[0],))
             lines = self.cursor.fetchall()
@@ -560,7 +543,7 @@ class connect:
         sql = """UPDATE users SET password = %s, updated_by = %s
                  WHERE seq = %s"""
         hashed = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt())
-        print(sql, (hashed, 0, user_seq))
+        (sql, (hashed, 0, user_seq))
         self.cursor.execute(sql, (hashed, 1, user_seq))
         email_utils.send_password_updated_email(self.get_user_by_seq(user_seq))
         self.connection.commit()
@@ -575,11 +558,13 @@ class connect:
         self.cursor.execute(sql, (user_seq,))
         return self.cursor.fetchone()[0] == 1
 
+    def close(self):
+        self.connection.close()
+
     def __del__(self):
         try:
             self.connection.close()
         except Exception as e:
-            print(e)
             return
 
     @staticmethod
@@ -708,7 +693,7 @@ class connect:
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         values = (user_seq,) + vals[6:] + (current_user.seq, current_user.seq)
-        print(sql, values)
+        (sql, values)
         self.cursor.execute(sql, values)
         self.connection.commit()
         if not self.get_user_by_seq(user_seq).system_user:
@@ -727,7 +712,7 @@ class connect:
     def get_officer_docket(self):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at,
         a.updated_at, CONCAT(b.first_name, ' ', b.last_name),
-        CONCAT(c.first_name, ' ', c.last_name), a.created_by FROM
+        CONCAT(c.first_name, ' ', c.last_name), a.created_by, is_voteable FROM
         officer_docket a, users b, users c, docket_status d WHERE
         a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq
         ORDER BY a.seq"""
@@ -753,23 +738,26 @@ class connect:
     def create_officer_docket(self, data: dict, user: containers.User):
         sql = """
         INSERT INTO officer_docket
-        (title, body, status, created_by, updated_by)
-        VALUES (%s, %s, %s, %s, %s)"""
-        values = (data["title"], data["body"], 1, user.seq, user.seq)
+        (title, body, status, is_voteable, created_by, updated_by)
+        VALUES (%s, %s, %s, %s, %s, %s)"""
+        values = (data["title"], data["body"], 1,
+                  data.get('isVote', 'off') == 'on', user.seq, user.seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
         seq = self.cursor.lastrowid
-        email_utils.alert_docket_creation(
-            user, self.get_docket_vote_email_users(), data, seq
-        )
+        if data.get('isVote', 'off') == 'on':
+            email_utils.alert_docket_creation(
+                user, self.get_docket_vote_email_users(), data, seq
+            )
         return seq
 
     def search_officer_docket(self, seq: int):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at,
         a.updated_at, CONCAT(b.first_name, ' ', b.last_name),
-        CONCAT(c.first_name, ' ', c.last_name) FROM officer_docket a, users b,
-        users c, docket_status d WHERE a.created_by = b.seq AND
-        a.updated_by = c.seq AND a.status = d.seq AND a.seq = %s"""
+        CONCAT(c.first_name, ' ', c.last_name), is_voteable FROM
+        officer_docket a, users b,users c, docket_status d WHERE
+        a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq AND
+        a.seq = %s"""
         self.cursor.execute(sql, (seq,))
         docket = self.cursor.fetchone()
         self.cursor.fetchall()
@@ -833,7 +821,7 @@ class connect:
     def update_officer_docket(self, docket, user, seq):
         sql = """UPDATE officer_docket SET title = %s,
         body = %s, status = %s, updated_by = %s WHERE seq = %s"""
-        print(docket["status"])
+        (docket["status"])
         values = (docket["title"], docket["body"],
                   docket["status"], user.seq, seq)
         self.cursor.execute(sql, values)
@@ -953,6 +941,12 @@ class connect:
         domain = load_app_info()["public"]["email_domain"]
         return [x[0] + domain for x in self.cursor.fetchall()]
 
+    def create_docket_status(self, desc: str, user: containers.User):
+        SQL = """INSERT INTO (stat_desc, added_by, updated_by) VALUES
+        (%s, %s, %s)"""
+        self.cursor.execute(SQL, desc, user.seq, user.seq)
+        self.connection.commit()
+        pass
 
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

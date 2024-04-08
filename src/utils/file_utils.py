@@ -30,5 +30,4 @@ def is_file_valid_type(file_name: str, file_data: str) -> bool:
     proc = subprocess.Popen(["/bin/file", "-b", temp_file_path],
                             stdout=subprocess.PIPE)
     output = proc.stdout.read().decode()
-    print(output)
     return any([output.startswith(x[0]) for x in valid_file_types])

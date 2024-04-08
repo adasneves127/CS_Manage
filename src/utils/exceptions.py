@@ -29,3 +29,9 @@ class MalformedRequestException(Exception):
     def __init__(self, message: str = "Request is malformed"):
         self.message = message
         super().__init__(self.message)
+
+
+class DocketNotVoting(Exception):
+    def __init__(self, message: str = "Docket item is not accepting votes."):
+        self.message = message
+        super().__init__(self.message)

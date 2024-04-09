@@ -231,6 +231,14 @@ class connect:
 
         return return_list
 
+    def get_docket_conversations(self, seq):
+        SQL = """SELECT a.docket_text, concat(b.first_name, ' ', b.last_name)
+        FROM docket_conversations a, users b WHERE a.added_by = b.seq AND
+        a.docket_seq = %s"""
+        self.cursor.execute(SQL, (seq,))
+        conversations = self.cursor.fetchall()
+        return conversations
+
     def get_record_by_seq(self, seq):
         SQL = """
         SELECT a.seq, a.id, concat(b.first_name, ' ', b.last_name),
@@ -523,6 +531,13 @@ class connect:
         self.cursor.execute(sql, (user.seq,))
         result = self.cursor.fetchone()
         return result[0] == 1 or result[1] == 1
+
+    def create_docket_conversation(self, seq: int, 
+                                   conversation_info: dict, user: User):
+        sql = """INSERT INTO docket_conversations 
+        (docket_seq, docket_text, added_by) VALUES (%s, %s, %s)"""
+        self.cursor.execute(sql, (seq, conversation_info['data'], user.seq))
+        self.connection.commit()
 
     def get_docket_viewers(self):
         sql = """SELECT a.seq, CONCAT(a.first_name, ' ', a.last_name)

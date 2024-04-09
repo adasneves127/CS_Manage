@@ -57,6 +57,7 @@ def get_officer_docket(seq):
             assignees=docket_info[2],
             attachments=docket_info[3],
             users=docket_viewers,
+            conversations=conn.get_docket_conversations(seq)
         )
 
 

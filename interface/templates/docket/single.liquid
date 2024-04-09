@@ -8,10 +8,71 @@
         function viewItem(seq){
             window.location.href = `/docket/attach/view/${seq}`
         }
+
+        function openTab(evt, cityName) {
+            // Declare all variables
+            var i, tabcontent, tablinks;
+            console.log(evt.currentTarget.className)
+
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(cityName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        function create_conversation(){
+            let input = document.getElementsByTagName("textarea")[0].value
+            let xhr = new XMLHttpRequest()
+            xhr.open("POST", "/docket/conversation/add/{{docket[0]}}")
+            xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
+            xhr.send(JSON.stringify({
+                'data': input
+            }))
+            xhr.onreadystatechange = () => {
+                console.log(xhr)
+                if(xhr.readyState == 4){
+                    if(xhr.status == 200){
+                        location.reload()
+                    } else {
+                        alert("Failed to create the conversation!")
+                    }
+                }
+            }
+        }
+
+        function new_conversation(){
+            let table = document.getElementById('conversations');
+            let row = table.insertRow();
+            row.innerHTML = `
+                <td>{{full_name}}</td>
+                <td><textarea style="width:100%"></textarea></td>
+            `;
+            let button = document.getElementById('new_conversation')
+            button.textContent = "Add Conversation"
+            button.onclick = create_conversation
+        }
+
     </script>
 </head>
-<body>
+<body onload="document.getElementById('new_conversation').onclick=new_conversation">
     {% render "navbar.liquid" %}
+
+    <div class="tab">
+        <button class="tablinks active" onclick="openTab(event, 'Setup')">Docket Info</button>
+        <button class="tablinks" onclick="openTab(event, 'Table')">Conversations</button>
+      </div>
+    <div id="Setup" class="tabcontent" style="display:block;">
     <h1>View Docket {{docket[0]}}</h1>
     <p>Created By: {{docket[6]}}</p>
     <p>Created At: {{docket[4]}}</p>
@@ -40,5 +101,21 @@
             {% endfor %}
 
         </table>
+    </div>
+    <div id="Table" class="tabcontent" style="display:none">
+    <table style="width: 100%" id="conversations">
+        <tr>
+            <th style="width:20%">Posted By</th>
+            <th>Discussion</th>
+        </tr>
+        {% for conversation in conversations %}
+        <tr>
+            <td>{{conversation[1]}}</td>
+            <td>{{conversation[0]}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button id="new_conversation">New Conversation</button>
+    </div>
 </body>
 </html>

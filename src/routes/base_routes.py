@@ -25,7 +25,7 @@ def prevent_rapid_requests():
     if request.method == "POST":
         last_post = session.get('last_post', 0)
         if last_post >= time.time() - 10:
-            raise Exception
+            raise TimeoutError
 
 @app.route('/register/', methods=['GET'])
 def get_current_event_link():

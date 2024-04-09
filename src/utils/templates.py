@@ -30,4 +30,4 @@ def send_template(template: str, should_rl=True, **kwargs):
             **kwargs,
             isLoggedIn=session["loggedin"],
             **user_data
-        )
+        ) 

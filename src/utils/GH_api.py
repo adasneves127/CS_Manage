@@ -23,7 +23,6 @@ class IssueTypes(Enum):
 
 
 def get_api_repo():
-    return "adasneves127/Test_repo"
     proc = subprocess.Popen(['/bin/git','remote','get-url','origin'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = proc.stdout.read().decode()

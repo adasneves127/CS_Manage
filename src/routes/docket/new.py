@@ -1,7 +1,7 @@
 from app import app
 from src.utils.templates import send_template
 from src.utils.db_utils import db_connection
-from flask import session, request, redirect
+from flask import session, request, redirect, abort
 from src.utils import exceptions
 
 
@@ -29,3 +29,14 @@ def create_officer_docket():
         docket = request.form
         conn.create_officer_docket(docket, user)
         return redirect("/docket/officer/view/")
+
+@app.route("/docket/conversation/add/<int:seq>", methods=['POST'])
+def create_docket_conversation(seq: int):
+    with db_connection() as conn:
+        user = session['user']
+        if conn.can_user_view_officer_docket(user):
+            try:
+                conn.create_docket_conversation(seq, request.json, user)
+            except Exception:
+                abort(500)
+    return ""

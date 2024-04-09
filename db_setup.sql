@@ -28,7 +28,7 @@ create table permissions(
     inv_view            bool default 0 NOT NULL,
     doc_edit            bool default 0 NOT NULL,
     doc_view            bool default 0 NOT NULL,
-    doc_vote            bool default 0 NOT NULL,
+--    doc_vote            bool default 0 NOT NULL,
     inv_admin           bool default 0 NOT NULL,
     doc_admin           bool default 0 NOT NULL,
     approve_invoices    bool default 0 NOT NULL,
@@ -42,6 +42,20 @@ create table permissions(
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (user_seq) references users(seq)
 );
+
+create table vote_perms(
+    seq int auto_increment PRIMARY KEY,
+    user_seq INT NOT NULL,
+    vote_seq INT NOT NULL,
+    added_by int not null,
+    updated_by int not null,
+    dt_added timestamp default current_timestamp,
+    dt_updated timestamp default current_timestamp on update current_timestamp,
+    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (user_seq) references users(seq),
+    CONSTRAINT FOREIGN KEY (vote_seq) references voting_types(seq)
+)
 
 create table statuses(
     seq int not null auto_increment primary key,
@@ -127,6 +141,17 @@ create table docket_status(
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
 );
 
+create table voting_types(
+    seq int not null auto_increment primary key,
+    type_desc varchar(20),
+    added_by int not null,
+    updated_by int not null,
+    dt_added timestamp default current_timestamp,
+    dt_updated timestamp default current_timestamp on update current_timestamp,
+    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
+);
+
 create table officer_docket(
     seq int auto_increment primary key,
     created_by int,
@@ -136,10 +161,11 @@ create table officer_docket(
     created_at datetime default current_timestamp,
     updated_at datetime default current_timestamp on update current_timestamp,
     status int,
-    is_voteable tinyint default 1,
+    vote_type int not null default 1,
     CONSTRAINT FOREIGN KEY (created_by) references users(seq),
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
-    CONSTRAINT FOREIGN KEY (status) references docket_status(seq)
+    CONSTRAINT FOREIGN KEY (status) references docket_status(seq),
+    CONSTRAINT FOREIGN KEY (vote_type) references voting_types(seq)
 );
 
 create table officer_votes(

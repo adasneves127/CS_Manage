@@ -215,7 +215,7 @@ class User:
         return ((user_sql, user_vals), (perms_sql, perms_vals))
 
     @staticmethod
-    def from_sql(user_info, permissions):
+    def from_sql(user_info, permissions, voting):
         user = User(
             user_info[1],
             user_info[2],
@@ -240,6 +240,9 @@ class User:
         user.user_admin = permissions[9] == 1
         user.docket_vote = permissions[10] == 1
         user.can_send_email = permissions[11]
+
+        
+
         return user
 
     def __str__(self) -> str:

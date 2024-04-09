@@ -105,7 +105,9 @@ class connect:
         if perms is None:
             raise MalformedUserException
         self.cursor.fetchall()  # Flush the cursor
-        return User.from_sql(user, perms)
+        vote_sql = """SELECT """
+
+        return User.from_sql(user, perms, voting)
 
     def get_user_by_user_name(self, user_name: str) -> User:
         user_sql = """SELECT seq, user_name,
@@ -620,6 +622,11 @@ class connect:
         WHERE a.added_by = b.seq AND a.updated_by = c.seq ORDER BY a.seq"""
         self.cursor.execute(sql)
         return self.cursor.fetchall()
+    
+    def get_all_docket_voting_types(self):
+        sql = """SELECT (type_desc) FROM voting_types"""
+        self.cursor.execute(sql)
+        return [x[0] for x in self.cursor.fetchall()]
 
     def get_all_record_types(self):
         sql = """SELECT a.seq, a.type_desc,

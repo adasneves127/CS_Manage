@@ -136,6 +136,7 @@ create table officer_docket(
     created_at datetime default current_timestamp,
     updated_at datetime default current_timestamp on update current_timestamp,
     status int,
+    is_voteable tinyint default 1,
     CONSTRAINT FOREIGN KEY (created_by) references users(seq),
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (status) references docket_status(seq)

@@ -1,4 +1,4 @@
-from app import load_app_info
+from src.utils.app_utils import load_app_info
 
 
 class finance:

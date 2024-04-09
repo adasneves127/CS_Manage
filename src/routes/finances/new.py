@@ -4,7 +4,7 @@ from flask import request, session
 from mysql.connector.errors import DatabaseError
 from src.utils import exceptions
 import requests
-from app import load_app_info
+from src.utils.app_utils import load_app_info
 from src.utils.db_utils import db_connection
 from base64 import b64encode
 

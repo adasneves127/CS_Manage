@@ -4,7 +4,7 @@ from src.utils.containers import User, finance
 from src.utils.exceptions import UserNotFoundException, MalformedUserException
 import bcrypt
 from typing import NoReturn
-from app import load_app_info
+from src.utils.app_utils import load_app_info
 from src.utils import email_utils
 from uuid import uuid4
 import datetime

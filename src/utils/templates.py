@@ -1,7 +1,7 @@
 from flask_liquid import render_template
 from app import app
 from flask import session, request
-from app import load_app_info
+from src.utils.app_utils import load_app_info
 from src.utils.db_utils import db_connection
 import time
 

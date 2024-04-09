@@ -62,7 +62,6 @@ def update_user():
                 data.get("doc_admin") == "on",
                 data.get("user_admin") == "on",
                 data.get("doc_vote") == "on",
-                data.get("can_send_email") == "on",
             )
 
             conn.update_user(seq, vals, user)

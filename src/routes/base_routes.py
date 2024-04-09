@@ -26,3 +26,12 @@ def prevent_rapid_requests():
         last_post = session.get('last_post', 0)
         if last_post >= time.time() - 10:
             raise Exception
+
+@app.route('/register/', methods=['GET'])
+def get_current_event_link():
+    with open('events.csv') as f:
+        for line in f:
+            link, start, end = line.split(',')
+            if float(start) - 1800 < time.time() < float(end) + 1800:
+                return redirect(link)
+    return "No Event is Occuring..."

@@ -1,10 +1,10 @@
 import os
 import mysql.connector
-from src.utils import containers
+from src.utils.containers import User, finance
 from src.utils.exceptions import UserNotFoundException, MalformedUserException
 import bcrypt
 from typing import NoReturn
-from src.utils.app_utils import load_app_info
+from app import load_app_info
 from src.utils import email_utils
 from uuid import uuid4
 import datetime
@@ -12,6 +12,7 @@ import subprocess
 from dotenv import load_dotenv
 import random
 import sys
+from contextlib import contextmanager
 
 
 class connect:
@@ -60,12 +61,12 @@ class connect:
         for row in rows:
             self.cursor.execute(line_sql, (row[0],))
             lines = self.cursor.fetchall()
-            row_container = containers.finance(row, lines)
+            row_container = finance(row, lines)
             return_list.append(row_container.__dict__)
 
         return return_list
 
-    def save_user(self, user: containers.User):
+    def save_user(self, user: User):
         ((user_seq, user_val), (perms_seq, perms_val)) = user.sql()
         self.cursor.execute(user_seq, user_val)
         self.connection.commit()
@@ -78,14 +79,14 @@ class connect:
         if not user.system_user:
             self.send_password_reset(user)
 
-    def send_password_reset(self, user: containers.User):
+    def send_password_reset(self, user: User):
         token = self.request_reset_password(user.seq, "SYSTEM")
         app_domain = load_app_info()["public"]["application_url"]
         email_utils.send_password_reset_email(
             user, f"{app_domain}/reset_password/{token}"
         )
 
-    def get_user_by_seq(self, user_seq: int) -> containers.User:
+    def get_user_by_seq(self, user_seq: int) -> User:
         user_sql = """SELECT seq, user_name,
         first_name, last_name, email, system_user, theme, added_by,
         updated_by, dt_added, dt_updated FROM users WHERE seq = %s"""
@@ -104,9 +105,9 @@ class connect:
         if perms is None:
             raise MalformedUserException
         self.cursor.fetchall()  # Flush the cursor
-        return containers.User.from_sql(user, perms)
+        return User.from_sql(user, perms)
 
-    def get_user_by_user_name(self, user_name: str) -> containers.User:
+    def get_user_by_user_name(self, user_name: str) -> User:
         user_sql = """SELECT seq, user_name,
         first_name, last_name, email, system_user, theme, added_by,
         updated_by, dt_added, dt_updated FROM users WHERE user_name = %s"""
@@ -125,10 +126,9 @@ class connect:
         if perms is None:
             raise MalformedUserException
         self.cursor.fetchall()  # flush the cursor
-        return containers.User.from_sql(user, perms)
+        return User.from_sql(user, perms)
 
-    def check_user_valid(self, username: str, password: str) \
-            -> containers.User:
+    def check_user_valid(self, username: str, password: str) -> User:
         sql = """SELECT seq, user_name, password FROM users WHERE
         user_name = %s AND is_active = 1;"""
         self.cursor.execute(sql, (username,))
@@ -226,7 +226,7 @@ class connect:
         for row in finance_filtered_rows:
             self.cursor.execute(line_sql, (row[0],))
             lines = self.cursor.fetchall()
-            row_container = containers.finance(row, lines)
+            row_container = finance(row, lines)
             return_list.append(row_container.__dict__)
 
         return return_list
@@ -255,7 +255,7 @@ class connect:
         AND a.updated_by = d.seq"""
         self.cursor.execute(line_sql, (seq,))
         lines = self.cursor.fetchall()
-        row_container = containers.finance(rows, lines)
+        row_container = finance(rows, lines)
         return row_container.__dict__
 
     def get_user_by_full_name(self, full_name: str) -> int:
@@ -274,7 +274,7 @@ class connect:
         self.cursor.execute(sql, (status_desc,))
         return self.cursor.fetchone()[0]
 
-    def create_record(self, record_data: dict, user: containers.User):
+    def create_record(self, record_data: dict, user: User):
         sql = """INSERT INTO inv_head (id, creator, approver, inv_date,
         record_status, record_type, tax, fees, added_by, updated_by)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
@@ -349,7 +349,7 @@ class connect:
         self.cursor.execute(sql, (seq,))
         return self.cursor.fetchall()
 
-    def edit_record(self, seq: int, data: dict, current_user: containers.User):
+    def edit_record(self, seq: int, data: dict, current_user: User):
         sql = """UPDATE inv_head SET id = %s, creator = %s, approver = %s,
         inv_date = %s, record_status = %s, record_type = %s, tax = %s,
         fees = %s, updated_by = %s WHERE seq = %s"""
@@ -431,13 +431,13 @@ class connect:
         for row in rows:
             self.cursor.execute(line_sql, (row[0],))
             lines = self.cursor.fetchall()
-            row_container = containers.finance(row, lines)
+            row_container = finance(row, lines)
             return_list.append(row_container.__dict__)
 
         return return_list
 
     def change_preferences(
-        self, target_user: int, current_user: containers.User, new_prefs: dict
+        self, target_user: int, current_user: User, new_prefs: dict
     ):
         sql = """UPDATE users SET user_name = %s, theme = %s, email=%s,
                  updated_by = %s WHERE seq = %s"""
@@ -456,7 +456,7 @@ class connect:
         self.connection.commit()
 
     def change_password(
-        self, target_seq: int, current_user: containers.User, new_password: str
+        self, target_seq: int, current_user: User, new_password: str
     ):
         sql = """UPDATE users SET password = %s,
                  updated_by = %s WHERE seq = %s"""
@@ -485,7 +485,7 @@ class connect:
         self.cursor.execute(sql, (token,))
         return self.cursor.fetchone()
 
-    def can_user_edit_docket_record(self, user: containers.User, seq: int):
+    def can_user_edit_docket_record(self, user: User, seq: int):
         # If the user created it, then they can edit it
         sql = """SELECT created_by FROM officer_docket WHERE seq = %s"""
         self.cursor.execute(sql, (seq,))
@@ -510,14 +510,14 @@ class connect:
         return False
 
     def change_approver_pin(
-        self, target_seq: int, current_user: containers.User, new_pin: str
+        self, target_seq: int, current_user: User, new_pin: str
     ):
         sql = """UPDATE users SET finance_pin = %s, updated_by = %s
                  WHERE seq = %s"""
         self.cursor.execute(sql, (new_pin, current_user.seq, target_seq))
         self.connection.commit()
 
-    def can_user_view_officer_docket(self, user: containers.User) -> bool:
+    def can_user_view_officer_docket(self, user: User) -> bool:
         sql = """SELECT doc_view, doc_admin FROM permissions
                  WHERE user_seq = %s"""
         self.cursor.execute(sql, (user.seq,))
@@ -532,7 +532,7 @@ class connect:
         result = self.cursor.fetchall()
         return result
 
-    def can_user_edit_officer_docket(self, user: containers.User) -> bool:
+    def can_user_edit_officer_docket(self, user: User) -> bool:
         sql = """SELECT doc_edit, doc_admin FROM permissions
                  WHERE user_seq = %s"""
         self.cursor.execute(sql, (user.seq,))
@@ -579,19 +579,19 @@ class connect:
         with open("backup.sql", "w") as f:
             f.write(output)
 
-    def update_finance_status(self, seq, stat_desc, user: containers.User):
+    def update_finance_status(self, seq, stat_desc, user: User):
         sql = """UPDATE statuses SET stat_desc = %s, updated_by = %s
         WHERE seq = %s"""
         self.cursor.execute(sql, (stat_desc, user.seq, seq))
         self.connection.commit()
 
-    def create_finance_status(self, stat_desc, user: containers.User):
+    def create_finance_status(self, stat_desc, user: User):
         sql = """INSERT INTO statuses (stat_desc, added_by, updated_by)
         VALUES (%s, %s, %s)"""
         self.cursor.execute(sql, (stat_desc, user.seq, user.seq))
         self.connection.commit()
 
-    def update_docket_status(self, seq, stat_desc, user: containers.User):
+    def update_docket_status(self, seq, stat_desc, user: User):
         sql = """UPDATE docket_status SET stat_desc = %s, updated_by = %s
         WHERE seq = %s"""
         self.cursor.execute(sql, (stat_desc, user.seq, seq))
@@ -615,7 +615,7 @@ class connect:
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
-    def update_record_type(self, seq, type_desc, user: containers.User):
+    def update_record_type(self, seq, type_desc, user: User):
         sql = (
             """UPDATE record_types SET type_desc = %s, updated_by = %s
             WHERE seq = %s"""
@@ -623,7 +623,7 @@ class connect:
         self.cursor.execute(sql, (type_desc, user.seq, seq))
         self.connection.commit()
 
-    def create_record_type(self, type_desc, user: containers.User):
+    def create_record_type(self, type_desc, user: User):
         sql = """INSERT INTO record_types (type_desc, added_by, updated_by)
         VALUES (%s, %s, %s)"""
         self.cursor.execute(sql, (type_desc, user.seq, user.seq))
@@ -638,7 +638,7 @@ class connect:
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
-    def update_user(self, user_seq, vals, current_user: containers.User):
+    def update_user(self, user_seq, vals, current_user: User):
         sql = """
         UPDATE users SET user_name = %s,
         email = %s,
@@ -735,7 +735,7 @@ class connect:
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
-    def create_officer_docket(self, data: dict, user: containers.User):
+    def create_officer_docket(self, data: dict, user: User):
         sql = """
         INSERT INTO officer_docket
         (title, body, status, is_voteable, created_by, updated_by)
@@ -777,7 +777,7 @@ class connect:
         attachments = self.cursor.fetchall()
         return docket, votes, assignees, attachments
 
-    def get_assigned_records(self, user: containers.User):
+    def get_assigned_records(self, user: User):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at,
         a.updated_at, CONCAT(b.first_name, ' ', b.last_name),
         CONCAT(c.first_name, ' ', c.last_name), a.created_by FROM
@@ -845,14 +845,14 @@ class connect:
         results = self.cursor.fetchone()
         return results[0] == 1 or results[1] == 1
 
-    def has_user_voted(self, user: containers.User, seq: int):
+    def has_user_voted(self, user: User, seq: int):
         sql = """SELECT * FROM officer_votes WHERE user = %s AND
         docket_item = %s"""
         vals = (user.seq, seq)
         self.cursor.execute(sql, vals)
         return len(self.cursor.fetchall()) > 0
 
-    def save_vote(self, user: containers.User, vote: str, dock_seq: int):
+    def save_vote(self, user: User, vote: str, dock_seq: int):
         sql = """INSERT INTO officer_votes (user, vote_type, docket_item)
         VALUES (%s, %s, %s)"""
         values = (user.seq, vote, dock_seq)
@@ -867,7 +867,7 @@ class connect:
         self.cursor.execute(sql, (docket_seq,))
         return [x[0] for x in self.cursor.fetchall()]
 
-    def close_vote(self, docket_seq: int, user: containers.User):
+    def close_vote(self, docket_seq: int, user: User):
         votes = self.get_vote_types_by_docket_seq(docket_seq)
         in_favor = votes.count("In Favor")
         opposed = votes.count("Opposed")
@@ -890,7 +890,7 @@ class connect:
         docket_seq: int,
         file_name: str,
         file_data: str,
-        current_user: containers.User,
+        current_user: User,
     ):
         SQL = """INSERT INTO docket_attachments (docket_seq, file_name,
         file_data, added_by, updated_by) VALUES (%s,%s,%s,%s,%s)"""
@@ -941,7 +941,7 @@ class connect:
         domain = load_app_info()["public"]["email_domain"]
         return [x[0] + domain for x in self.cursor.fetchall()]
 
-    def create_docket_status(self, desc: str, user: containers.User):
+    def create_docket_status(self, desc: str, user: User):
         SQL = """INSERT INTO (stat_desc, added_by, updated_by) VALUES
         (%s, %s, %s)"""
         self.cursor.execute(SQL, desc, user.seq, user.seq)
@@ -950,3 +950,12 @@ class connect:
 
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
+
+
+@contextmanager
+def db_connection():
+    connection = connect()
+    try:
+        yield connection
+    finally:
+        connection.close()

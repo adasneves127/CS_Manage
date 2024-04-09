@@ -1,4 +1,4 @@
-from src.utils.app_utils import db_connection
+from src.utils.db_utils import db_connection
 import dotenv
 from src.utils.email_utils import send_backup_file
 from src.utils.db_utils import connect

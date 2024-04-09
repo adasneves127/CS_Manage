@@ -1,5 +1,5 @@
 from src.utils import containers
-from src.utils.app_utils import load_app_info
+from app import load_app_info
 from email.utils import formataddr
 import smtplib
 from email.message import EmailMessage

@@ -1,7 +1,7 @@
 from app import app
 from src.utils.templates import send_template
 from flask import session, redirect, request
-from src.utils.db_utils import connect
+from src.utils.db_utils import db_connection
 from src.utils import exceptions
 
 
@@ -9,9 +9,9 @@ from src.utils import exceptions
 def reload_user():
     if "user" not in session:
         raise exceptions.UserNotSignedInException()
-    connection = connect()
-    session["user"] = connection.get_user_by_seq(session["user"].seq)
-    return "", 200
+    with db_connection() as connection:
+        session["user"] = connection.get_user_by_seq(session["user"].seq)
+        return "", 200
 
 
 @app.route("/user/settings/")
@@ -34,37 +34,38 @@ def change_password():
         )
 
     else:
-        connection = connect()
-        user_valid = connection.check_user_valid(
-            session["user"].user_name, request.form.get("old_password", "")
-        )
-        if not user_valid[0]:
-            return (
-                send_template(
-                    "user/settings.liquid",
-                    error="Current Password not correct"
-                ),
-                400,
+        with db_connection() as connection:
+            user_valid = connection.check_user_valid(
+                session["user"].user_name, request.form.get("old_password", "")
             )
-
-        user = connection.get_user_by_seq(user_valid[1])
-        if user is None:
-            return send_template("user/settings.liquid",
-                                 error="User not found"), 404
-        else:
-            new_password = request.form.get("new_password", "")
-            if new_password == "":
+            if not user_valid[0]:
                 return (
                     send_template(
-                        "user/settings.liquid", error="Internal Server Error"
+                        "user/settings.liquid",
+                        error="Current Password not correct"
                     ),
-                    500,
+                    400,
                 )
+
+            user = connection.get_user_by_seq(user_valid[1])
+            if user is None:
+                return send_template("user/settings.liquid",
+                                    error="User not found"), 404
             else:
-                connection.change_password(target_seq, session["user"],
-                                           new_password)
-                reload_user()
-                return redirect("/user/settings/")
+                new_password = request.form.get("new_password", "")
+                if new_password == "":
+                    return (
+                        send_template(
+                            "user/settings.liquid",
+                            error="Internal Server Error"
+                        ),
+                        500,
+                    )
+                else:
+                    connection.change_password(target_seq, session["user"],
+                                            new_password)
+                    reload_user()
+                    return redirect("/user/settings/")
 
 
 @app.route("/user/preferences", methods=["POST"])
@@ -76,15 +77,15 @@ def change_preferences():
         return send_template("user/settings.liquid",
                              error="Internal Server Error"), 500
     else:
-        connection = connect()
-        user = session["user"]
-        if user is None:
-            return send_template("user/settings.liquid",
-                                 error="User not found"), 404
-        else:
-            connection.change_preferences(target_seq, user, request.form)
-            reload_user()
-            return redirect("/user/settings/")
+        with db_connection() as connection:
+            user = session["user"]
+            if user is None:
+                return send_template("user/settings.liquid",
+                                    error="User not found"), 404
+            else:
+                connection.change_preferences(target_seq, user, request.form)
+                reload_user()
+                return redirect("/user/settings/")
 
 
 @app.route("/user/change_approver_pin", methods=["POST"])
@@ -96,13 +97,13 @@ def change_approver_pin():
         return send_template("user/settings.liquid",
                              error="Internal Server Error"), 500
     else:
-        connection = connect()
-        user = connection.get_user_by_seq(seq)
-        if user is None:
-            return send_template("user/settings.liquid",
-                                 error="User not found"), 404
-        else:
-            connection.change_approver_pin(user, seq,
-                                           request.form.get("new_pin", ""))
-            reload_user()
-            return redirect("/user/settings/")
+        with db_connection() as connection:
+            user = connection.get_user_by_seq(seq)
+            if user is None:
+                return send_template("user/settings.liquid",
+                                    error="User not found"), 404
+            else:
+                connection.change_approver_pin(user, seq,
+                                            request.form.get("new_pin", ""))
+                reload_user()
+                return redirect("/user/settings/")

@@ -34,4 +34,4 @@ def get_current_event_link():
             link, start, end = line.split(',')
             if float(start) - 1800 < time.time() < float(end) + 1800:
                 return redirect(link)
-    return "No Event is Occuring..."
+    return f"""No Event is Occuring..."""

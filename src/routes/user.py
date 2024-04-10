@@ -50,7 +50,7 @@ def change_password():
             user = connection.get_user_by_seq(user_valid[1])
             if user is None:
                 return send_template("user/settings.liquid",
-                                    error="User not found"), 404
+                                     error="User not found"), 404
             else:
                 new_password = request.form.get("new_password", "")
                 if new_password == "":
@@ -63,7 +63,7 @@ def change_password():
                     )
                 else:
                     connection.change_password(target_seq, session["user"],
-                                            new_password)
+                                               new_password)
                     reload_user()
                     return redirect("/user/settings/")
 
@@ -81,7 +81,7 @@ def change_preferences():
             user = session["user"]
             if user is None:
                 return send_template("user/settings.liquid",
-                                    error="User not found"), 404
+                                     error="User not found"), 404
             else:
                 connection.change_preferences(target_seq, user, request.form)
                 reload_user()
@@ -101,9 +101,9 @@ def change_approver_pin():
             user = connection.get_user_by_seq(seq)
             if user is None:
                 return send_template("user/settings.liquid",
-                                    error="User not found"), 404
+                                     error="User not found"), 404
             else:
                 connection.change_approver_pin(user, seq,
-                                            request.form.get("new_pin", ""))
+                                               request.form.get("new_pin", ""))
                 reload_user()
                 return redirect("/user/settings/")

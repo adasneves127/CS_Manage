@@ -47,8 +47,8 @@ def patch_record(seq):
                 if not creator_auth[0] and not creator_auth[1]:
                     return "Err: Auth Info not correct", 401
 
-            if old_record["header"]["approver"] != \
-            request.json["auth"]["approver"]:
+            new_approver = request.json["auth"]["approver"]
+            if old_record["header"]["approver"] != new_approver:
                 approver_auth = connection.check_invoice_info(
                     request.json["auth"]["approver"],
                     request.json["auth"]["approverPin"]

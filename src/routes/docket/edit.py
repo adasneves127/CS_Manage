@@ -6,6 +6,7 @@ from src.utils import exceptions
 from src.utils.file_utils import is_file_valid_type, valid_file_types
 from pathlib import Path
 
+
 @app.route("/docket/officer/edit/<int:seq>", methods=["GET"])
 def edit_officer_docket(seq):
     with db_connection() as conn:
@@ -82,7 +83,7 @@ def del_assignee():
         if not conn.can_user_edit_docket_record(user, seq):
             return exceptions.InvalidPermissionException()
         conn.del_assignee((seq, data["user"], user.seq))
-        
+
         return redirect(f"/docket/officer/edit/{int(seq)}")
 
 

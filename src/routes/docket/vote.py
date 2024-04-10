@@ -19,14 +19,14 @@ def get_vote_page(seq):
             raise exceptions.DocketNotVoting()
         if docket[8] == 1:
             return send_template('docket/vote.liquid', docket=docket,
-                                is_vote=False)
+                                 is_vote=False)
         has_voted = conn.has_user_voted(user, seq)
         if has_voted:
             return send_template("docket/vote.liquid", docket=docket,
-                                has_voted=True, is_vote=True)
+                                 has_voted=True, is_vote=True)
         else:
             return send_template("docket/vote.liquid", docket=docket,
-                                has_voted=False, is_vote=True)
+                                 has_voted=False, is_vote=True)
 
 
 @app.route("/docket/officer/vote/<int:seq>", methods=["POST"])

@@ -30,6 +30,7 @@ def create_officer_docket():
         conn.create_officer_docket(docket, user)
         return redirect("/docket/officer/view/")
 
+
 @app.route("/docket/conversation/add/<int:seq>", methods=['POST'])
 def create_docket_conversation(seq: int):
     with db_connection() as conn:

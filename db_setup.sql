@@ -58,6 +58,7 @@ create table vote_perms(
     seq int auto_increment PRIMARY KEY,
     user_seq INT NOT NULL,
     vote_seq INT NOT NULL,
+    granted tinyint NOT NULL default 0,
     added_by int not null,
     updated_by int not null,
     dt_added timestamp default current_timestamp,

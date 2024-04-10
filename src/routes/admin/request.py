@@ -7,8 +7,7 @@ from src.utils.exceptions import UserNotSignedInException
 
 @app.route("/admin/user/requests/", methods=["GET"])
 def get_user_requests():
-    with db_connection() as conn:
-        
+    with db_connection() as _:
         if "user" not in session:
             raise UserNotSignedInException()
         return send_template()

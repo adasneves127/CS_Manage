@@ -241,7 +241,7 @@ class User:
         user.docket_vote = permissions[10] == 1
         user.can_send_email = permissions[11]
 
-        
+        user.vote = voting
 
         return user
 

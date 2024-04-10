@@ -31,9 +31,9 @@ def new_record():
 def create_record():
     with db_connection() as connection:
         if connection.can_user_view_finances(session["user"].seq):
-            
             creator_auth = connection.check_invoice_info(
-                request.json["auth"]["creator"], request.json["auth"]["creatorPin"]
+                request.json["auth"]["creator"],
+                request.json["auth"]["creatorPin"]
             )
             if creator_auth is None:
                 return "Err: Creator not found", 401
@@ -54,7 +54,7 @@ def create_record():
             try:
                 connection.create_record(
                     request.json["record"], session["user"]
-                    )
+                )
                 if approver == "Not Approved":
                     seq = connection.create_officer_docket(
                         {
@@ -78,7 +78,6 @@ def create_record():
                         b64encode(
                             requests.get(
                                 f"{url}/finances/view/{seq}",
-                                
                                 json={"auth": auth},
                             ).content
                         ),
@@ -99,7 +98,9 @@ def preview_record():
     with db_connection() as connection:
         if connection.can_user_view_finances(session["user"].seq):
             return send_template(
-                "finances/finance_view.liquid", record=request.json, isPreview=True
+                "finances/finance_view.liquid",
+                record=request.json,
+                isPreview=True
             )
         else:
             raise exceptions.InvalidPermissionException()

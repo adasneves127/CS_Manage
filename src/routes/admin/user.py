@@ -28,9 +28,12 @@ def edit_user():
         user = session["user"]
         if conn.is_user_admin(user.seq):
             target_user = conn.get_user_by_seq(int(request.args["seq"]))
-            vote_types = conn.get_all_docket_voting_types()
+            vote_types = [x for x in conn.get_all_docket_voting_types()
+                          if x != "No Vote"]
             return send_template(
-                "admin/user.liquid", user=target_user.__dict__, voting_types=vote_types
+                "admin/user.liquid",
+                user=target_user.__dict__,
+                voting_types=vote_types
             )
         else:
             raise exceptions.InvalidPermissionException()
@@ -66,7 +69,14 @@ def update_user():
             )
 
             conn.update_user(seq, vals, user)
-            conn.update_user_vote_types(seq, vote_types, user)
+
+            all_vote_types = [x for x in conn.get_all_docket_voting_types()
+                              if x != "No Vote"]
+            votes = {vote_type: data.get(f"vote_type-{vote_type}") == "on"
+                     for vote_type in all_vote_types
+                     if data.get(f"vote_type-{vote_type}")}
+
+            conn.update_user_vote_types(seq, votes, user)
             return """<script>window.close();</script>"""
         else:
             raise exceptions.InvalidPermissionException()

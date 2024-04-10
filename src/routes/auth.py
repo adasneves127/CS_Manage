@@ -15,7 +15,6 @@ def get_login_page():
 @app.route("/auth/login/", methods=["POST"])
 def login():
     with db_connection() as connection:
-        
         # Get the username and password from the form
         username = request.form["username"]
         password = request.form["password"]

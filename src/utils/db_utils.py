@@ -3,7 +3,7 @@ import mysql.connector
 from src.utils.containers import User, finance
 from src.utils.exceptions import UserNotFoundException, MalformedUserException
 import bcrypt
-from typing import NoReturn
+from typing import NoReturn, List, Dict
 from src.utils.app_utils import load_app_info
 from src.utils import email_utils
 from uuid import uuid4
@@ -105,7 +105,17 @@ class connect:
         if perms is None:
             raise MalformedUserException
         self.cursor.fetchall()  # Flush the cursor
-        vote_sql = """SELECT """
+        vote_sql = """SELECT a.type_desc FROM voting_types a, vote_perms b
+            WHERE a.seq = b.vote_seq AND b.user_seq = %s"""
+
+        self.cursor.execute(vote_sql, (user_seq,))
+
+        user_votes: List[str] = self.cursor.fetchall()
+        all_types = [x for x in self.get_all_docket_voting_types()
+                     if x != "No Vote"]
+
+        voting = {vote_type: vote_type
+                  in user_votes for vote_type in all_types}
 
         return User.from_sql(user, perms, voting)
 
@@ -534,9 +544,9 @@ class connect:
         result = self.cursor.fetchone()
         return result[0] == 1 or result[1] == 1
 
-    def create_docket_conversation(self, seq: int, 
+    def create_docket_conversation(self, seq: int,
                                    conversation_info: dict, user: User):
-        sql = """INSERT INTO docket_conversations 
+        sql = """INSERT INTO docket_conversations
         (docket_seq, docket_text, added_by) VALUES (%s, %s, %s)"""
         self.cursor.execute(sql, (seq, conversation_info['data'], user.seq))
         self.connection.commit()
@@ -581,7 +591,7 @@ class connect:
     def __del__(self):
         try:
             self.connection.close()
-        except Exception as e:
+        except Exception:
             return
 
     @staticmethod
@@ -622,8 +632,8 @@ class connect:
         WHERE a.added_by = b.seq AND a.updated_by = c.seq ORDER BY a.seq"""
         self.cursor.execute(sql)
         return self.cursor.fetchall()
-    
-    def get_all_docket_voting_types(self):
+
+    def get_all_docket_voting_types(self) -> List[str]:
         sql = """SELECT (type_desc) FROM voting_types"""
         self.cursor.execute(sql)
         return [x[0] for x in self.cursor.fetchall()]
@@ -693,6 +703,20 @@ class connect:
         user_seq = %s
         """
         values = vals[6:] + (current_user.seq, user_seq)
+        self.cursor.execute(sql, values)
+        self.connection.commit()
+
+    def update_user_vote_types(self,
+                               user_seq: int,
+                               votes: Dict[str, bool],
+                               current_user: User):
+        sql = """UPDATE vote_perms a, voting_types b SET
+        a.granted = %s,
+        a.updated_by = %s
+        WHERE a.vote_seq = b.seq AND a.user_seq = %s
+        AND b.type_desc = %s
+        """
+        values = [(v, current_user.seq, user_seq, k) for k, v in votes.items()]
         self.cursor.execute(sql, values)
         self.connection.commit()
 
@@ -969,6 +993,7 @@ class connect:
         self.cursor.execute(SQL, desc, user.seq, user.seq)
         self.connection.commit()
         pass
+
 
 def convert_to_datetime(date_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")

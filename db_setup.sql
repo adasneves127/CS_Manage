@@ -43,6 +43,17 @@ create table permissions(
     CONSTRAINT FOREIGN KEY (user_seq) references users(seq)
 );
 
+create table voting_types(
+    seq int not null auto_increment primary key,
+    type_desc varchar(20),
+    added_by int not null,
+    updated_by int not null,
+    dt_added timestamp default current_timestamp,
+    dt_updated timestamp default current_timestamp on update current_timestamp,
+    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
+);
+
 create table vote_perms(
     seq int auto_increment PRIMARY KEY,
     user_seq INT NOT NULL,
@@ -55,7 +66,7 @@ create table vote_perms(
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (user_seq) references users(seq),
     CONSTRAINT FOREIGN KEY (vote_seq) references voting_types(seq)
-)
+);
 
 create table statuses(
     seq int not null auto_increment primary key,
@@ -141,16 +152,7 @@ create table docket_status(
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
 );
 
-create table voting_types(
-    seq int not null auto_increment primary key,
-    type_desc varchar(20),
-    added_by int not null,
-    updated_by int not null,
-    dt_added timestamp default current_timestamp,
-    dt_updated timestamp default current_timestamp on update current_timestamp,
-    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
-    CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
-);
+
 
 create table officer_docket(
     seq int auto_increment primary key,

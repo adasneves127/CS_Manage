@@ -28,7 +28,8 @@ def edit_user():
         user = session["user"]
         if conn.is_user_admin(user.seq):
             target_user = conn.get_user_by_seq(int(request.args["seq"]))
-            vote_types = [x for x in conn.get_all_docket_voting_types()
+            vote_types = [x
+                          for x in conn.get_all_docket_voting_types()
                           if x != "No Vote"]
             return send_template(
                 "admin/user.liquid",
@@ -69,12 +70,15 @@ def update_user():
             )
 
             conn.update_user(seq, vals, user)
-
-            all_vote_types = [x for x in conn.get_all_docket_voting_types()
+            # print(f"Post Data: {data}")
+            all_vote_types = [x.replace(" ", "_") for x
+                              in conn.get_all_docket_voting_types()
                               if x != "No Vote"]
-            votes = {vote_type: data.get(f"vote_type-{vote_type}") == "on"
-                     for vote_type in all_vote_types
-                     if data.get(f"vote_type-{vote_type}")}
+            votes = {vote_type.replace("_", " "):
+                     data.get(f"vote_type-{vote_type}") == "on"
+                     for vote_type in all_vote_types}
+
+            # print(f"Votes: {votes}")
 
             conn.update_user_vote_types(seq, votes, user)
             return """<script>window.close();</script>"""

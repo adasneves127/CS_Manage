@@ -11,22 +11,21 @@ def get_vote_page(seq):
         raise exceptions.UserNotSignedInException()
     user = session["user"]
     with db_connection() as conn:
-        if not user.docket_vote:
+        docket = conn.search_officer_docket(seq)[0]
+
+        if docket[8] == "No Vote":
+            return send_template('docket/vote.liquid', docket=docket,
+                                 non_votable=True)
+
+        if not user.vote[docket[8]]:
             raise exceptions.InvalidPermissionException()
 
-        docket = conn.search_officer_docket(seq)[0]
         if docket[3] != 'In Vote':
             raise exceptions.DocketNotVoting()
-        if docket[8] == 1:
-            return send_template('docket/vote.liquid', docket=docket,
-                                 is_vote=False)
+
         has_voted = conn.has_user_voted(user, seq)
-        if has_voted:
-            return send_template("docket/vote.liquid", docket=docket,
-                                 has_voted=True, is_vote=True)
-        else:
-            return send_template("docket/vote.liquid", docket=docket,
-                                 has_voted=False, is_vote=True)
+        return send_template("docket/vote.liquid", docket=docket,
+                             has_voted=has_voted, non_votable=False)
 
 
 @app.route("/docket/officer/vote/<int:seq>", methods=["POST"])
@@ -35,7 +34,8 @@ def save_officer_vote(seq):
         raise exceptions.UserNotSignedInException()
     user = session["user"]
     with db_connection() as conn:
-        if not user.docket_vote:
+        docket = conn.search_officer_docket(seq)[0]
+        if not user.vote[docket[8]]:
             raise exceptions.InvalidPermissionException()
 
         vote = request.form["vote_type"]

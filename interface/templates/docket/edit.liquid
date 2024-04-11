@@ -136,7 +136,7 @@
             <label for="status">Status</label>
             <select name="status" id="status">
                 {% for stat in statuses %}
-                    {% if stat[1] != 'In Vote' or docket[8] == 1 %}
+                    {% if stat[1] != 'In Vote' or docket[8] != "No Vote" %}
                         <option value="{{stat[0]}}">{{stat[1]}}</option>
                     {% endif %}
                     

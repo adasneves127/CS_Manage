@@ -14,7 +14,9 @@ def new_officer_docket():
         if not conn.can_user_view_officer_docket(user):
             return exceptions.InvalidPermissionException()
 
-        return send_template("docket/new.liquid")
+        vote_types = conn.get_all_docket_voting_types()
+        return send_template("docket/new.liquid",
+                             vote_types=vote_types)
 
 
 @app.route("/docket/officer/new/", methods=["POST"])

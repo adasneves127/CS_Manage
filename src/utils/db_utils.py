@@ -110,14 +110,18 @@ class connect:
 
         self.cursor.execute(vote_sql, (user_seq,))
 
-        user_votes: List[str] = self.cursor.fetchall()
-        all_types = [x for x in self.get_all_docket_voting_types()
-                     if x != "No Vote"]
-
-        voting = {vote_type: vote_type
-                  in user_votes for vote_type in all_types}
+        voting = self.get_user_vote_perms(user_seq)
+        # print(f"User.from_sql with votes: {voting}")
 
         return User.from_sql(user, perms, voting)
+
+    def get_user_vote_perms(self, user_seq):
+        sql = """SELECT a.type_desc, b.granted
+        FROM voting_types a, vote_perms b
+        WHERE a.seq = b.vote_seq AND b.user_seq = %s"""
+        self.cursor.execute(sql, (user_seq,))
+        votes = {k: v == 1 for (k, v) in self.cursor.fetchall()}
+        return votes
 
     def get_user_by_user_name(self, user_name: str) -> User:
         user_sql = """SELECT seq, user_name,
@@ -500,8 +504,8 @@ class connect:
     def get_user_by_reset_token(self, token: str) -> tuple:
         sql = """SELECT a.seq, a.user_name FROM users a, password_reset b WHERE
         a.seq = b.user_seq AND b.token = %s AND
-        b.created_at > NOW() - INTERVAL 1 DAY and is_active = 1
-        and is_system_user != 1"""
+        b.created_at > NOW() - INTERVAL 1 DAY and a.is_active = 1
+        and a.system_user != 1"""
         self.cursor.execute(sql, (token,))
         return self.cursor.fetchone()
 
@@ -710,6 +714,7 @@ class connect:
                                user_seq: int,
                                votes: Dict[str, bool],
                                current_user: User):
+        self.ensure_vote_perms_exist(user_seq, current_user)
         sql = """UPDATE vote_perms a, voting_types b SET
         a.granted = %s,
         a.updated_by = %s
@@ -717,7 +722,29 @@ class connect:
         AND b.type_desc = %s
         """
         values = [(v, current_user.seq, user_seq, k) for k, v in votes.items()]
-        self.cursor.execute(sql, values)
+        print(f"Running sql with values: {values}")
+        self.cursor.executemany(sql, values)
+        self.connection.commit()
+
+    def ensure_vote_perms_exist(self, user_seq, current_user: User):
+        sql = """SELECT seq, type_desc FROM voting_types"""
+        self.cursor.execute(sql)
+        all_types = [x[0] for x in self.cursor.fetchall()
+                     if x[1] != "No Vote"]
+
+        sql = """SELECT vote_seq FROM vote_perms WHERE user_seq = %s"""
+        self.cursor.execute(sql, (user_seq,))
+        user_types = [x[0] for x in self.cursor.fetchall()]
+
+        need_types = [x for x in all_types if x not in user_types]
+
+        sql = """INSERT INTO vote_perms
+        (user_seq, vote_seq, added_by, updated_by) VALUES
+        (%s, %s, %s, %s)"""
+        cur_seq = current_user.seq
+        values = [(user_seq, x, cur_seq, cur_seq) for x in need_types]
+
+        self.cursor.executemany(sql, values)
         self.connection.commit()
 
     def add_user(self, vals, current_user):
@@ -748,6 +775,7 @@ class connect:
             email_utils.send_welcome_email(
                 self.get_user_by_seq(user_seq), key, finance_pin
             )
+        self.ensure_vote_perms_exist(user_seq, current_user)
 
     def clear_old_resets(self):
         SQL = """DELETE FROM password_reset WHERE created_at <
@@ -758,9 +786,13 @@ class connect:
     def get_officer_docket(self):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at,
         a.updated_at, CONCAT(b.first_name, ' ', b.last_name),
-        CONCAT(c.first_name, ' ', c.last_name), a.created_by, is_voteable FROM
-        officer_docket a, users b, users c, docket_status d WHERE
-        a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq
+        CONCAT(c.first_name, ' ', c.last_name), a.created_by, e.type_desc FROM
+        officer_docket a, users b, users c,
+        docket_status d, voting_types e WHERE
+        a.created_by = b.seq AND
+        a.updated_by = c.seq AND
+        a.status = d.seq AND
+        a.vote_type = e.seq
         ORDER BY a.seq"""
         self.cursor.execute(sql)
         docket_data = []
@@ -784,10 +816,14 @@ class connect:
     def create_officer_docket(self, data: dict, user: User):
         sql = """
         INSERT INTO officer_docket
-        (title, body, status, is_voteable, created_by, updated_by)
+        (title, body, status, vote_type, created_by, updated_by)
         VALUES (%s, %s, %s, %s, %s, %s)"""
+
+        vote_type = self.get_docket_vote_type_by_name(
+            data.get("voteType", "No Vote"))
+
         values = (data["title"], data["body"], 1,
-                  data.get('isVote', 'off') == 'on', user.seq, user.seq)
+                  vote_type, user.seq, user.seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
         seq = self.cursor.lastrowid
@@ -797,12 +833,22 @@ class connect:
             )
         return seq
 
+    def get_docket_vote_type_by_name(self, type_desc):
+        sql = """SELECT seq FROM voting_types
+        WHERE type_desc = %s"""
+        self.cursor.execute(sql, (type_desc,))
+        return self.cursor.fetchone()[0]
+
     def search_officer_docket(self, seq: int):
         sql = """SELECT a.seq, a.title, a.body, d.stat_desc, a.created_at,
         a.updated_at, CONCAT(b.first_name, ' ', b.last_name),
-        CONCAT(c.first_name, ' ', c.last_name), is_voteable FROM
-        officer_docket a, users b,users c, docket_status d WHERE
-        a.created_by = b.seq AND a.updated_by = c.seq AND a.status = d.seq AND
+        CONCAT(c.first_name, ' ', c.last_name), e.type_desc FROM
+        officer_docket a, users b,users c,
+        docket_status d, voting_types e WHERE
+        a.created_by = b.seq AND
+        a.updated_by = c.seq AND
+        a.status = d.seq AND
+        a.vote_type = e.seq AND
         a.seq = %s"""
         self.cursor.execute(sql, (seq,))
         docket = self.cursor.fetchone()

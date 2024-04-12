@@ -39,7 +39,7 @@ def get_api_repo():
 
 def create_issue(title, body, labels: List[IssueTypes]):
     if os.environ.get('gh_token') is None:
-        return "No Auth Key Found!"
+        return False
     repo_path = get_api_repo()
     endpoint = f"https://api.github.com/repos/{repo_path}/issues"
     req = requests.post(endpoint, json={

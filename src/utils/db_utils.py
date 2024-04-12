@@ -97,7 +97,7 @@ class connect:
         self.cursor.fetchall()  # flush the cursor
         perms_sql = """SELECT seq, inv_edit, inv_view,
         doc_edit, doc_view, inv_admin, doc_admin, approve_invoices,
-        receive_emails, user_admin, doc_vote added_by, updated_by, dt_added,
+        receive_emails, user_admin added_by, updated_by, dt_added,
         dt_updated
         FROM permissions WHERE user_seq = %s"""
         self.cursor.execute(perms_sql, (user_seq,))
@@ -600,15 +600,13 @@ class connect:
 
     @staticmethod
     def dump_database():
-        proc = subprocess.Popen(
-            f"""/usr/bin/mysqldump -u {os.environ['DB_BACKUP_USER']} management
-            -p{os.environ['DB_BACKUP_PASS']}""",
-            stdout=subprocess.PIPE,
-            shell=True,
-        )
-        output = proc.stdout.read().decode()
+
         with open("backup.sql", "w") as f:
-            f.write(output)
+            subprocess.Popen(
+                ["/usr/bin/mysqldump", "-u" + os.environ['DB_BACKUP_USER'],
+                "management", "-p"+ os.environ['DB_BACKUP_PASS']],
+                stdout=f
+            ).communicate()
 
     def update_finance_status(self, seq, stat_desc, user: User):
         sql = """UPDATE statuses SET stat_desc = %s, updated_by = %s

@@ -32,5 +32,6 @@ def send_feature_request():
     title = html.escape(request.form.get('title'))
     description = html.escape(request.form.get('description'))
     user = session.get('user')
-    create_feature_request(title, description, user)
+    if not create_feature_request(title, description, user):
+        raise Exception("Uh oh")
     return redirect('/about/feature')

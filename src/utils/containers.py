@@ -238,8 +238,6 @@ class User:
         user.approve_invoices = permissions[7] == 1
         user.receive_emails = permissions[8] == 1
         user.user_admin = permissions[9] == 1
-        user.docket_vote = permissions[10] == 1
-        user.can_send_email = permissions[11]
 
         user.vote = voting
 

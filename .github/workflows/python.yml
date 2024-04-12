@@ -6,17 +6,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    env:
-      DB_HOST: "localhost"
-      DB_USER: "invoices"
-      DB_PASSWORD: ${{ secrets.DatabasePassword }}
-      DB_NAME: "management"
-
     strategy:
       matrix:
-        python-version: ["3.12"]
-
+        python-version: ["3.10"]
 
     steps:
       - uses: mirromutth/mysql-action@v1.1
@@ -30,8 +22,8 @@ jobs:
           mysql root password: ${{ secrets.RootPassword }} # Required if "mysql user" is empty, default is empty. The root superuser password
           mysql user: 'developer' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
           mysql password: ${{ secrets.DatabasePassword }} # Required if "mysql user" exists. The password for the "mysql user"
-      run:
-        mysql -u root -p${{ secrets.RootPassword }} < db_setup.py
+          run: |
+            mysql -u root -p${{ secrets.RootPassword }} < db_setup.py
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4

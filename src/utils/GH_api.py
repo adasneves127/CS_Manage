@@ -23,16 +23,18 @@ class IssueTypes(Enum):
 
 
 def get_api_repo():
-    proc = subprocess.Popen(['/bin/git', 'remote', 'get-url', 'origin'],
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output = proc.stdout.read().decode()
-    proc.communicate()
-    if proc.returncode != 0:
-        return
+    return os.environ.get('gh_repo')
 
-    path = output.split('.com')[1][1:]
-    path = path.split('.git')[0]
-    return path
+    # proc = subprocess.Popen(['/bin/git', 'remote', 'get-url', 'origin'],
+    #                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # output = proc.stdout.read().decode()
+    # proc.communicate()
+    # if proc.returncode != 0:
+    #     raise Exception("Could not get URL")
+
+    # path = output.split('.com')[1][1:]
+    # path = path.split('.git')[0]
+    # return path
 
 
 def create_issue(title, body, labels: List[IssueTypes]):

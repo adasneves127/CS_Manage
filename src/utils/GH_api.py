@@ -6,6 +6,7 @@ from typing import List
 import os
 import json
 from src.utils.containers import User
+import sys
 
 dotenv.load_dotenv()
 HEADERS = {
@@ -48,6 +49,7 @@ def create_issue(title, body, labels: List[IssueTypes]):
         "labels": [x.value for x in labels]
     }, headers=HEADERS)
     # print(json.dumps(req.json(), indent=4))
+    print(req.status_code, file=sys.stderr)
     return req.status_code == 201
 
 

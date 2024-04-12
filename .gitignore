@@ -168,3 +168,4 @@ backup.sql
 interface/static/logo.*
 backups/
 wsgi.py
+.vscode/

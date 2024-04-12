@@ -73,7 +73,7 @@
         <table>
             <tr>
                 <th colspan="4">Finances</th>
-                <th colspan="4">Docket</th>
+                <th colspan="3">Docket</th>
                 <th colspan="1">Admininstration</th>
             </tr>
             <tr>
@@ -84,7 +84,7 @@
                 <th>Read</th>
                 <th>Write</th>
                 <th>Admin</th>
-                <th>Vote</th>
+                {% comment %} <th>Vote</th> {% endcomment %}
                 <th>Users</th>
             </tr>
             <tr>
@@ -103,9 +103,10 @@
         <h2>Voting Types</h2>
         <table>
             {% for type in voting_types %}
+                {% assign nice_type = type |  replace: " ", "_" %}
                 <tr>
                     <td>{{type}}</td>
-                    <td><input type="checkbox" name="vote_type-{{type}}" id="vote_type-{{type}}" {% if user.vote["{{type}}"] %}checked {% endif %}></td>
+                    <td><input type="checkbox" name="vote_type-{{nice_type}}" id="vote_type-{{nice_type}}" {% if user.vote[type] %}checked {% endif %}></td>
                 </tr>
             {% endfor %}
         </table>
@@ -118,6 +119,5 @@
     <br>
     <br>
     <button onclick="sendPasswordReset()">Send Password Reset</button>
-    {% comment %} {{user}} {% endcomment %}
 </body>
 </html>

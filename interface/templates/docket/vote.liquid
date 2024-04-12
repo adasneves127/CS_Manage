@@ -19,7 +19,7 @@
     <p>Status: {{docket[3]}}</p>
     <p>Title: {{docket[1]}}</p>
     <p>Description: <br> {{docket[2]}}</p>
-    {% if is_vote %}
+    {% if non_votable %}
         <p>This is a non-votable docket item.</p>
     {% else %}
             

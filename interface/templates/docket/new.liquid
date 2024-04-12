@@ -14,7 +14,13 @@
         <label for="body">Body:</label> <br>
         <textarea name="body" id="body" cols="40" rows="10"></textarea> <br>
         {% if doc_admin %}
-            <input type="checkbox" name="isVote" id="isVote"> <label for="isVote">Is Voteable?</label> <br>
+            <select name="voteType" id="voteType">
+                {% for type in vote_types %}
+                    <option value="{{type}}">{{type}}</option>
+                {% endfor %}
+            </select>
+
+            {% comment %} <input type="checkbox" name="isVote" id="isVote"> <label for="isVote">Is Voteable?</label> <br> {% endcomment %}
         {% endif %}
         <input type="submit" value="Submit">
     </form>

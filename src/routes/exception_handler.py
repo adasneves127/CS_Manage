@@ -54,7 +54,8 @@ def malformed_req_handler(e: exceptions.MalformedRequestException):
 def docket_not_voting(e: exceptions.DocketNotVoting):
     return send_template('exceptions/notVoting.liquid'), 500
 
+
 @app.errorhandler(TimeoutError)
 def quick_post_handle(e: TimeoutError):
-    return """You have submitted too many post requests in 10 seconds. 
-    Please wait before submitting aditional requests.""", 500
+    return """You have submitted too many post requests in 10 seconds.
+    Please wait before submitting additional requests.""", 500

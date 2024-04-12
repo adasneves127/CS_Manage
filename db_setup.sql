@@ -28,7 +28,6 @@ create table permissions(
     inv_view            bool default 0 NOT NULL,
     doc_edit            bool default 0 NOT NULL,
     doc_view            bool default 0 NOT NULL,
---    doc_vote            bool default 0 NOT NULL,
     inv_admin           bool default 0 NOT NULL,
     doc_admin           bool default 0 NOT NULL,
     approve_invoices    bool default 0 NOT NULL,
@@ -43,10 +42,22 @@ create table permissions(
     CONSTRAINT FOREIGN KEY (user_seq) references users(seq)
 );
 
+create table voting_types(
+    seq int not null auto_increment primary key,
+    type_desc varchar(20),
+    added_by int not null,
+    updated_by int not null,
+    dt_added timestamp default current_timestamp,
+    dt_updated timestamp default current_timestamp on update current_timestamp,
+    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
+    CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
+);
+
 create table vote_perms(
     seq int auto_increment PRIMARY KEY,
     user_seq INT NOT NULL,
     vote_seq INT NOT NULL,
+    granted tinyint NOT NULL default 0,
     added_by int not null,
     updated_by int not null,
     dt_added timestamp default current_timestamp,
@@ -55,7 +66,7 @@ create table vote_perms(
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq),
     CONSTRAINT FOREIGN KEY (user_seq) references users(seq),
     CONSTRAINT FOREIGN KEY (vote_seq) references voting_types(seq)
-)
+);
 
 create table statuses(
     seq int not null auto_increment primary key,
@@ -141,16 +152,7 @@ create table docket_status(
     CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
 );
 
-create table voting_types(
-    seq int not null auto_increment primary key,
-    type_desc varchar(20),
-    added_by int not null,
-    updated_by int not null,
-    dt_added timestamp default current_timestamp,
-    dt_updated timestamp default current_timestamp on update current_timestamp,
-    CONSTRAINT FOREIGN KEY (added_by) references users(seq),
-    CONSTRAINT FOREIGN KEY (updated_by) references users(seq)
-);
+
 
 create table officer_docket(
     seq int auto_increment primary key,
@@ -228,8 +230,8 @@ create table user_requests (
 -- Insert a 'root' system user - No password set! Don't set one plz
 INSERT INTO users (seq, user_name, first_name, last_name, email, finance_pin, password, system_user, theme, added_by, updated_by) VALUES
 (1, '~', 'System', 'Account', '', '0000', '', 1, 0, 1, 1);
-INSERT INTO permissions (user_seq, inv_edit, inv_view, doc_edit, doc_view, doc_vote, inv_admin, doc_admin, approve_invoices, receive_emails, user_admin, added_by, updated_by) VALUES
-(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1);
+INSERT INTO permissions (user_seq, inv_edit, inv_view, doc_edit, doc_view, inv_admin, doc_admin, approve_invoices, receive_emails, user_admin, added_by, updated_by) VALUES
+(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1);
 
 -- Insert some typical Statuses and Types
 INSERT INTO statuses (stat_desc, added_by, updated_by) VALUES
@@ -257,3 +259,8 @@ INSERT INTO docket_status (stat_desc, added_by, updated_by) VALUES
 ('In Process',      1,1),
 ('Confirmed',       1,1);
 
+
+INSERT INTO voting_types (type_desc, added_by, updated_by) VALUES
+("Standard Vote", 1, 1),
+("Constitution Vote", 1, 1),
+("No Vote", 1, 1);

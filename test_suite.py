@@ -8,7 +8,7 @@ def test_initial():
 
 def test_database_connection():
     with db_connection() as conn:
-        conn.initDB()
+        conn.get_all_approvers()
 
 
 if __name__ == "__main__":

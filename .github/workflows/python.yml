@@ -9,7 +9,12 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12"]
-
+    
+    env:
+        DB_HOST: "localhost"
+        DB_USER: "invoices"
+        DB_PASSWORD: ${{ secrets.DatabasePassword }}
+        DB_NAME: "management"
     steps:
       - uses: mirromutth/mysql-action@v1.1
         with:

@@ -11,7 +11,7 @@ jobs:
         python-version: ["3.12"]
     
     env:
-        DB_HOST: "localhost"
+        DB_HOST: "127.0.0.1"
         DB_USER: "root"
         DB_PASSWORD: ${{ secrets.RootPassword }}
         DB_NAME: "management"
@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup MySQL
         run: |
+            sudo systemctl start mysql
             mysql -u root -p${{ secrets.RootPassword }} < ./db_setup.sql
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4

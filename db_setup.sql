@@ -261,6 +261,6 @@ INSERT INTO docket_status (stat_desc, added_by, updated_by) VALUES
 
 
 INSERT INTO voting_types (type_desc, added_by, updated_by) VALUES
-("Standard Vote", 2, 2),
-("Constitution Vote", 2, 2),
+("Standard Vote", 1, 1),
+("Constitution Vote", 1, 1),
 ("No Vote", 1, 1);

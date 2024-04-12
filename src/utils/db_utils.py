@@ -604,7 +604,7 @@ class connect:
         with open("backup.sql", "w") as f:
             subprocess.Popen(
                 ["/usr/bin/mysqldump", "-u" + os.environ['DB_BACKUP_USER'],
-                "management", "-p"+ os.environ['DB_BACKUP_PASS']],
+                 "management", "-p" + os.environ['DB_BACKUP_PASS']],
                 stdout=f
             ).communicate()
 
@@ -1037,10 +1037,6 @@ class connect:
         self.cursor.execute(SQL, desc, user.seq, user.seq)
         self.connection.commit()
         pass
-
-
-def convert_to_datetime(date_str: str) -> datetime.datetime:
-    return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
 
 
 @contextmanager

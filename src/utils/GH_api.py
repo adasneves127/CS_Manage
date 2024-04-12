@@ -49,7 +49,7 @@ def create_issue(title, body, labels: List[IssueTypes]):
         "labels": [x.value for x in labels]
     }, headers=HEADERS)
     # print(json.dumps(req.json(), indent=4))
-    print(req.status_code, file=sys.stderr)
+    print(req.status_code, endpoint, file=sys.stderr)
     return req.status_code == 201
 
 

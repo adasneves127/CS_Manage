@@ -1,5 +1,4 @@
 from json import load
-from contextlib import contextmanager
 
 
 def load_app_info() -> dict:

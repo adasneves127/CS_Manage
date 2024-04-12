@@ -1,7 +1,6 @@
 import subprocess
 import tempfile
 import base64
-from flask import current_app
 
 # A list of valid files that can be uploaded to the system
 

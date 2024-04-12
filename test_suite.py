@@ -12,6 +12,7 @@ def test_initial_user():
     assert user.system_user == 1
     assert user.theme == 0
 
+
 def test_initial_finance_status():
     with db_connection() as conn:
         statuses = conn.get_all_finance_statuses()
@@ -38,17 +39,12 @@ def test_database_new_status():
         conn.create_finance_status("test_status", user)
         seq = conn.cursor.lastrowid
         stats = conn.get_all_finance_statuses()
-        new_stat = stats[seq-1]
+        new_stat = stats[seq - 1]
         assert new_stat[0] == seq
         assert new_stat[1] == "test_status"
         assert new_stat[2] == "System Account"
         assert new_stat[3] == "System Account"
         assert new_stat[4] == new_stat[5]
-
-
-def test_database_connection():
-    with db_connection() as conn:
-        conn.get_all_approvers()
 
 
 if __name__ == "__main__":

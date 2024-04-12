@@ -31,7 +31,7 @@ jobs:
       - name: Setup MySQL
         run: |
             sudo systemctl start mysql
-            mysql -p${{ secrets.RootPassword }} < ./db_setup.sql
+            mysql -uroot -proot < ./db_setup.sql
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:

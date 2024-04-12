@@ -336,7 +336,7 @@ def alert_docket_creation(creation_user, docket_all_users, docket_data,
     send_email(subject, body_html, email, cc_list, [])
 
 
-def alert_docket_update(creation_user, assignee_users, docket_data):
+def alert_docket_update(creation_user, assignee_users, docket_data, creator):
     app_info = load_app_info()
     email_domain = app_info['public']['email_domain']
     email = creation_user.email
@@ -345,6 +345,7 @@ def alert_docket_update(creation_user, assignee_users, docket_data):
     cc_list = []
     for user in assignee_users:
         cc_list.append(user['email'] + email_domain)
+    cc_list.append(creator + email_domain)
 
     body_html = f"""
     <html>

@@ -282,11 +282,11 @@ class connect:
         row_container = finance(rows, lines)
         return row_container.__dict__
 
-    def get_user_by_full_name(self, full_name: str) -> int:
+    def get_user_by_full_name(self, full_name: str) -> User:
         sql = """SELECT seq FROM users WHERE
         concat(first_name, ' ', last_name) = %s"""
         self.cursor.execute(sql, (full_name,))
-        return self.cursor.fetchone()[0]
+        return self.get_user_by_seq(self.cursor.fetchone()[0])
 
     def get_type_seq(self, type_desc: str) -> int:
         sql = "SELECT seq FROM record_types WHERE type_desc = %s"
@@ -916,9 +916,11 @@ class connect:
                   docket["status"], user.seq, seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
+        docket_item = self.search_officer_docket(seq)
         email_utils.alert_docket_update(
             user, self.get_record_assignees(seq),
-            self.search_officer_docket(seq)
+            docket_item,
+            self.get_user_by_full_name(docket_item[0][6]).email
         )
 
     def get_record_assignees(self, seq: int):

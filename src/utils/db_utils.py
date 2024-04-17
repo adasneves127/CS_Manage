@@ -105,13 +105,8 @@ class connect:
         if perms is None:
             raise MalformedUserException
         self.cursor.fetchall()  # Flush the cursor
-        vote_sql = """SELECT a.type_desc FROM voting_types a, vote_perms b
-            WHERE a.seq = b.vote_seq AND b.user_seq = %s"""
-
-        self.cursor.execute(vote_sql, (user_seq,))
 
         voting = self.get_user_vote_perms(user_seq)
-        # print(f"User.from_sql with votes: {voting}")
 
         return User.from_sql(user, perms, voting)
 
@@ -142,7 +137,10 @@ class connect:
         if perms is None:
             raise MalformedUserException
         self.cursor.fetchall()  # flush the cursor
-        return User.from_sql(user, perms)
+
+        voting = self.get_user_vote_perms(user[0])
+
+        return User.from_sql(user, perms, voting)
 
     def check_user_valid(self, username: str, password: str) -> User:
         sql = """SELECT seq, user_name, password FROM users WHERE

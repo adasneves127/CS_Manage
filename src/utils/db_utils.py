@@ -666,7 +666,8 @@ class connect:
         a.system_user, a.theme, CONCAT(b.first_name, ' ', b.last_name),
         CONCAT(c.first_name, ' ', c.last_name), a.dt_added, a.dt_updated
         FROM users a, users b, users c WHERE a.added_by = b.seq AND
-        a.updated_by = c.seq ORDER BY a.system_user, a.is_active, a.seq"""
+        a.updated_by = c.seq ORDER BY a.is_active DESC, a.system_user, a.seq;
+"""
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 

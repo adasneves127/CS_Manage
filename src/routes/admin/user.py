@@ -57,6 +57,7 @@ def update_user():
                 data.get("last_name"),
                 data.get("theme"),
                 data.get("system_user") == "on",
+                data.get("is_active") == "on",
                 data.get("enable_emails") == "on",
                 data.get("is_active") == "on",
                 data.get("inv_view") == "on",
@@ -66,7 +67,6 @@ def update_user():
                 data.get("doc_edit") == "on",
                 data.get("doc_admin") == "on",
                 data.get("user_admin") == "on",
-                data.get("doc_vote") == "on",
             )
 
             conn.update_user(seq, vals, user)

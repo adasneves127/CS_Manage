@@ -89,7 +89,7 @@ class connect:
     def get_user_by_seq(self, user_seq: int) -> User:
         user_sql = """SELECT seq, user_name,
         first_name, last_name, email, system_user, theme, added_by,
-        updated_by, dt_added, dt_updated FROM users WHERE seq = %s"""
+        updated_by, is_active, dt_added, dt_updated FROM users WHERE seq = %s"""
         self.cursor.execute(user_sql, (user_seq,))
         user = self.cursor.fetchone()
         if user is None:
@@ -668,7 +668,7 @@ class connect:
         a.system_user, a.theme, CONCAT(b.first_name, ' ', b.last_name),
         CONCAT(c.first_name, ' ', c.last_name), a.dt_added, a.dt_updated
         FROM users a, users b, users c WHERE a.added_by = b.seq AND
-        a.updated_by = c.seq"""
+        a.updated_by = c.seq ORDER BY a.system_user, a.is_active, a.seq"""
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
@@ -680,11 +680,13 @@ class connect:
         last_name = %s,
         theme = %s,
         system_user = %s,
+        is_active = %s,
         updated_by = %s
         WHERE
         seq = %s
         """
-        values = vals[0:6] + (current_user.seq, user_seq)
+        values = vals[0:7] + (current_user.seq, user_seq)
+        print(sql,values)
         self.cursor.execute(sql, values)
         self.connection.commit()
 
@@ -699,12 +701,11 @@ class connect:
         doc_edit = %s,
         doc_admin = %s,
         user_admin = %s,
-        doc_vote = %s,
         updated_by = %s
         WHERE
         user_seq = %s
         """
-        values = vals[6:] + (current_user.seq, user_seq)
+        values = vals[7:] + (current_user.seq, user_seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
 

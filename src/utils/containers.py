@@ -227,8 +227,9 @@ class User:
         user.theme = user_info[6]
         user.added_by = user_info[7]
         user.updated_by = user_info[8]
-        user.dt_added = user_info[9]
-        user.dt_updated = user_info[10]
+        user.is_active = user_info[9]
+        user.dt_added = user_info[10]
+        user.dt_updated = user_info[11]
         user.inv_edit = permissions[1] == 1 or permissions[5] == 1
         user.inv_view = permissions[2] == 1 or permissions[5] == 1
         user.doc_edit = permissions[3] == 1 or permissions[6] == 1

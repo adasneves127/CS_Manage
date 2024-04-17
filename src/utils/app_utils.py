@@ -7,6 +7,6 @@ def load_app_info() -> dict:
     except FileNotFoundError as e:
         return {
             "public": {
-                "email_domain": "bridgew.edu"
+                "email_domain": "example.com"
             }
         }

@@ -77,7 +77,7 @@ def create_record():
                         }.html""",
                         b64encode(
                             requests.get(
-                                f"{url}/finances/view/{seq}",
+                                f"http://{url}/finances/view/{seq}",
                                 json={"auth": auth},
                             ).content
                         ),

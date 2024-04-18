@@ -89,7 +89,8 @@ class connect:
     def get_user_by_seq(self, user_seq: int) -> User:
         user_sql = """SELECT seq, user_name,
         first_name, last_name, email, system_user, theme, added_by,
-        updated_by, is_active, dt_added, dt_updated FROM users WHERE seq = %s"""
+        updated_by, is_active, dt_added, dt_updated FROM users WHERE seq = %s
+        """
         self.cursor.execute(user_sql, (user_seq,))
         user = self.cursor.fetchone()
         if user is None:
@@ -305,8 +306,8 @@ class connect:
 
         values = (
             record_data["header"]["id"],
-            creator,
-            approve,
+            creator.seq,
+            approve.seq,
             record_data["header"]["inv_date"],
             status_type,
             record_type,

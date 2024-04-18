@@ -210,7 +210,6 @@ class connect:
         for type in valid_types:
             if type in filter_data['types'] and filter_data['types'][type]:
                 allowed_types.append(type)
-
         sql = """
         SELECT a.seq, a.id, concat(b.first_name, ' ', b.last_name),
             concat(c.first_name, ' ', c.last_name), d.stat_desc, e.type_desc,
@@ -221,7 +220,6 @@ class connect:
             WHERE a.creator = b.seq AND a.approver = c.seq AND
             a.record_status = d.seq AND a.record_type = e.seq AND
             a.added_by = f.seq AND a.updated_by = g.seq ORDER BY a.id"""
-        (allowed_statuses, allowed_types, filter_data)
 
         self.cursor.execute(sql)
         rows = self.cursor.fetchall()
@@ -685,7 +683,6 @@ class connect:
         seq = %s
         """
         values = vals[0:7] + (current_user.seq, user_seq)
-        print(sql,values)
         self.cursor.execute(sql, values)
         self.connection.commit()
 
@@ -720,7 +717,6 @@ class connect:
         AND b.type_desc = %s
         """
         values = [(v, current_user.seq, user_seq, k) for k, v in votes.items()]
-        print(f"Running sql with values: {values}")
         self.cursor.executemany(sql, values)
         self.connection.commit()
 

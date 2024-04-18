@@ -16,8 +16,8 @@ def get_table():
             }
 
             print(request.json)
-            # if request.is_json:
-            #     data =
+            if request.is_json:
+                data = request.json
             finance_records = connection.filter_finances(data)
             return_data = send_template("finances/table.liquid", False,
                                         records=finance_records), 200

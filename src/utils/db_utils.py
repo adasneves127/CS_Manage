@@ -380,8 +380,8 @@ class connect:
         status_type = self.get_status_seq(data["header"]["status"])
         values = (
             data["header"]["id"],
-            creator,
-            approver,
+            creator.seq,
+            approver.seq,
             data["header"]["inv_date"],
             record_type,
             status_type,

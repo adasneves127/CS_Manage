@@ -100,7 +100,7 @@ def view_docket_attachment(seq: int):
         with tempfile.NamedTemporaryFile(delete_on_close=False, delete=False) as tempFile:
             file_contents = base64.b64decode(file_data[1])
             tempFile.write(file_contents)
-            
+            tempFile.flush()
 
            
             return send_file(tempFile.name, as_attachment=True,

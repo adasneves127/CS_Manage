@@ -102,7 +102,7 @@ def view_docket_attachment(seq: int):
             tempFile.write(file_contents)
             
 
-            resp = make_response(send_file(tempFile.name,
+            resp = make_response(send_file(base64.b64decode(file_data[1]),
                                        mimetype="application/octet-stream",
                                        download_name=file_data[0],
                                        as_attachment=True

@@ -100,8 +100,9 @@ def view_docket_attachment(seq: int):
         with tempfile.TemporaryFile() as tempFile:
             file_contents = base64.b64decode(file_data[1])
             tempFile.write(file_contents)
+            
 
-        resp = make_response(send_file(tempFile,
+            resp = make_response(send_file(tempFile.name,
                                        mimetype="application/octet-stream",
                                        download_name=file_data[0],
                                        as_attachment=True

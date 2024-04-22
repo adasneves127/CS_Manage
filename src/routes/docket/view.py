@@ -102,6 +102,6 @@ def view_docket_attachment(seq: int):
             tempFile.write(file_contents)
 
         resp = make_response(send_file(tempFile),
-                             download_name=file_data[0]
+                             download_name=file_data[0],
                              mimetype="application/octet-stream")
         return resp

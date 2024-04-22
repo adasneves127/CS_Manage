@@ -802,7 +802,7 @@ class connect:
         a.created_by = b.seq AND
         a.updated_by = c.seq AND
         a.status = d.seq AND
-        a.vote_type = e.seq
+        a.vote_type = e.seq AND d.stat_desc != 'Archived'
         ORDER BY a.seq"""
         self.cursor.execute(sql)
         docket_data = []

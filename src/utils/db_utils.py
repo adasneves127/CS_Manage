@@ -78,6 +78,7 @@ class connect:
         # Send Password Reset Email if not a system user
         if not user.system_user:
             self.send_password_reset(user)
+        
 
     def send_password_reset(self, user: User):
         token = self.request_reset_password(user.seq, "SYSTEM")
@@ -383,8 +384,8 @@ class connect:
             creator.seq,
             approver.seq,
             data["header"]["inv_date"],
-            record_type,
             status_type,
+            record_type,
             data["header"]["tax"],
             data["header"]["fees"],
             current_user.seq,
@@ -485,6 +486,20 @@ class connect:
         self.cursor.execute(sql, (hashed, current_user.seq, target_seq))
         user = self.get_user_by_seq(target_seq)
         email_utils.send_password_updated_email(user)
+        self.connection.commit()
+        if user.doc_admin or user.inv_admin or user.user_admin:
+            self.create_backend_user(user)
+    
+
+    def create_backend_user(self, user: User, password: str):
+        sql = "CREATE USER %s@'localhost' IDENTIFIED BY %s"
+        self.cursor.execute(sql, (user.user_name, password))
+        if user.inv_admin or user.doc_admin:
+            sql = """GRANT SELECT (seq, first_name, last_name, email) ON
+            management.users TO %s;"""
+            self.cursor.execute(sql, (user.user_name,))
+        # if user.user_admin:
+
         self.connection.commit()
 
     def request_reset_password(self, target_seq: int, requested_ip: str) \

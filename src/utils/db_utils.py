@@ -78,7 +78,6 @@ class connect:
         # Send Password Reset Email if not a system user
         if not user.system_user:
             self.send_password_reset(user)
-        
 
     def send_password_reset(self, user: User):
         token = self.request_reset_password(user.seq, "SYSTEM")
@@ -489,7 +488,6 @@ class connect:
         self.connection.commit()
         if user.doc_admin or user.inv_admin or user.user_admin:
             self.create_backend_user(user)
-    
 
     def create_backend_user(self, user: User, password: str):
         sql = "CREATE USER %s@'localhost' IDENTIFIED BY %s"

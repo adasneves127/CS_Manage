@@ -22,7 +22,6 @@ def send_template(template: str, should_rl=True, **kwargs):
 
             if request.method == 'POST' and should_rl:
                 session['last_post'] = time.time()
-            print(session)
 
         return render_template(
             template,

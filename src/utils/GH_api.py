@@ -6,6 +6,7 @@ from typing import List
 import os
 import json
 from src.utils.containers import User
+import sys
 
 dotenv.load_dotenv()
 HEADERS = {
@@ -23,21 +24,23 @@ class IssueTypes(Enum):
 
 
 def get_api_repo():
-    proc = subprocess.Popen(['/bin/git', 'remote', 'get-url', 'origin'],
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output = proc.stdout.read().decode()
-    proc.communicate()
-    if proc.returncode != 0:
-        return
+    return os.environ.get('gh_repo')
 
-    path = output.split('.com')[1][1:]
-    path = path.split('.git')[0]
-    return path
+    # proc = subprocess.Popen(['/bin/git', 'remote', 'get-url', 'origin'],
+    #                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # output = proc.stdout.read().decode()
+    # proc.communicate()
+    # if proc.returncode != 0:
+    #     raise Exception("Could not get URL")
+
+    # path = output.split('.com')[1][1:]
+    # path = path.split('.git')[0]
+    # return path
 
 
 def create_issue(title, body, labels: List[IssueTypes]):
     if os.environ.get('gh_token') is None:
-        return "No Auth Key Found!"
+        return False
     repo_path = get_api_repo()
     endpoint = f"https://api.github.com/repos/{repo_path}/issues"
     req = requests.post(endpoint, json={
@@ -46,6 +49,7 @@ def create_issue(title, body, labels: List[IssueTypes]):
         "labels": [x.value for x in labels]
     }, headers=HEADERS)
     # print(json.dumps(req.json(), indent=4))
+    print(req.status_code, endpoint, file=sys.stderr)
     return req.status_code == 201
 
 

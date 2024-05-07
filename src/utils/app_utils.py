@@ -1,6 +1,12 @@
 from json import load
-from contextlib import contextmanager
 
 
 def load_app_info() -> dict:
-    return load(open("app_info.json", "r"))
+    try:
+        return load(open("app_info.json", "r"))
+    except FileNotFoundError:
+        return {
+            "public": {
+                "email_domain": "example.com"
+            }
+        }

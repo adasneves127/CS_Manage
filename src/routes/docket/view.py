@@ -97,10 +97,11 @@ def view_docket_attachment(seq: int):
 
         file_data = conn.search_docket_attachments(seq)
 
-        with tempfile.TemporaryFile() as tempFile:
+        with tempfile.NamedTemporaryFile(delete_on_close=False,
+                                         delete=False) as tempFile:
             file_contents = base64.b64decode(file_data[1])
             tempFile.write(file_contents)
+            tempFile.flush()
 
-        resp = make_response(send_file(tempFile))
-        resp.mimetype = "application/octet-stream"
-        return resp
+            return send_file(tempFile.name, as_attachment=True,
+                             download_name=file_data[0])

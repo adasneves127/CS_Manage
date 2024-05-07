@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Overview" id="Overview">
+
+    <p>
+        Overview articles give background information and provide context to a particular subject.
+        Their goal is to explain a concept, not to teach or give instructions.
+    </p>
+
+    <chapter title="What is the &quot;Club Management System&quot;" id="overview-chapter" >
+        <p>The "Club Management System" is a system to assist in the management and maintenance of a student organization at a college.</p>
+    </chapter>
+    <chapter title="Glossary" id="glossary">
+        <p>A list of terms used in this documentation</p>
+        <deflist>
+            <def title="Docket">
+                A list of items to discuss at an officer meeting.
+            </def>
+            <def title="Term2">
+                This is the definition of the second term.
+            </def>
+        </deflist>
+    </chapter>
+</topic>

@@ -1,0 +1,52 @@
+Table users {
+    seq int [pk, increment]
+    user_name varchar(20)
+    first_name varchar(20)
+    last_name varchar(20)
+    email varchar(30)
+    password varchar(255)
+    system_user bool
+    finance_pin char(4)
+    theme int
+    added_by int
+    updated_by int
+    dt_added timestamp
+    dt_updated timestamp
+    is_active bool
+}
+
+ref: users.added_by > users.seq
+ref: users.updated_by > users.seq
+
+Table permissions {
+    seq int [pk, increment]
+    user_seq            int
+    inv_edit            bool
+    inv_view            bool
+    doc_edit            bool
+    doc_view            bool
+    inv_admin           bool
+    doc_admin           bool
+    approve_invoices    bool
+    receive_emails      bool
+    user_admin          bool
+    added_by            int
+    updated_by          int
+    dt_added            timestamp
+    dt_updated          timestamp 
+}
+
+ref: permissions.added_by > users.seq
+ref: permissions.updated_by > users.seq
+
+Table voting_types {
+    seq int [pk, increment]
+    type_desc varchar(20)
+    added_by int
+    updated_by int
+    dt_added timestamp
+    dt_updated timestamp
+}
+
+ref: voting_types.added_by > users.seq
+ref: voting_types.updated_by > users.seq

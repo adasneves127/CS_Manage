@@ -89,7 +89,8 @@ class connect:
     def get_user_by_seq(self, user_seq: int) -> User:
         user_sql = """SELECT seq, user_name,
         first_name, last_name, email, system_user, theme, added_by,
-        updated_by, dt_added, dt_updated FROM users WHERE seq = %s"""
+        updated_by, is_active, dt_added, dt_updated FROM users WHERE seq = %s
+        """
         self.cursor.execute(user_sql, (user_seq,))
         user = self.cursor.fetchone()
         if user is None:
@@ -97,7 +98,7 @@ class connect:
         self.cursor.fetchall()  # flush the cursor
         perms_sql = """SELECT seq, inv_edit, inv_view,
         doc_edit, doc_view, inv_admin, doc_admin, approve_invoices,
-        receive_emails, user_admin, doc_vote added_by, updated_by, dt_added,
+        receive_emails, user_admin added_by, updated_by, dt_added,
         dt_updated
         FROM permissions WHERE user_seq = %s"""
         self.cursor.execute(perms_sql, (user_seq,))
@@ -105,13 +106,8 @@ class connect:
         if perms is None:
             raise MalformedUserException
         self.cursor.fetchall()  # Flush the cursor
-        vote_sql = """SELECT a.type_desc FROM voting_types a, vote_perms b
-            WHERE a.seq = b.vote_seq AND b.user_seq = %s"""
-
-        self.cursor.execute(vote_sql, (user_seq,))
 
         voting = self.get_user_vote_perms(user_seq)
-        # print(f"User.from_sql with votes: {voting}")
 
         return User.from_sql(user, perms, voting)
 
@@ -142,7 +138,10 @@ class connect:
         if perms is None:
             raise MalformedUserException
         self.cursor.fetchall()  # flush the cursor
-        return User.from_sql(user, perms)
+
+        voting = self.get_user_vote_perms(user[0])
+
+        return User.from_sql(user, perms, voting)
 
     def check_user_valid(self, username: str, password: str) -> User:
         sql = """SELECT seq, user_name, password FROM users WHERE
@@ -212,7 +211,6 @@ class connect:
         for type in valid_types:
             if type in filter_data['types'] and filter_data['types'][type]:
                 allowed_types.append(type)
-
         sql = """
         SELECT a.seq, a.id, concat(b.first_name, ' ', b.last_name),
             concat(c.first_name, ' ', c.last_name), d.stat_desc, e.type_desc,
@@ -223,7 +221,6 @@ class connect:
             WHERE a.creator = b.seq AND a.approver = c.seq AND
             a.record_status = d.seq AND a.record_type = e.seq AND
             a.added_by = f.seq AND a.updated_by = g.seq ORDER BY a.id"""
-        (allowed_statuses, allowed_types, filter_data)
 
         self.cursor.execute(sql)
         rows = self.cursor.fetchall()
@@ -282,11 +279,11 @@ class connect:
         row_container = finance(rows, lines)
         return row_container.__dict__
 
-    def get_user_by_full_name(self, full_name: str) -> int:
+    def get_user_by_full_name(self, full_name: str) -> User:
         sql = """SELECT seq FROM users WHERE
         concat(first_name, ' ', last_name) = %s"""
         self.cursor.execute(sql, (full_name,))
-        return self.cursor.fetchone()[0]
+        return self.get_user_by_seq(self.cursor.fetchone()[0])
 
     def get_type_seq(self, type_desc: str) -> int:
         sql = "SELECT seq FROM record_types WHERE type_desc = %s"
@@ -309,8 +306,8 @@ class connect:
 
         values = (
             record_data["header"]["id"],
-            creator,
-            approve,
+            creator.seq,
+            approve.seq,
             record_data["header"]["inv_date"],
             status_type,
             record_type,
@@ -383,11 +380,11 @@ class connect:
         status_type = self.get_status_seq(data["header"]["status"])
         values = (
             data["header"]["id"],
-            creator,
-            approver,
+            creator.seq,
+            approver.seq,
             data["header"]["inv_date"],
-            record_type,
             status_type,
+            record_type,
             data["header"]["tax"],
             data["header"]["fees"],
             current_user.seq,
@@ -488,6 +485,19 @@ class connect:
         self.cursor.execute(sql, (hashed, current_user.seq, target_seq))
         user = self.get_user_by_seq(target_seq)
         email_utils.send_password_updated_email(user)
+        self.connection.commit()
+        if user.doc_admin or user.inv_admin or user.user_admin:
+            self.create_backend_user(user)
+
+    def create_backend_user(self, user: User, password: str):
+        sql = "CREATE USER %s@'localhost' IDENTIFIED BY %s"
+        self.cursor.execute(sql, (user.user_name, password))
+        if user.inv_admin or user.doc_admin:
+            sql = """GRANT SELECT (seq, first_name, last_name, email) ON
+            management.users TO %s;"""
+            self.cursor.execute(sql, (user.user_name,))
+        # if user.user_admin:
+
         self.connection.commit()
 
     def request_reset_password(self, target_seq: int, requested_ip: str) \
@@ -600,15 +610,13 @@ class connect:
 
     @staticmethod
     def dump_database():
-        proc = subprocess.Popen(
-            f"""/usr/bin/mysqldump -u {os.environ['DB_BACKUP_USER']} management
-            -p{os.environ['DB_BACKUP_PASS']}""",
-            stdout=subprocess.PIPE,
-            shell=True,
-        )
-        output = proc.stdout.read().decode()
+
         with open("backup.sql", "w") as f:
-            f.write(output)
+            subprocess.Popen(
+                ["/usr/bin/mysqldump", "-u" + os.environ['DB_BACKUP_USER'],
+                 "management", "-p" + os.environ['DB_BACKUP_PASS']],
+                stdout=f
+            ).communicate()
 
     def update_finance_status(self, seq, stat_desc, user: User):
         sql = """UPDATE statuses SET stat_desc = %s, updated_by = %s
@@ -670,7 +678,8 @@ class connect:
         a.system_user, a.theme, CONCAT(b.first_name, ' ', b.last_name),
         CONCAT(c.first_name, ' ', c.last_name), a.dt_added, a.dt_updated
         FROM users a, users b, users c WHERE a.added_by = b.seq AND
-        a.updated_by = c.seq"""
+        a.updated_by = c.seq ORDER BY a.is_active DESC, a.system_user, a.seq;
+"""
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
@@ -682,11 +691,12 @@ class connect:
         last_name = %s,
         theme = %s,
         system_user = %s,
+        is_active = %s,
         updated_by = %s
         WHERE
         seq = %s
         """
-        values = vals[0:6] + (current_user.seq, user_seq)
+        values = vals[0:7] + (current_user.seq, user_seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
 
@@ -701,12 +711,11 @@ class connect:
         doc_edit = %s,
         doc_admin = %s,
         user_admin = %s,
-        doc_vote = %s,
         updated_by = %s
         WHERE
         user_seq = %s
         """
-        values = vals[6:] + (current_user.seq, user_seq)
+        values = vals[7:] + (current_user.seq, user_seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
 
@@ -722,7 +731,6 @@ class connect:
         AND b.type_desc = %s
         """
         values = [(v, current_user.seq, user_seq, k) for k, v in votes.items()]
-        print(f"Running sql with values: {values}")
         self.cursor.executemany(sql, values)
         self.connection.commit()
 
@@ -792,7 +800,7 @@ class connect:
         a.created_by = b.seq AND
         a.updated_by = c.seq AND
         a.status = d.seq AND
-        a.vote_type = e.seq
+        a.vote_type = e.seq AND d.stat_desc != 'Archived'
         ORDER BY a.seq"""
         self.cursor.execute(sql)
         docket_data = []
@@ -918,9 +926,11 @@ class connect:
                   docket["status"], user.seq, seq)
         self.cursor.execute(sql, values)
         self.connection.commit()
+        docket_item = self.search_officer_docket(seq)
         email_utils.alert_docket_update(
             user, self.get_record_assignees(seq),
-            self.search_officer_docket(seq)
+            docket_item,
+            self.get_user_by_full_name(docket_item[0][6]).email
         )
 
     def get_record_assignees(self, seq: int):
@@ -1039,10 +1049,6 @@ class connect:
         self.cursor.execute(SQL, desc, user.seq, user.seq)
         self.connection.commit()
         pass
-
-
-def convert_to_datetime(date_str: str) -> datetime.datetime:
-    return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
 
 
 @contextmanager
